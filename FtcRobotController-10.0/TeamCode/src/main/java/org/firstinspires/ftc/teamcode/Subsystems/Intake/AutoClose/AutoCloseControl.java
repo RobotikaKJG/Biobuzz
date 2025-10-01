@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.Pivot.PivotStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.Slides.ArmSlideStates;
 
 public class AutoCloseControl {
+//    lemme try
 
     private AutoCloseStates prevIntakeAutoCloseState = AutoCloseStates.idle;
     private final Gamepad gamepad1;

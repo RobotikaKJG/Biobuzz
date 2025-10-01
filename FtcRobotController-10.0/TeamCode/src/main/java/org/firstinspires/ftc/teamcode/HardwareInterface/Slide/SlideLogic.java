@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.HardwareInterface.Slide;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeConstants;
-
 public class SlideLogic {
 
 

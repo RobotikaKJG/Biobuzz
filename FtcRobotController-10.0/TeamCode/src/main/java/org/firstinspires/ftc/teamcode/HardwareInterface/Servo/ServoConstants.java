@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.HardwareInterface.Servo;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 
 public class ServoConstants {
@@ -18,7 +17,6 @@ public class ServoConstants {
                     OuttakeConstants.outtakeClawTurnServoMinPos,
                     OuttakeConstants.specimenClawServoMinPos,
                     OuttakeConstants.outtakeDownServoMinPos,
-                    IntakeConstants.intakeServoMinPos,
             };
     public static final double[] servoMaxPos =
             {
@@ -26,6 +24,5 @@ public class ServoConstants {
                     OuttakeConstants.outtakeClawTurnServoMaxPos,
                     OuttakeConstants.specimenClawServoMaxPos,
                     OuttakeConstants.outtakeDownServoMaxPos,
-                    IntakeConstants.intakeServoMaxPos,
             };
 }

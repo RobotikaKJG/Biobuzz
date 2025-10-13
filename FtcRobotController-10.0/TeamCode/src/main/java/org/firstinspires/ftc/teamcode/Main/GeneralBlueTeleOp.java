@@ -33,6 +33,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
         }
 
         dependencies.sensorControl.initPinpoint();
+        dependencies.sensorControl.initLimelight(0);
 
         waitForStart();
 
@@ -44,7 +45,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
             iterativeController.TeleOp();
 
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
-            telemetry.addLine(" ");
+            telemetry.addData(" Nusisauk dis", dependencies.sensorControl.getTagDistance());
 
             if (gamepad1.triangle) break;
             calculateLoopTime();

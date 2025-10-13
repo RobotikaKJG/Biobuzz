@@ -67,7 +67,7 @@ public class IterativeController {
 //        }
 //        if(edgeDetection.rising(GamepadIndexValues.dpadLeft))
 //            colorSensorActive = !colorSensorActive;
-            colorSensorActive = true;
+//            colorSensorActive = true;
 
         updateHardwareValues();
 
@@ -82,7 +82,7 @@ public class IterativeController {
     }
 
     private void updateHardwareValues() {
-        sensorControl.updateDistance();
+//        sensorControl.updateDistance();
 //        intakeSlideControl.updateSlidePosition();
     }
 

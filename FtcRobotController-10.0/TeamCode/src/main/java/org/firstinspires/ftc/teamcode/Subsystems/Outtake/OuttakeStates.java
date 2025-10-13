@@ -1,16 +1,15 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 
-import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurnServo.TurnServoStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class OuttakeStates {
     private static SubsystemState outtakeState = SubsystemState.Idle;
-    private static TurnServoStates turnServoState = TurnServoStates.idle;
+    private static OuttakeServoStates outtakeServoState = OuttakeServoStates.idle;
 
     public static void setInitialStates() {
         outtakeState = SubsystemState.Idle;
-        turnServoState = TurnServoStates.idle;
+        outtakeServoState = OuttakeServoStates.idle;
     }
 
     public static SubsystemState getOuttakeState() {
@@ -21,10 +20,10 @@ public class OuttakeStates {
         outtakeState = state;
     }
 
-    public static TurnServoStates getTurnServoState() {
-        return turnServoState;
+    public static OuttakeServoStates getOuttakeServoState() {
+        return outtakeServoState;
     }
 
-    public static void setTurnServoState(TurnServoStates state) {turnServoState = state;}
+    public static void setOuttakeServoState(OuttakeServoStates state) {outtakeServoState = state;}
 
 }

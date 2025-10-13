@@ -1,16 +1,16 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurnServo.TurnServoControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class OuttakeControl {
-    private final TurnServoControl turnServoControl;
+    private final OuttakeServoControl outtakeServoControl;
 
-    public OuttakeControl(TurnServoControl turnServoControl) {
-        this.turnServoControl = turnServoControl;
+    public OuttakeControl(OuttakeServoControl turnServoControl) {
+        this.outtakeServoControl = turnServoControl;
     }
 
     public void update() {
-        turnServoControl.update();
+        outtakeServoControl.update();
 
         updateOuttakeState();
     }

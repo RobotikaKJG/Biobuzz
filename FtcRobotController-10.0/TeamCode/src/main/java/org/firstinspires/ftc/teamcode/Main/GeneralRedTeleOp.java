@@ -27,6 +27,9 @@ public class GeneralRedTeleOp extends LinearOpMode {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
+        dependencies.sensorControl.initPinpoint();
+        dependencies.sensorControl.initLimelight(0);
+
         waitForStart();
 
         dependencies.servoControl.setServoStartPos();
@@ -39,8 +42,7 @@ public class GeneralRedTeleOp extends LinearOpMode {
 
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
             telemetry.addLine(" ");
-
-            telemetry.addData("Slides angle", dependencies.motorControl.getMotorPosition(MotorConstants.slideLeft));
+            
             calculateLoopTime();
             telemetry.update();
         }

@@ -8,21 +8,25 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Main.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 
 public class SensorControl {
 
-    private final LimitSwitch[] limitSwitches;
+//    private final LimitSwitch[] limitSwitches;
+    private Limelight3A limelight;
     private final EdgeDetection edgeDetection;
     private final StandardTrackingWheelLocalizer localizer;
-    public final NormalizedColorSensor colorSensor;
-    public final LynxI2cColorRangeSensor rangeSensor;
+//    public final NormalizedColorSensor colorSensor;
+//    public final LynxI2cColorRangeSensor rangeSensor;
     public final GoBildaPinpointDriver pinpointImu;
     public int currentColor;
     public int currentRed;
@@ -31,12 +35,13 @@ public class SensorControl {
     private double currentDistance;
 
     public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection,  StandardTrackingWheelLocalizer localizer) {
-        limitSwitches = getLimitSwitches(hardwareMap);
+//        limitSwitches = getLimitSwitches(hardwareMap);
 
-        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "ColorSensor");
-        rangeSensor = hardwareMap.get(LynxI2cColorRangeSensor.class, "ColorSensor");
+//        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "ColorSensor");
+//        rangeSensor = hardwareMap.get(LynxI2cColorRangeSensor.class, "ColorSensor");
         pinpointImu = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointIMU");
-        colorSensor.setGain(15);//2);
+//        colorSensor.setGain(15);//2);
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         this.localizer = localizer;
         setInitialLocalisationAngle();
@@ -44,17 +49,17 @@ public class SensorControl {
         this.edgeDetection = edgeDetection;
     }
 
-    private LimitSwitch[] getLimitSwitches(HardwareMap hardwareMap) {
-        final LimitSwitch[] limitSwitches;
-        limitSwitches = new LimitSwitch[]{
-                hardwareMap.get(LimitSwitch.class, "slidesLimitSwitch"),
-                hardwareMap.get(LimitSwitch.class, "pivotLimitSwitch")
-        };
-
-        limitSwitches[0].setMode(LimitSwitch.SwitchConfig.NC);
-        limitSwitches[1].setMode(LimitSwitch.SwitchConfig.NC);
-        return limitSwitches;
-    }
+//    private LimitSwitch[] getLimitSwitches(HardwareMap hardwareMap) {
+//        final LimitSwitch[] limitSwitches;
+//        limitSwitches = new LimitSwitch[]{
+//                hardwareMap.get(LimitSwitch.class, "slidesLimitSwitch"),
+//                hardwareMap.get(LimitSwitch.class, "pivotLimitSwitch")
+//        };
+//
+//        limitSwitches[0].setMode(LimitSwitch.SwitchConfig.NC);
+//        limitSwitches[1].setMode(LimitSwitch.SwitchConfig.NC);
+//        return limitSwitches;
+//    }
 
     private void setInitialLocalisationAngle() {
         if (!GlobalVariables.wasAutonomous)
@@ -68,6 +73,31 @@ public class SensorControl {
     public void initPinpoint() {
         pinpointImu.initialize();
         pinpointImu.resetPosAndIMU();
+    }
+
+    public void initLimelight(int pipelineNr) {
+        limelight.start();
+        limelight.pipelineSwitch(pipelineNr);
+    }
+
+    public LLResult limelightResult() {
+        return limelight.getLatestResult();
+    }
+
+    public double getTagDistance() {
+        LLResult result = limelight.getLatestResult();
+
+        if (result != null && result.isValid()) {
+            // Get botpose relative to field (make sure your Limelight is configured to Field mode)
+            Pose3D botpose = result.getBotpose();
+
+            double x = botpose.getPosition().x + 1.7;
+            double y = botpose.getPosition().y - 1.7;
+
+            // Calculate distance to tag (in meters)
+            return Math.sqrt(x * x + y * y);
+        }
+        return 5;
     }
 
     public double getPinpointAngle() {
@@ -92,19 +122,19 @@ public class SensorControl {
             localizer.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
     }
 
-    public boolean isLimitSwitchPressed(LimitSwitches state) {
-        switch (state) {
-            case slides:
-                return limitSwitches[0].getIsPressed();
-            case pivot:
-                return limitSwitches[1].getIsPressed();
-            default:
-                return false; // Or throw an exception
-        }
-    }
+//    public boolean isLimitSwitchPressed(LimitSwitches state) {
+//        switch (state) {
+//            case slides:
+//                return limitSwitches[0].getIsPressed();
+//            case pivot:
+//                return limitSwitches[1].getIsPressed();
+//            default:
+//                return false; // Or throw an exception
+//        }
+//    }
 
     public void updateColor(){
-        currentColor = colorSensor.getNormalizedColors().toColor();
+//        currentColor = colorSensor.getNormalizedColors().toColor();
         currentRed = Color.red(currentColor);
         currentGreen = Color.green(currentColor);
         currentBlue = Color.blue(currentColor);
@@ -117,9 +147,9 @@ public class SensorControl {
         currentBlue = 0;
     }
 
-    public void updateDistance(){
-        currentDistance = rangeSensor.getDistance(DistanceUnit.MM);
-    }
+//    public void updateDistance(){
+//        currentDistance = rangeSensor.getDistance(DistanceUnit.MM);
+//    }
 
     public void resetDistance(){
         currentDistance = 100;

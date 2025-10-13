@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurnServo.TurnServoControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoControl;
 
 public class Dependencies {
     public final HardwareMap hardwareMap;
@@ -59,7 +59,7 @@ public class Dependencies {
         return new OuttakeControl(createTurnServoControl());
     }
 
-    private TurnServoControl createTurnServoControl() {
-        return new TurnServoControl(servoControl);
+    private OuttakeServoControl createTurnServoControl() {
+        return new OuttakeServoControl(servoControl, sensorControl);
     }
 }

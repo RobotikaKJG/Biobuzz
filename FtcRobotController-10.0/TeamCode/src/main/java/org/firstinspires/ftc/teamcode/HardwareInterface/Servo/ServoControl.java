@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.HardwareInterface.Servo;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -10,6 +11,7 @@ public class ServoControl {
 
     private final HardwareMap hardwareMap;
     private Servo[] servos;
+    private CRServo[] crservos;
 
     public ServoControl(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
@@ -17,29 +19,16 @@ public class ServoControl {
     }
 
     private void getServos() {
-
+        crservos = new CRServo[]{
+                hardwareMap.get(CRServo.class, "transferServo")
+        };
         servos = new Servo[]{
-                hardwareMap.get(Servo.class, "outtakeArmServo"),
-                hardwareMap.get(Servo.class, "outtakeClawTurnServo"),
-                hardwareMap.get(Servo.class, "specimenClawServo"),
-                hardwareMap.get(Servo.class, "outtakeDownServo"),
-                hardwareMap.get(Servo.class, "intakeServo")
+                hardwareMap.get(Servo.class, "outtakeServo")
         };
     }
 
     public void setServoStartPos() {
-        setServoPos(ServoConstants.outtakeDown, OuttakeConstants.outtakeDownServoMaxPos);
-
-        if (GlobalVariables.isAutonomous) {
-            setServoPos(ServoConstants.specimenClaw, OuttakeConstants.specimenClawServoMinPos);
-            setServoPos(ServoConstants.outtakeArm, OuttakeConstants.outtakeArmServoPlacePos);
-            setServoPos(ServoConstants.outtakeClawTurn, OuttakeConstants.outtakeClawTurnServoMinPos);
-        }
-        else {
-            setServoPos(ServoConstants.specimenClaw, OuttakeConstants.specimenClawServoMaxPos);
-            setServoPos(ServoConstants.outtakeArm, OuttakeConstants.outtakeArmServoIdlePos);
-            setServoPos(ServoConstants.outtakeClawTurn, OuttakeConstants.outtakeClawTurnServoMaxPos);
-        }
+        setServoPos(ServoConstants.outtakeServo, OuttakeConstants.outtakeDownServoMaxPos);
     }
 
     public void setServoPos(int index, double position) {

@@ -27,7 +27,7 @@ public class RevColorV2Test extends LinearOpMode {
         // While the Op Mode is running, update the telemetry values.
         while (opModeIsActive()) {
             sensorControl.updateColor();
-            sensorControl.updateDistance();
+//            sensorControl.updateDistance();
             telemetry.addData("Red", sensorControl.isRed());
             telemetry.addData("Yellow", sensorControl.isYellow());
             telemetry.addData("Blue", sensorControl.isBlue());

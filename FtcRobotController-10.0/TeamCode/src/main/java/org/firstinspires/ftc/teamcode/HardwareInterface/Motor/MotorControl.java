@@ -15,6 +15,8 @@ public class MotorControl {
         public static final String frontRight = "frontRightMotor";
         public static final String backRight = "backRightMotor";
         public static final String outtake = "outtakeMotor";
+        public static final String intake = "intakeMotor";
+        public static final String transfer = "transferMotor";
     }
 
     private final HardwareMap hardwareMap;
@@ -22,7 +24,7 @@ public class MotorControl {
     private final Utilities utilities = new Utilities();
 
 
-    private final double[] motorSpeeds = new double[5];
+    private final double[] motorSpeeds = new double[7];
 
     public MotorControl(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
@@ -36,6 +38,8 @@ public class MotorControl {
                 hardwareMap.get(DcMotorEx.class, MotorNames.frontRight),
                 hardwareMap.get(DcMotorEx.class, MotorNames.backRight),
                 hardwareMap.get(DcMotorEx.class, MotorNames.outtake),
+                hardwareMap.get(DcMotorEx.class, MotorNames.intake),
+                hardwareMap.get(DcMotorEx.class, MotorNames.transfer),
         };
 
         setMotorProperties();
@@ -45,6 +49,7 @@ public class MotorControl {
         motors[MotorConstants.frontLeft].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[MotorConstants.backLeft].setDirection(DcMotorSimple.Direction.REVERSE);
         setZeroPowerBehavior(MotorConstants.all, DcMotor.ZeroPowerBehavior.BRAKE);
+        setZeroPowerBehavior(MotorConstants.outtake, DcMotor.ZeroPowerBehavior.FLOAT);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }

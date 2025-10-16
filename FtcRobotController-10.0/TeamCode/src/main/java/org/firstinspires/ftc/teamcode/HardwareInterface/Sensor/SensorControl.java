@@ -97,7 +97,7 @@ public class SensorControl {
             // Calculate distance to tag (in meters)
             return Math.sqrt(x * x + y * y);
         }
-        return 5;
+        return -1;
     }
 
     public double getPinpointAngle() {

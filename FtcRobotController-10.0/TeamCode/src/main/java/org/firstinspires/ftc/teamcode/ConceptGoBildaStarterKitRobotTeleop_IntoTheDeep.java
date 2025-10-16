@@ -39,7 +39,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
  * This robot has a two-motor differential-steered (sometimes called tank or skid steer) drivetrain.
  * With a left and right drive motor.
  * The drive on this robot is controlled in an "Arcade" style, with the left stick Y axis
- * controlling the forward movement and the right stick X axis controlling rotation.
+ * controlling the forwardStart movement and the right stick X axis controlling rotation.
  * This allows easy transition to a standard "First Person" control of a
  * mecanum or omnidirectional chassis.
  *
@@ -144,7 +144,7 @@ public class ConceptGoBildaStarterKitRobotTeleop_IntoTheDeep extends LinearOpMod
         armMotor   = hardwareMap.get(DcMotor.class, "left_arm"); //the arm motor
 
 
-        /* Most skid-steer/differential drive robots require reversing one motor to drive forward.
+        /* Most skid-steer/differential drive robots require reversing one motor to drive forwardStart.
         for this robot, we reverse the right motor.*/
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -195,9 +195,9 @@ public class ConceptGoBildaStarterKitRobotTeleop_IntoTheDeep extends LinearOpMod
 
             /* Here we "mix" the input channels together to find the power to apply to each motor.
             The both motors need to be set to a mix of how much you're retesting the robot move
-            forward, and how much you're requesting the robot turn. When you ask the robot to rotate
+            forwardStart, and how much you're requesting the robot turn. When you ask the robot to rotate
             the right and left motors need to move in opposite directions. So we will add rotate to
-            forward for the left motor, and subtract rotate from forward for the right motor. */
+            forwardStart for the left motor, and subtract rotate from forwardStart for the right motor. */
 
             left  = forward + rotate;
             right = forward - rotate;

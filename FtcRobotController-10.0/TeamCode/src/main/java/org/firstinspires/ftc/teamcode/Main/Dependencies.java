@@ -12,7 +12,11 @@ import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.TransferCRServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoControl;
 
 public class Dependencies {
@@ -56,10 +60,26 @@ public class Dependencies {
     }
 
     public OuttakeControl createOuttakeControl() {
-        return new OuttakeControl(createTurnServoControl());
+        return new OuttakeControl(createTurnServoControl(), createOuttakeMotorControl());
     }
 
     private OuttakeServoControl createTurnServoControl() {
         return new OuttakeServoControl(servoControl, sensorControl);
+    }
+
+    private OuttakeMotorControl createOuttakeMotorControl() {
+        return new OuttakeMotorControl(motorControl);
+    }
+
+    public IntakeControl createIntakeControl() {
+        return new IntakeControl(createIntakeMotorControl(), createTransferCRServoControl());
+    }
+
+    private IntakeMotorControl createIntakeMotorControl() {
+        return new IntakeMotorControl(motorControl);
+    }
+
+    private TransferCRServoControl createTransferCRServoControl() {
+        return new TransferCRServoControl(servoControl);
     }
 }

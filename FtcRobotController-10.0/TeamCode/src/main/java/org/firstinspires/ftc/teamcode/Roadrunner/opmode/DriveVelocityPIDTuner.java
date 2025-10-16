@@ -31,7 +31,7 @@ import java.util.List;
  * relies heavily upon the dashboard. To access the dashboard, connect your computer to the RC's
  * WiFi network. In your browser, navigate to https://192.168.49.1:8080/dash if you're using the RC
  * phone or https://192.168.43.1:8080/dash if you are using the Control Hub. Once you've successfully
- * connected, start the program, and your robot will begin moving forward and backward according to
+ * connected, start the program, and your robot will begin moving forwardStart and backward according to
  * a motion profile. Your job is to graph the velocity errors over time and adjust the PID
  * coefficients (note: the tuning variable will not appear until the op mode finishes initializing).
  * Once you've found a satisfactory set of gains, add them to the DriveConstants.java file under the

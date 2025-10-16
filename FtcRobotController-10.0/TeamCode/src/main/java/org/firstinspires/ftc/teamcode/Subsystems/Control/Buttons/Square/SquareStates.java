@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Square;
 
 public enum SquareStates {
-    takeSpecimen,
+    runOuttake,
+    stopOuttake,
     idle
 }

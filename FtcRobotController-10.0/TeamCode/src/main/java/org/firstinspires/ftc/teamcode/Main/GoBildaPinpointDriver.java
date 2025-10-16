@@ -283,10 +283,10 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     /**
      * Sets the odometry pod positions relative to the point that the odometry computer tracks around.<br><br>
      * The most common tracking position is the center of the robot. <br> <br>
-     * The X pod offset refers to how far sideways (in mm) from the tracking point the X (forward) odometry pod is. Left of the center is a positive number, right of center is a negative number. <br>
-     * the Y pod offset refers to how far forwards (in mm) from the tracking point the Y (strafe) odometry pod is. forward of center is a positive number, backwards is a negative number.<br>
-     * @param xOffset how sideways from the center of the robot is the X (forward) pod? Left increases
-     * @param yOffset how far forward from the center of the robot is the Y (Strafe) pod? forward increases
+     * The X pod offset refers to how far sideways (in mm) from the tracking point the X (forwardStart) odometry pod is. Left of the center is a positive number, right of center is a negative number. <br>
+     * the Y pod offset refers to how far forwards (in mm) from the tracking point the Y (strafe) odometry pod is. forwardStart of center is a positive number, backwards is a negative number.<br>
+     * @param xOffset how sideways from the center of the robot is the X (forwardStart) pod? Left increases
+     * @param yOffset how far forwardStart from the center of the robot is the Y (Strafe) pod? forwardStart increases
      */
     public void setOffsets(double xOffset, double yOffset){
         writeFloat(Register.X_POD_OFFSET, (float) xOffset);
@@ -309,7 +309,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
 
     /**
      * Can reverse the direction of each encoder.
-     * @param xEncoder FORWARD or REVERSED, X (forward) pod should increase when the robot is moving forward
+     * @param xEncoder FORWARD or REVERSED, X (forwardStart) pod should increase when the robot is moving forwardStart
      * @param yEncoder FORWARD or REVERSED, Y (strafe) pod should increase when the robot is moving left
      */
     public void setEncoderDirections(EncoderDirection xEncoder, EncoderDirection yEncoder){
@@ -439,7 +439,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     }
 
     /**
-     * @return the raw value of the X (forward) encoder in ticks
+     * @return the raw value of the X (forwardStart) encoder in ticks
      */
     public int getEncoderX(){return xEncoderValue; }
 
@@ -449,7 +449,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     public int getEncoderY(){return yEncoderValue; }
 
     /**
-     * @return the estimated X (forward) position of the robot in mm
+     * @return the estimated X (forwardStart) position of the robot in mm
      */
     public double getPosX(){return xPosition; }
 
@@ -464,7 +464,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     public double getHeading(){return hOrientation;}
 
     /**
-     * @return the estimated X (forward) velocity of the robot in mm/sec
+     * @return the estimated X (forwardStart) velocity of the robot in mm/sec
      */
     public double getVelX(){return xVelocity; }
 
@@ -480,7 +480,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
 
     /**
      * <strong> This uses its own I2C read, avoid calling this every loop. </strong>
-     * @return the user-set offset for the X (forward) pod
+     * @return the user-set offset for the X (forwardStart) pod
      */
     public float getXOffset(){return readFloat(Register.X_POD_OFFSET);}
 

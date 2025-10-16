@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 
 public class OuttakeConstants {
 
-    public static final double outtakeServoMaxPos = 0.40;
+    public static final double outtakeServoMaxPos = 0.385;
     public static final double outtakeServoMinPos = 0.32;
 
     public static final double specimenClawServoMaxPos = 0.6;     // Maximum rotational position, claw open
@@ -24,7 +24,7 @@ public class OuttakeConstants {
     public static double outtakeDownServoMinPos = 0.269;
     public static double outtakeDownServoMaxPos = 0.55;
 
-    public static double maxDistance = 5.0;
+    public static double maxDistance = 4.0;
     public static double minDistance = 2.0;
 
 }

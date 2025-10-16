@@ -12,6 +12,8 @@ import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
@@ -31,6 +33,7 @@ public class IterativeController {
     private final ButtonControl buttonControl;
     private final ButtonControl subsystemControl2;
     private final OuttakeControl outtakeControl;
+    private final IntakeControl intakeControl;
     private final SensorControl sensorControl;
     private boolean colorSensorActive = true;
 
@@ -47,7 +50,9 @@ public class IterativeController {
         buttonControl = dependencies.createSubsystemControl();
         subsystemControl2 = dependencies.createSubsystemControl2();
         outtakeControl = dependencies.createOuttakeControl();
+        intakeControl = dependencies.createIntakeControl();
         sensorControl = dependencies.sensorControl;
+        IntakeStates.setInitialStates();
         OuttakeStates.setInitialStates();
         ButtonStates.setInitialStates();
     }
@@ -77,7 +82,7 @@ public class IterativeController {
         if(sensorControl.getDistance() < 90)
             sensorControl.updateColor();
 
-
+        intakeControl.update();
         outtakeControl.update();
     }
 
@@ -96,7 +101,7 @@ public class IterativeController {
 //        currentGamepad2.copy(gamepad2);
 //        gamepad2EdgeDetection.refreshGamepadIndex(currentGamepad2, prevGamepad2);
 
-        motorControl.setMotors(MotorConstants.notSlide);
+        motorControl.setMotors(MotorConstants.all);
         localizer.update();
     }
 

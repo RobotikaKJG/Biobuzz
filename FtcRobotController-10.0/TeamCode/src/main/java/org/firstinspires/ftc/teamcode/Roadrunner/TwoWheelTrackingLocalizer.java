@@ -24,7 +24,7 @@ import java.util.List;
  *    v
  *    <----( y direction )---->
 
- *        (forwardStart)
+ *        (forward)
  *    /--------------\
  *    |     ____     |
  *    |     ----     |    <- Perpendicular Wheel
@@ -40,16 +40,16 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 2000;
     public static double WHEEL_RADIUS = 0.629921; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
-
+    //AUTONOTE change these if too bad (check with localizationtest)T
     public static double PARALLEL_X = 0; // X is the up and down direction
     public static double PARALLEL_Y = -7.63; // Y is the strafe direction
 
     public static double PERPENDICULAR_X = -2.55;
     public static double PERPENDICULAR_Y = 0;
 
-    // Parallel/Perpendicular to the forwardStart axis
-    // Parallel wheel is parallel to the forwardStart axis
-    // Perpendicular is perpendicular to the forwardStart axis
+    // Parallel/Perpendicular to the forward axis
+    // Parallel wheel is parallel to the forward axis
+    // Perpendicular is perpendicular to the forward axis
     private final Encoder parallelEncoder;
     private final Encoder perpendicularEncoder;
 

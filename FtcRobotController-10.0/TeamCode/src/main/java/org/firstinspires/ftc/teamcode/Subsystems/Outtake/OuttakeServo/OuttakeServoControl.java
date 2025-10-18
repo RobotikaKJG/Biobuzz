@@ -10,7 +10,7 @@ public class OuttakeServoControl {
     private OuttakeServoStates prevOuttakeServoState;
     private ServoControl servoControl;
     private SensorControl sensorControl;
-    private double max = OuttakeConstants.outtakeServoMaxPos;
+    private double max = OuttakeConstants.outtakeServoMaxPosClose;
     private double min = OuttakeConstants.outtakeServoMinPos;
     private double maxD = OuttakeConstants.maxDistance;
     private double minD = OuttakeConstants.minDistance;
@@ -25,18 +25,22 @@ public class OuttakeServoControl {
     }
 
     public void update() {
-//        if (prevOuttakeServoState != OuttakeStates.getOuttakeServoState()) {
-//            updateStates();
-//            prevOuttakeServoState = OuttakeStates.getOuttakeServoState();
-//        }
-        updateStates();
+        if (prevOuttakeServoState != OuttakeStates.getOuttakeServoState()) {
+            updateStates();
+            prevOuttakeServoState = OuttakeStates.getOuttakeServoState();
+        }
+        else if (OuttakeStates.getOuttakeServoState() == OuttakeServoStates.setPosAuto) {
+            updateStates();
+        }
     }
 
     private void updateStates() {
         switch (OuttakeStates.getOuttakeServoState()) {
             case setPosAuto:
                 setPosAuto();
-                System.out.println("Juodas");
+                break;
+            case setPosFar:
+                setPosFar();
                 break;
             case idle:
                 break;
@@ -52,11 +56,7 @@ public class OuttakeServoControl {
             wasIfCalled = true;
         }
 
-        System.out.println("Black3");
-
         if(currentWait > getSeconds()) return;
-
-        System.out.println("nigger");
 
         distance = sensorControl.getTagDistance();
         if (distance <= 0) return;
@@ -65,6 +65,10 @@ public class OuttakeServoControl {
         servoControl.setServoPos(ServoConstants.outtakeServo, servoPos);
 
         wasIfCalled = false;
+    }
+
+    private void setPosFar() {
+        servoControl.setServoPos(ServoConstants.outtakeServo, OuttakeConstants.outtakeServoMaxPosFar);
     }
 
     private void addWaitTime(double waitTime) {

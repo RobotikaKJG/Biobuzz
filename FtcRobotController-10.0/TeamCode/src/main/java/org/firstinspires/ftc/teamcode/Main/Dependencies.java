@@ -18,6 +18,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.Transfer
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TransferMotor.TransferMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TransferServo.TransferServoControl;
 
 public class Dependencies {
     public final HardwareMap hardwareMap;
@@ -60,7 +62,7 @@ public class Dependencies {
     }
 
     public OuttakeControl createOuttakeControl() {
-        return new OuttakeControl(createTurnServoControl(), createOuttakeMotorControl());
+        return new OuttakeControl(createTurnServoControl(), createOuttakeMotorControl(), createTransferServoControl(), createTransferMotorControl());
     }
 
     private OuttakeServoControl createTurnServoControl() {
@@ -81,5 +83,13 @@ public class Dependencies {
 
     private TransferCRServoControl createTransferCRServoControl() {
         return new TransferCRServoControl(servoControl);
+    }
+
+    private TransferServoControl createTransferServoControl() {
+        return new TransferServoControl(servoControl);
+    }
+
+    private TransferMotorControl createTransferMotorControl() {
+        return new TransferMotorControl(motorControl);
     }
 }

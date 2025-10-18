@@ -35,7 +35,7 @@ public class Drivebase {
         selectGamepad();
         double y = -currentGamepad.left_stick_y;// * yGain;
         double x = -currentGamepad.left_stick_x;// * xGain;
-        double rotation = currentGamepad.right_stick_x;// * rotationGain;
+        double rotation = -currentGamepad.right_stick_x;// * rotationGain;
         robotOrientedGamepadDrive(y, x, rotation, maxSpeed);
     }
 
@@ -43,7 +43,7 @@ public class Drivebase {
         selectGamepad();
         double y = currentGamepad.left_stick_y;
         double x = currentGamepad.left_stick_x;
-        double rotation = currentGamepad.right_stick_x;
+        double rotation = -currentGamepad.right_stick_x;
         driverOrientedGamepadDrive(y, x, rotation, maxSpeed);
     }
 

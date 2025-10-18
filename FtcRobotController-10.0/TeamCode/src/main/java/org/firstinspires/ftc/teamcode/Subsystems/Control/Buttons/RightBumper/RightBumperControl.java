@@ -7,8 +7,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 public class RightBumperControl {
     public void update() {
         switch (ButtonStates.getRightBumperState()) {
-            case aim:
+            case aimAuto:
                 OuttakeStates.setOuttakeServoState(OuttakeServoStates.setPosAuto);
+                break;
+            case aimFar:
+                OuttakeStates.setOuttakeServoState(OuttakeServoStates.setPosFar);
                 break;
             case idle:
                 break;

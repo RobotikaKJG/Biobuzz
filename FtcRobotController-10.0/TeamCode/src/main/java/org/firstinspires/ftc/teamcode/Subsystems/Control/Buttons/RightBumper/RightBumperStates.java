@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.RightBumper;
 
 public enum RightBumperStates {
-    aim,
-    shoot,
+    aimAuto,
+    aimFar,
     idle
 }

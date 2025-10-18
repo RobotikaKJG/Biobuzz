@@ -23,10 +23,11 @@ public class ServoControl {
 
     private void getServos() {
         crservos = new CRServo[]{
-                hardwareMap.get(CRServo.class, "transferServo")
+                hardwareMap.get(CRServo.class, "transferCRServo")
         };
         servos = new Servo[]{
-                hardwareMap.get(Servo.class, "outtakeServo")
+                hardwareMap.get(Servo.class, "outtakeServo"),
+                hardwareMap.get(Servo.class, "transferServo")
         };
         analog = new AnalogInput[]{
                 hardwareMap.get(AnalogInput.class, "transferAnalog")

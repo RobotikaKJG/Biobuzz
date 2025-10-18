@@ -48,6 +48,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
 
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
             telemetry.addData(" Nusisauk ", IntakeStates.getTransferCRServoState());
+            telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
 
             if (gamepad1.triangle) break;
             calculateLoopTime();

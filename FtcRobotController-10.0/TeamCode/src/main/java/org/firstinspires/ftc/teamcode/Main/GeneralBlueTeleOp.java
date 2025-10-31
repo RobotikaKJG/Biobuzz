@@ -43,9 +43,9 @@ public class GeneralBlueTeleOp extends LinearOpMode {
             iterativeController.TeleOp();
 
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
-            telemetry.addData("Motor velocity", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake));
+            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake));
             telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
-            telemetry.addData("Outtake servo state", OuttakeStates.getOuttakeServoState());
+            telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());
             
             if (gamepad1.triangle) break;
             calculateLoopTime();

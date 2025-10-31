@@ -1,13 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftTrigger;
 
-import android.widget.Button;
-
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
-import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class LeftTriggerLogic {
     private final LeftTriggerControl leftTriggerControl = new LeftTriggerControl();
@@ -16,8 +9,8 @@ public class LeftTriggerLogic {
     }
 
     public void update() {
-        if(runOuttake()) return;
-        stopOuttake();
+        if(toggleOuttake()) return;
+//        stopOuttake();
     }
 
     private void completeAction(){
@@ -25,15 +18,15 @@ public class LeftTriggerLogic {
         ButtonStates.setLeftTriggerState(LeftTriggerStates.idle);
     }
 
-    private boolean runOuttake() {
-        if(OuttakeStates.getMotorState() != OuttakeMotorStates.idle) return false;
-        ButtonStates.setLeftTriggerState(LeftTriggerStates.runOuttake);
+    private boolean toggleOuttake() {
+//        if(OuttakeStates.getMotorState() != OuttakeMotorStates.idle) return false;
+        ButtonStates.setLeftTriggerState(LeftTriggerStates.toggleOuttake);
         completeAction();
         return true;
     }
 
-    private void stopOuttake() {
-        ButtonStates.setLeftTriggerState(LeftTriggerStates.stopOuttake);
-        completeAction();
-    }
+//    private void stopOuttake() {
+//        ButtonStates.setLeftTriggerState(LeftTriggerStates.stopOuttake);
+//        completeAction();
+//    }
 }

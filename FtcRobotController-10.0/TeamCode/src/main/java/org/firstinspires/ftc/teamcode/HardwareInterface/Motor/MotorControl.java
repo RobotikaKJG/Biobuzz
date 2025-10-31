@@ -53,7 +53,7 @@ public class MotorControl {
         setZeroPowerBehavior(MotorConstants.outtake, DcMotor.ZeroPowerBehavior.FLOAT);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        setMotorMode(MotorConstants.outtake, DcMotor.RunMode.RUN_USING_ENCODER);
+//        setMotorMode(MotorConstants.outtake, DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void setZeroPowerBehavior(int index, DcMotor.ZeroPowerBehavior zeroPowerBehavior) {

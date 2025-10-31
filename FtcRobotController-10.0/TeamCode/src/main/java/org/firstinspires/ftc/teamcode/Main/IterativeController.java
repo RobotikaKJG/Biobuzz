@@ -105,7 +105,7 @@ public class IterativeController {
 //        currentGamepad2.copy(gamepad2);
 //        gamepad2EdgeDetection.refreshGamepadIndex(currentGamepad2, prevGamepad2);
 
-        motorControl.setMotors(MotorConstants.notOuttake);
+        motorControl.setMotors(MotorConstants.all);
         localizer.update();
     }
 

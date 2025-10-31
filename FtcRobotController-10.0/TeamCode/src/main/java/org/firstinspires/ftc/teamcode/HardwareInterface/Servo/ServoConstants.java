@@ -21,7 +21,7 @@ public class ServoConstants {
             };
     public static final double[] servoMaxPos =
             {
-                    OuttakeConstants.outtakeServoMaxPosFar,
+                    OuttakeConstants.outtakeServoMaxPosClose,
                     OuttakeConstants.transferServoMaxPos
             };
 }

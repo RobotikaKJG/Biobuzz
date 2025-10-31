@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
@@ -20,16 +21,20 @@ public class AutonomousControl {
     private final GoalAuton goalAuton;
     private final IntakeControl intakeControl;
     private final OuttakeControl outtakeControl;
+    private final SensorControl sensorControl;
 
 
-    public AutonomousControl(MotorControl motorControl, GoalAuton goalAuton, IntakeControl intakeControl, OuttakeControl outtakeControl) {
+    public AutonomousControl(MotorControl motorControl, GoalAuton goalAuton, IntakeControl intakeControl, OuttakeControl outtakeControl, SensorControl sensorControl) {
         this.motorControl = motorControl;
         this.goalAuton = goalAuton;
         this.intakeControl = intakeControl;
         this.outtakeControl = outtakeControl;
+        this.sensorControl = sensorControl;
         IntakeStates.setInitialStates();
         OuttakeStates.setInitialStates();
         ButtonStates.setInitialStates();
+
+        sensorControl.initLimelight(0);
     }
 
     public void startAutonomous() {

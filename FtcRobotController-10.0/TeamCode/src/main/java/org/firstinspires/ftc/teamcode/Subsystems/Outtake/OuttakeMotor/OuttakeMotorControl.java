@@ -27,16 +27,16 @@ public class OuttakeMotorControl {
     public void updateStates() {
         switch (OuttakeStates.getMotorState()) {
             case forwardStart:
-                motorControl.setMotorSpeed(MotorConstants.outtake, -0.5);
-                addWaitTime(1);
+                motorControl.setMotorSpeed(MotorConstants.outtake, -0.4);
+                addWaitTime(0.5);
                 OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
                 break;
             case forwardFull:
                 if(currentWait > getSeconds()) return;
-                motorControl.setMotorSpeed(MotorConstants.outtake, -1);
+                motorControl.setMotorSpeed(MotorConstants.outtake, -0.9);
                 break;
             case backward:
-                motorControl.setMotorSpeed(MotorConstants.outtake, 1.0);
+                motorControl.setMotorSpeed(MotorConstants.outtake, 0.9);
                 break;
             case idle:
                 motorControl.setMotorSpeed(MotorConstants.outtake, 0);

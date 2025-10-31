@@ -24,9 +24,9 @@ public class TransferCRServoControl {
     }
 
     public void update() {
-        if (IntakeStates.getIntakeMotorState() != prevMotorStates) {
+        if (IntakeStates.getMotorState() != prevMotorStates) {
             updateStates();
-            prevMotorStates = IntakeStates.getIntakeMotorState();
+            prevMotorStates = IntakeStates.getMotorState();
         } else if (
                 IntakeStates.getTransferCRServoState() == TransferCRServoStates.turnIntake ||
                         IntakeStates.getTransferCRServoState() == TransferCRServoStates.turnOuttake

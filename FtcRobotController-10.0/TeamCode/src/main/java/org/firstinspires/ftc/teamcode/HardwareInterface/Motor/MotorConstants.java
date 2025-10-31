@@ -24,7 +24,8 @@ public class MotorConstants {
             {frontLeft, backRight},
             {backLeft, frontRight},
             {frontLeft, backLeft, frontRight, backRight, outtake, intake, transfer},
-            {outtake, intake, transfer}
+            {outtake, intake, transfer},
+            {frontLeft, backLeft, frontRight, backRight, intake, transfer}
     };
     // motorConfig combined value names
     public static final int allDrive = 7;
@@ -34,4 +35,5 @@ public class MotorConstants {
     public static final int frontRightBackLeft = 11;
     public static final int all = 12;
     public static final int notDrive = 13;
+    public static final int notOuttake = 14;
 }

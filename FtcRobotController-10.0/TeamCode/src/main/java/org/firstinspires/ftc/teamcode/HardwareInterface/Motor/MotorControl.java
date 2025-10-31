@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
@@ -52,6 +53,7 @@ public class MotorControl {
         setZeroPowerBehavior(MotorConstants.outtake, DcMotor.ZeroPowerBehavior.FLOAT);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setMotorMode(MotorConstants.outtake, DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void setZeroPowerBehavior(int index, DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
@@ -95,6 +97,30 @@ public class MotorControl {
             motors[Utilities.motorIndex(index, i)].setTargetPosition(position);
     }
 
+    private double getBatteryVoltage() {
+        double result = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) {
+                result = Math.min(result, voltage);
+            }
+        }
+        return result;
+    }
+
+    private double compensateForVoltage(double desiredPower) {
+        double voltage = getBatteryVoltage();
+        double nominalVoltage = 12.0; // or 13.0 depending on your tuning
+        double compensated = desiredPower * (nominalVoltage / voltage);
+        return Math.max(-1.0, Math.min(1.0, compensated)); // clip to [-1, 1]
+    }
+
+
+    public void setMotorSpeedVoltage(int index, double power){
+        for (int i = 0; i < Utilities.configLength(index); i++)
+            motors[Utilities.motorIndex(index, i)].setPower(compensateForVoltage(power));
+    }
+
     public double getMotorCurrent(int index)
     {
         return motors[Utilities.motorIndex(index, 0)].getCurrent(CurrentUnit.AMPS);
@@ -125,6 +151,10 @@ public class MotorControl {
 
     public int getMotorPosition(int index) {
         return Utilities.getMotorPosition(motors, index);
+    }
+
+    public double getMotorVelocity(int index) {
+        return (motors[Utilities.motorIndex(index, 0)].getVelocity());
     }
 
     public void resetMotorEncoders(int index) {

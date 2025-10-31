@@ -7,6 +7,8 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 //import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadLeft.DpadLeftLogic;
 //import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadRight.DpadRightLogic;
 //import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadUp.DpadUpLogic;
+import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Circle.CircleLogic;
+import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadUp.DpadUpLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftBumper.LeftBumperLogic;
 //import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftTrigger.LeftTriggerLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftTrigger.LeftTriggerLogic;
@@ -22,9 +24,10 @@ public class ButtonControl {
     private final LeftTriggerLogic leftTriggerLogic = new LeftTriggerLogic();
     private final LeftBumperLogic leftBumperLogic = new LeftBumperLogic();
     private final SquareLogic squareLogic = new SquareLogic();
+    private final CircleLogic circleLogic = new CircleLogic();
 //    private final DpadRightLogic dpadRightLogic = new DpadRightLogic();
 //    private final DpadDownLogic dpadDownLogic = new DpadDownLogic();
-//    private final DpadUpLogic dpadUpLogic = new DpadUpLogic();
+    private final DpadUpLogic dpadUpLogic = new DpadUpLogic();
 //    private final DpadLeftLogic dpadLeftLogic = new DpadLeftLogic();
 
     public ButtonControl(EdgeDetection edgeDetection, SensorControl sensorControl) {
@@ -58,9 +61,12 @@ public class ButtonControl {
         if(edgeDetection.rising(GamepadIndexValues.square))
             squareLogic.update();
 
-//        if(edgeDetection.rising(GamepadIndexValues.dpadUp))
-//            dpadUpLogic.update();
-//
+        if(edgeDetection.rising(GamepadIndexValues.circle))
+            circleLogic.update();
+
+        if(edgeDetection.rising(GamepadIndexValues.dpadUp))
+            dpadUpLogic.update();
+
 //        if(edgeDetection.rising(GamepadIndexValues.dpadLeft))
 //            dpadLeftLogic.update();
 

@@ -22,6 +22,7 @@ public class RedTrajectories implements Trajectories{
     private void fillVariables() {
         moveToShoot = drive.trajectorySequenceBuilder(startPose)
                 .lineTo(new Vector2d(15,15))
+                .waitSeconds(3)
                 .build();
 
         park = drive.trajectorySequenceBuilder(moveToShoot.end())

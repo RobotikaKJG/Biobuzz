@@ -23,11 +23,11 @@ public class IntakeStates {
         intakeState = state;
     }
 
-    public static IntakeMotorStates getIntakeMotorState() {
+    public static IntakeMotorStates getMotorState() {
         return intakeMotorState;
     }
 
-    public static void setIntakeMotorState(IntakeMotorStates state) {
+    public static void setMotorState(IntakeMotorStates state) {
         intakeMotorState = state;
     }
 

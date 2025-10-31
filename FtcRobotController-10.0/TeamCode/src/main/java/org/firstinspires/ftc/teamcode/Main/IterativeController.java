@@ -52,6 +52,10 @@ public class IterativeController {
         outtakeControl = dependencies.createOuttakeControl();
         intakeControl = dependencies.createIntakeControl();
         sensorControl = dependencies.sensorControl;
+
+        sensorControl.initPinpoint();
+        sensorControl.initLimelight(0);
+
         IntakeStates.setInitialStates();
         OuttakeStates.setInitialStates();
         ButtonStates.setInitialStates();
@@ -101,7 +105,7 @@ public class IterativeController {
 //        currentGamepad2.copy(gamepad2);
 //        gamepad2EdgeDetection.refreshGamepadIndex(currentGamepad2, prevGamepad2);
 
-        motorControl.setMotors(MotorConstants.all);
+        motorControl.setMotors(MotorConstants.notOuttake);
         localizer.update();
     }
 

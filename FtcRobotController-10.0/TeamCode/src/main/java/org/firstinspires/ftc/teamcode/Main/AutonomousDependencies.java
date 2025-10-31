@@ -29,6 +29,6 @@ public class AutonomousDependencies extends Dependencies {
     }
 
     public AutonomousControl createAutonomousControl() {
-        return new AutonomousControl(motorControl,createSpecimenAuton(),createIntakeControl(),createOuttakeControl());
+        return new AutonomousControl(motorControl,createSpecimenAuton(),createIntakeControl(),createOuttakeControl(), sensorControl);
     }
 }

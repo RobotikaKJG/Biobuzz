@@ -26,16 +26,12 @@ public class GeneralBlueTeleOp extends LinearOpMode {
         GlobalVariables.subCycles = false;
         GlobalVariables.hang = false;
         GlobalVariables.alliance = Alliance.Blue;
-        MotorControl motorControl = new MotorControl(hardwareMap);
         Dependencies dependencies = new Dependencies(hardwareMap, gamepad1, gamepad2, telemetry);
         IterativeController iterativeController = new IterativeController(dependencies);
 
         for (LynxModule hub : allHubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
-
-        dependencies.sensorControl.initPinpoint();
-        dependencies.sensorControl.initLimelight(0);
 
         waitForStart();
 
@@ -47,9 +43,10 @@ public class GeneralBlueTeleOp extends LinearOpMode {
             iterativeController.TeleOp();
 
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
-            telemetry.addData(" Nusisauk ", IntakeStates.getTransferCRServoState());
+            telemetry.addData("Motor velocity", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake));
             telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
-
+            telemetry.addData("Outtake servo state", OuttakeStates.getOuttakeServoState());
+            
             if (gamepad1.triangle) break;
             calculateLoopTime();
             telemetry.update();

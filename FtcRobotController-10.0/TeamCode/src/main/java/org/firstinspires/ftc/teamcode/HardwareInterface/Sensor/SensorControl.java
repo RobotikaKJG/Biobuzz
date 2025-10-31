@@ -33,6 +33,7 @@ public class SensorControl {
     public int currentGreen;
     public int currentBlue;
     private double currentDistance;
+    double y = 0;
 
     public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection,  StandardTrackingWheelLocalizer localizer) {
 //        limitSwitches = getLimitSwitches(hardwareMap);
@@ -85,14 +86,19 @@ public class SensorControl {
     }
 
     public double getTagDistance() {
-        LLResult result = limelight.getLatestResult();
+        LLResult result = limelightResult();
 
         if (result != null && result.isValid()) {
             // Get botpose relative to field (make sure your Limelight is configured to Field mode)
             Pose3D botpose = result.getBotpose();
 
+            if (GlobalVariables.alliance == Alliance.Red)
+                y = botpose.getPosition().y - 1.7;
+            else
+                y = botpose.getPosition().y + 1.7;
             double x = botpose.getPosition().x + 1.7;
-            double y = botpose.getPosition().y - 1.7;
+
+            // red: x+ y-    blue: x+ y+
 
             // Calculate distance to tag (in meters)
             return Math.sqrt(x * x + y * y);
@@ -171,17 +177,5 @@ public class SensorControl {
 
     public double getDistance(){
         return currentDistance;
-    }
-
-    public boolean isAllianceColor(){
-        if(GlobalVariables.alliance == Alliance.Red)
-            return isRed();
-        return isBlue();
-    }
-
-    public boolean isOtherAllianceColor(){
-        if(GlobalVariables.alliance == Alliance.Red)
-            return isBlue();
-        return isRed();
     }
 }

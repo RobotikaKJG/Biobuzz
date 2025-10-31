@@ -48,7 +48,6 @@ public class OuttakeServoControl {
     }
 
     private void setPosAuto() {
-        System.out.println("Black1");
 
         if(!wasIfCalled)
         {

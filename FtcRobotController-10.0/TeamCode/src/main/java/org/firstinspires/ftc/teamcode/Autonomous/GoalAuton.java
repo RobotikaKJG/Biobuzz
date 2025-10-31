@@ -3,14 +3,20 @@ package org.firstinspires.ftc.teamcode.Autonomous;
 import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.BlueTrajectories;
 import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.RedTrajectories;
 import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.Trajectories;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoConstants;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 
 public class GoalAuton implements Auton{
     private final SampleMecanumDrive drive;
     private Trajectories trajectories;
+    private ServoControl servoControl;
     private GoalAutonState goalAutonState = GoalAutonState.moveToShoot;
     private double currentWait = 0;
 
@@ -70,31 +76,42 @@ public class GoalAuton implements Auton{
 //AUTONOTE FILL IN THE LOGIC
 
     private void moveToShoot() {
+        OuttakeStates.setOuttakeServoState(OuttakeServoStates.setPosAuto);
+//        servoControl.setServoPos(ServoConstants.outtakeServo, 0.351);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
         if(drive.isBusy()) return;
-        //activate shooting
+        //activate shooting+
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shootFirst;
+        addWaitTime(5);
     }
 
     private void shootFirst() {
-//        if(OuttakeStates.getShootState() != ShootStates.idle()) return;
+        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle && currentWait > getSeconds()) return;
         //activate shooting
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shootSecond;
+        addWaitTime(5);
     }
 
     private void shootSecond() {
-//        if(OuttakeStates.getShootState() != ShootStates.idle()) return;
+        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle && currentWait > getSeconds()) return;
         //activate shooting
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shootThird;
+        addWaitTime(5);
     }
 
     private void shootThird() {
-//        if(OuttakeStates.getShootState() != ShootStates.idle()) return;
+        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle && currentWait > getSeconds()) return;
         //activate shooting
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.park;
     }
 
     private void park() {
-        //        if(OuttakeStates.getShootState() != ShootStates.idle()) return;
+        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
+        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
         drive.followTrajectorySequenceAsync(trajectories.park());
         goalAutonState = GoalAutonState.stop;
     }

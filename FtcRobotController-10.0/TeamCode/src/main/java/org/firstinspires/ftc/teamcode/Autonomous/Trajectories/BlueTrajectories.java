@@ -21,12 +21,13 @@ public class BlueTrajectories implements Trajectories{
 
     private void fillVariables() {
         moveToShoot = drive.trajectorySequenceBuilder(startPose)
-                .lineTo(new Vector2d(-15,15))
+                .lineTo(new Vector2d(-6,7))
+                .waitSeconds(3)
                 .build();
 
         park = drive.trajectorySequenceBuilder(moveToShoot.end())
                 .turn(Math.toRadians(-45))
-                .lineTo(new Vector2d(-  15, -10))
+                .lineTo(new Vector2d(-  25, -20))
                 .build();
 
     }

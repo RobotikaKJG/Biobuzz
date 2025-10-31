@@ -27,9 +27,6 @@ public class GeneralRedTeleOp extends LinearOpMode {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        dependencies.sensorControl.initPinpoint();
-        dependencies.sensorControl.initLimelight(0);
-
         waitForStart();
 
         dependencies.servoControl.setServoStartPos();

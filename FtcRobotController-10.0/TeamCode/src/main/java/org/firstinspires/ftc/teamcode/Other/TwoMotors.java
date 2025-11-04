@@ -68,7 +68,7 @@ public class TwoMotors extends LinearOpMode {
             if(edgeDetection.rising(GamepadIndexValues.rightTrigger))
                 motor2Speed -= steps[currentStep];
 
-            if(edgeDetection.rising(GamepadIndexValues.dpadUp) && currentStep < 6)
+            if(edgeDetection.rising(GamepadIndexValues.dpadUp) && currentStep < 5)
                 currentStep ++;
 
             if(edgeDetection.rising(GamepadIndexValues.dpadDown) && currentStep >= 0)

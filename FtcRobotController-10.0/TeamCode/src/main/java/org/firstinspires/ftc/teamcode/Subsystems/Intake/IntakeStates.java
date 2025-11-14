@@ -1,18 +1,18 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Intake;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.TransferCRServoStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class IntakeStates {
     private static SubsystemState intakeState = SubsystemState.Idle;
     private static IntakeMotorStates intakeMotorState = IntakeMotorStates.idle;
-    private static TransferCRServoStates transferCRServoState = TransferCRServoStates.idle;
+    private static TransferMotorStates transferMotorState = TransferMotorStates.idle;
 
     public static void setInitialStates() {
         intakeState = SubsystemState.Idle;
         intakeMotorState = IntakeMotorStates.idle;
-        transferCRServoState = TransferCRServoStates.idle;
+        transferMotorState = TransferMotorStates.idle;
     }
 
     public static SubsystemState getIntakeState() {
@@ -31,11 +31,11 @@ public class IntakeStates {
         intakeMotorState = state;
     }
 
-    public static TransferCRServoStates getTransferCRServoState() {
-        return transferCRServoState;
+    public static TransferMotorStates getTransferMotorState() {
+        return transferMotorState;
     }
 
-    public static void setTransferCRServoState(TransferCRServoStates state) {
-        transferCRServoState = state;
+    public static void setTransferMotorState(TransferMotorStates state) {
+        transferMotorState = state;
     }
 }

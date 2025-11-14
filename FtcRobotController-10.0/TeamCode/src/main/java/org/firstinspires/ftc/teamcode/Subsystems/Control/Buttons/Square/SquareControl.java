@@ -2,13 +2,11 @@ package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Square;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.TransferCRServoStates;
 
 public class SquareControl {
     public void update() {
         switch (ButtonStates.getSquareState()) {
             case turnIntake:
-                IntakeStates.setTransferCRServoState(TransferCRServoStates.turnIntake);
                 break;
             case idle:
                 break;

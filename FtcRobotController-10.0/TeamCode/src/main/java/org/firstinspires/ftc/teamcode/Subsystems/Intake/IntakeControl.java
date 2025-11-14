@@ -1,21 +1,21 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Intake;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.TransferCRServoControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class IntakeControl {
     private final IntakeMotorControl intakeMotorControl;
-    private final TransferCRServoControl transferCRServoControl;
+    private final TransferMotorControl transferMotorControl;
 
-    public IntakeControl(IntakeMotorControl intakeMotorControl, TransferCRServoControl transferCRServoControl) {
+    public IntakeControl(IntakeMotorControl intakeMotorControl, TransferMotorControl transferMotorControl) {
         this.intakeMotorControl = intakeMotorControl;
-        this.transferCRServoControl = transferCRServoControl;
+        this.transferMotorControl = transferMotorControl;
     }
 
     public void update() {
         intakeMotorControl.update();
-        transferCRServoControl.update();
+        transferMotorControl.update();
 
         updateIntakeState();
     }

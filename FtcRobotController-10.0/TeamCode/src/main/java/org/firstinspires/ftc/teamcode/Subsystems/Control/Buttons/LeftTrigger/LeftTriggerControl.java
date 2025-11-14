@@ -22,9 +22,8 @@ public class LeftTriggerControl {
     private void toggleOuttake() {
         switch (OuttakeStates.getMotorState()){
             case idle:
-                OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
+                OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
                 break;
-            case forwardStart:
             case forwardFull:
                 OuttakeStates.setMotorState(OuttakeMotorStates.idle);
                 break;

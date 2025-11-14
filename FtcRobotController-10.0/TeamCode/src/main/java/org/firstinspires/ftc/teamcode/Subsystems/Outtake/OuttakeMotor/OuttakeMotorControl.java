@@ -28,43 +28,16 @@ public class OuttakeMotorControl {
 
     public void updateStates() {
         switch (OuttakeStates.getMotorState()) {
-            case forwardStart: // here both do the same but if speed is not close enough can be used elsewhere
             case forwardFull:
-                motorSpeedControl();
+                motorControl.setMotorRPM(MotorConstants.outtake, -1767);
                 break;
             case backward:
-                motorControl.setMotorSpeed(MotorConstants.outtake, 0.9);
+                motorControl.setMotorRPM(MotorConstants.outtake, 1300);
                 break;
             case idle:
-                motorControl.setMotorSpeed(MotorConstants.outtake, 0);
+                motorControl.setMotorRPM(MotorConstants.outtake, 0);
                 break;
         }
 
-    }
-
-    private void motorSpeedControl() {
-        double currentVelocity = motorControl.getMotorVelocity(MotorConstants.outtake);
-        double error = OuttakeConstants.targetVelocity + currentVelocity;
-        if(error < OuttakeConstants.targetVelocity/3.0){
-            if (error > 50)
-                power = power - 0.002;
-            else if (error < -50)
-                power = power + 0.003;
-            power = Math.max(-1, Math.min(1, power));
-            System.out.println("Power: " + power);
-        }
-        motorControl.setMotorSpeed(MotorConstants.outtake, power);
-        if(Math.abs(error) > 150)
-            OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
-        else
-            OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
-    }
-
-    private void addWaitTime(double waitTime) {
-        currentWait = getSeconds() + waitTime;
-    }
-
-    private double getSeconds() {
-        return System.currentTimeMillis() / 1000.0;
     }
 }

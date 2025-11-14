@@ -4,9 +4,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
 public class MotorControl {
 
@@ -18,6 +20,7 @@ public class MotorControl {
         public static final String outtake = "outtakeMotor";
         public static final String intake = "intakeMotor";
         public static final String transfer = "transferMotor";
+        public static final String feeder = "feederMotor";
     }
 
     private final HardwareMap hardwareMap;
@@ -25,7 +28,7 @@ public class MotorControl {
     private final Utilities utilities = new Utilities();
 
 
-    private final double[] motorSpeeds = new double[7];
+    private final double[] motorSpeeds = new double[8];
 
     public MotorControl(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
@@ -41,19 +44,22 @@ public class MotorControl {
                 hardwareMap.get(DcMotorEx.class, MotorNames.outtake),
                 hardwareMap.get(DcMotorEx.class, MotorNames.intake),
                 hardwareMap.get(DcMotorEx.class, MotorNames.transfer),
+                hardwareMap.get(DcMotorEx.class, MotorNames.feeder),
         };
 
         setMotorProperties();
     }
 
     private void setMotorProperties() {
-        motors[MotorConstants.frontRight].setDirection(DcMotorSimple.Direction.REVERSE);
+        motors[MotorConstants.frontLeft].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[MotorConstants.backLeft].setDirection(DcMotorSimple.Direction.REVERSE);
+        motors[MotorConstants.transfer].setDirection(DcMotorSimple.Direction.REVERSE);
+        motors[MotorConstants.feeder].setDirection(DcMotorSimple.Direction.REVERSE);
         setZeroPowerBehavior(MotorConstants.all, DcMotor.ZeroPowerBehavior.BRAKE);
         setZeroPowerBehavior(MotorConstants.outtake, DcMotor.ZeroPowerBehavior.FLOAT);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        setMotorMode(MotorConstants.outtake, DcMotor.RunMode.RUN_USING_ENCODER);
+        setMotorMode(MotorConstants.outtake, DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void setZeroPowerBehavior(int index, DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
@@ -84,6 +90,7 @@ public class MotorControl {
     public void setMotors(int index) {
         for (int i = 0; i < Utilities.configLength(index); i++)
             motors[Utilities.motorIndex(index, i)].setPower(motorSpeeds[Utilities.motorIndex(index, i)]);
+        System.out.println(IntakeStates.getTransferMotorState());
     }
 
     public void setMotorMode(int index, DcMotor.RunMode mode)
@@ -95,30 +102,6 @@ public class MotorControl {
     public void setMotorPos(int index, int position){
         for (int i = 0; i < Utilities.configLength(index); i++)
             motors[Utilities.motorIndex(index, i)].setTargetPosition(position);
-    }
-
-    private double getBatteryVoltage() {
-        double result = Double.POSITIVE_INFINITY;
-        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
-            double voltage = sensor.getVoltage();
-            if (voltage > 0) {
-                result = Math.min(result, voltage);
-            }
-        }
-        return result;
-    }
-
-    private double compensateForVoltage(double desiredPower) {
-        double voltage = getBatteryVoltage();
-        double nominalVoltage = 12.0; // or 13.0 depending on your tuning
-        double compensated = desiredPower * (nominalVoltage / voltage);
-        return Math.max(-1.0, Math.min(1.0, compensated)); // clip to [-1, 1]
-    }
-
-
-    public void setMotorSpeedVoltage(int index, double power){
-        for (int i = 0; i < Utilities.configLength(index); i++)
-            motors[Utilities.motorIndex(index, i)].setPower(compensateForVoltage(power));
     }
 
     public double getMotorCurrent(int index)
@@ -159,5 +142,40 @@ public class MotorControl {
 
     public void resetMotorEncoders(int index) {
         utilities.resetMotorEncoders(motors, index);
+    }
+
+    private double getBatteryVoltage() {
+        double result = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) {
+                result = Math.min(result, voltage);
+            }
+        }
+        return result;
+    }
+
+    public void setMotorRPM(int index, double rpm) {
+        double ticksPerRev = 103.6;
+//        double ticksPerSecond = (rpm / 60.0) * ticksPerRev;
+//        double nominalVoltage = 12.0;
+//        double voltage = getBatteryVoltage();
+
+        for (int i = 0; i < Utilities.configLength(index); i++) {
+            DcMotorEx motor = motors[Utilities.motorIndex(index, i)];
+
+            // Only set mode once when you first configure the motor elsewhere ideally
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            PIDFCoefficients pidf = new PIDFCoefficients(
+                    100.0,    // P
+                    10.0,     // I
+                    5.0,     // D
+                    16.0      //16.5 * (nominalVoltage / voltage) // F
+            );
+
+            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
+            motor.setVelocity(rpm);
+        }
     }
 }

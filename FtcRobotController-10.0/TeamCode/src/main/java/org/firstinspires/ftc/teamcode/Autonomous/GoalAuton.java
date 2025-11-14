@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 
@@ -76,7 +75,6 @@ public class GoalAuton implements Auton{
 //AUTONOTE FILL IN THE LOGIC
 
     private void moveToShoot() {
-        OuttakeStates.setOuttakeServoState(OuttakeServoStates.setPosAuto);
 //        servoControl.setServoPos(ServoConstants.outtakeServo, 0.351);
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
         if(drive.isBusy()) return;

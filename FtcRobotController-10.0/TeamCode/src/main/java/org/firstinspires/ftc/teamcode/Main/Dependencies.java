@@ -14,12 +14,10 @@ import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.TransferCRServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TransferMotor.TransferMotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TransferServo.TransferServoControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorControl;
 
 public class Dependencies {
     public final HardwareMap hardwareMap;
@@ -62,11 +60,7 @@ public class Dependencies {
     }
 
     public OuttakeControl createOuttakeControl() {
-        return new OuttakeControl(createTurnServoControl(), createOuttakeMotorControl(), createTransferServoControl(), createTransferMotorControl());
-    }
-
-    private OuttakeServoControl createTurnServoControl() {
-        return new OuttakeServoControl(servoControl, sensorControl);
+        return new OuttakeControl(createOuttakeMotorControl(), createFeederMotorControl());
     }
 
     private OuttakeMotorControl createOuttakeMotorControl() {
@@ -74,20 +68,17 @@ public class Dependencies {
     }
 
     public IntakeControl createIntakeControl() {
-        return new IntakeControl(createIntakeMotorControl(), createTransferCRServoControl());
+        return new IntakeControl(createIntakeMotorControl(), createTransferMotorControl());
     }
 
     private IntakeMotorControl createIntakeMotorControl() {
         return new IntakeMotorControl(motorControl);
     }
 
-    private TransferCRServoControl createTransferCRServoControl() {
-        return new TransferCRServoControl(servoControl);
+    private FeederMotorControl createFeederMotorControl() {
+        return new FeederMotorControl(motorControl);
     }
 
-    private TransferServoControl createTransferServoControl() {
-        return new TransferServoControl(servoControl);
-    }
 
     private TransferMotorControl createTransferMotorControl() {
         return new TransferMotorControl(motorControl);

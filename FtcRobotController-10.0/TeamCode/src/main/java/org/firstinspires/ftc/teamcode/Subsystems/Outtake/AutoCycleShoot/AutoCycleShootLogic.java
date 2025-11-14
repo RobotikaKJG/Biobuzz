@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.TransferCRServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
@@ -16,11 +14,14 @@ public class AutoCycleShootLogic {
             case turnTransfer:
                 turnTransfer();
                 break;
-            case ballToOuttake:
-                ballToOuttake();
+            case turnFeeder:
+                turnFeeder();
                 break;
-            case servoDown:
-                servoDown();
+            case stopTransfer:
+                stopTransfer();
+                break;
+            case deactivate:
+                deactivate();
                 break;
             case idle:
                 break;
@@ -32,18 +33,23 @@ public class AutoCycleShootLogic {
     }
 
     private void turnTransfer() {
-        if(IntakeStates.getTransferCRServoState() != TransferCRServoStates.turnedOuttake) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.ballToOuttake);
-        addWaitTime(OuttakeConstants.ballTransferWait);
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnFeeder);
+        addWaitTime(OuttakeConstants.turnTransferWait);
     }
 
-    private void ballToOuttake() {
+    private void turnFeeder() {
         if(currentWait > getSeconds()) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.servoDown);
-        addWaitTime(OuttakeConstants.ballTransferWait);
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
+        addWaitTime(OuttakeConstants.turnFeederWait);
     }
 
-    private void servoDown() {
+    private void stopTransfer() {
+        if(currentWait > getSeconds()) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.deactivate);
+        addWaitTime(OuttakeConstants.stopTransferWait);
+    }
+
+    private void deactivate() {
         if(currentWait > getSeconds()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
     }

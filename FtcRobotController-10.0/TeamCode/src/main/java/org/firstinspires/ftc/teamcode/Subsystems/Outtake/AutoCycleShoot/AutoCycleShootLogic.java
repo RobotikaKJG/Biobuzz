@@ -20,6 +20,9 @@ public class AutoCycleShootLogic {
             case stopTransfer:
                 stopTransfer();
                 break;
+            case turnFeederBack:
+                turnFeederBack();
+                break;
             case deactivate:
                 deactivate();
                 break;
@@ -34,19 +37,25 @@ public class AutoCycleShootLogic {
 
     private void turnTransfer() {
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnFeeder);
-        addWaitTime(OuttakeConstants.turnTransferWait);
+        addWaitTime(OuttakeConstants.stopTransferAfter);
     }
 
     private void turnFeeder() {
         if(currentWait > getSeconds()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
-        addWaitTime(OuttakeConstants.turnFeederWait);
+        addWaitTime(OuttakeConstants.reverseFeederAfter);
     }
 
     private void stopTransfer() {
         if(currentWait > getSeconds()) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnFeederBack);
+        addWaitTime(OuttakeConstants.stopFeederAfter);
+    }
+
+    private void turnFeederBack() {
+        if(currentWait > getSeconds()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.deactivate);
-        addWaitTime(OuttakeConstants.stopTransferWait);
+        addWaitTime(OuttakeConstants.stopFeederWait);
     }
 
     private void deactivate() {

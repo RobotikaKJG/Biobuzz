@@ -42,9 +42,9 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
     //AUTONOTE change these if too bad (check with localizationtest)T
     public static double PARALLEL_X = 0; // X is the up and down direction
-    public static double PARALLEL_Y = -2.85; // Y is the strafe direction
+    public static double PARALLEL_Y = 3.14; // Y is the strafe direction
 
-    public static double PERPENDICULAR_X = 2.5;
+    public static double PERPENDICULAR_X = 2.1;
     public static double PERPENDICULAR_Y = 0;
 
     // Parallel/Perpendicular to the forward axis
@@ -68,16 +68,19 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
         // TODO: reverse any encoders using Encoder.setDirection(Encoder.Direction.REVERSE)
         parallelEncoder.setDirection(Encoder.Direction.REVERSE);
-        perpendicularEncoder.setDirection(Encoder.Direction.REVERSE);
+//        perpendicularEncoder.setDirection(Encoder.Direction.REVERSE);
+
+        this.imu.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
     }
 
     public static double encoderTicksToInches(double ticks) {
-        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
+//        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
+        return 0.002204367*ticks;
     }
 
     @Override
     public double getHeading() {
-        return -imu.getHeading();
+        return imu.getHeading();
     }
 
     @Override
@@ -89,7 +92,7 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     @Override
     public List<Double> getWheelPositions() {
         return Arrays.asList(
-                encoderTicksToInches(-imu.getEncoderX()),
+                encoderTicksToInches(imu.getEncoderX()),
                 encoderTicksToInches(-imu.getEncoderY())
         );
     }

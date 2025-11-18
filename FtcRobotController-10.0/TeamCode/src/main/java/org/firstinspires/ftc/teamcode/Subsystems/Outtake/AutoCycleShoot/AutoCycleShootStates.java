@@ -5,6 +5,7 @@ public enum AutoCycleShootStates {
     turnTransfer,
     turnFeeder,
     stopTransfer,
+    turnFeederBack,
     deactivate,
     idle
 }

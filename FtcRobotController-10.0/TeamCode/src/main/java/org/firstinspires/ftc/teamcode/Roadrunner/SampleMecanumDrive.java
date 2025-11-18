@@ -56,7 +56,7 @@ import java.util.List;
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8, 0, 0);//new PIDCoefficients(8.5, 0, 0.3);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(11, 0, 0);//new PIDCoefficients(8.5, 0, 0.3);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 0, 0);//new PIDCoefficients(9, 0, 0.3);
 
     public static double LATERAL_MULTIPLIER = 1.08;
@@ -130,7 +130,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         // TODO: reverse any motors using DcMotor.setDirection()
         //Reversed in motorControl
-        rightFront.setDirection(DcMotor.Direction.REVERSE); // add if needed
+        leftFront.setDirection(DcMotor.Direction.REVERSE); // add if needed
         leftRear.setDirection(DcMotor.Direction.REVERSE); // add if needed
 
         List<Integer> lastTrackingEncPositions = new ArrayList<>();

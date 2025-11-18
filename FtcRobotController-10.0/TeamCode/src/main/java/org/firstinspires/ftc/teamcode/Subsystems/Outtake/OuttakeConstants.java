@@ -23,7 +23,8 @@ public class OuttakeConstants {
     public static double kP = 0.003;
     public static double turnTransferWait = 0.4;
 
-
-    public static double turnFeederWait = 0.3;
-    public static double stopTransferWait = 0.1;
+    public static double stopTransferAfter = 0.7;
+    public static double reverseFeederAfter = 0;
+    public static double stopFeederAfter = 0.4;
+    public static double stopFeederWait = 0;
 }

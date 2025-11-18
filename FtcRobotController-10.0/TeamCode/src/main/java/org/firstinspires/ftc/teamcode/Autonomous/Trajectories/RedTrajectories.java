@@ -9,10 +9,20 @@ import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySe
 public class RedTrajectories implements Trajectories{
 
     SampleMecanumDrive drive;
-    TrajectorySequence moveToShoot;
+    TrajectorySequence moveToShootFirst;
+    TrajectorySequence goToTakeSecondBalls;
+    TrajectorySequence takeSecondBalls;
+    TrajectorySequence moveToShootSecond;
+    TrajectorySequence goToTakeThirdBalls;
+    TrajectorySequence takeThirdBalls;
+    TrajectorySequence moveToShootThird;
+    TrajectorySequence goToTakeFourthBalls;
+    TrajectorySequence takeFourthBalls;
+    TrajectorySequence moveToShootFourth;
     TrajectorySequence park;
 
-    private final Pose2d startPose = new Pose2d(45, 45,Math.toRadians(45));
+    private final Pose2d startPose = new Pose2d(60, -55,Math.toRadians(306));
+    private final Vector2d shootPose = new Vector2d(30, -25);
 
     public RedTrajectories(SampleMecanumDrive drive) {
         this.drive = drive;
@@ -20,20 +30,89 @@ public class RedTrajectories implements Trajectories{
     }
 
     private void fillVariables() {
-        moveToShoot = drive.trajectorySequenceBuilder(startPose)
-                .lineTo(new Vector2d(15,15))
-                .waitSeconds(3)
+        moveToShootFirst = drive.trajectorySequenceBuilder(startPose)
+                .lineTo(shootPose)
                 .build();
 
-        park = drive.trajectorySequenceBuilder(moveToShoot.end())
-                .turn(Math.toRadians(45))
-                .lineTo(new Vector2d(15, -10))
+        goToTakeSecondBalls = drive.trajectorySequenceBuilder(moveToShootFirst.end())
+                .lineToLinearHeading(new Pose2d(17, -20, Math.toRadians(270)))
                 .build();
 
+        takeSecondBalls = drive.trajectorySequenceBuilder(goToTakeSecondBalls.end())
+                .lineTo(new Vector2d(17, -50))
+                .build();
+
+        moveToShootSecond = drive.trajectorySequenceBuilder(takeSecondBalls.end())
+                .lineToLinearHeading(new Pose2d(shootPose, Math.toRadians(306)))
+                .build();
+
+        goToTakeThirdBalls = drive.trajectorySequenceBuilder(moveToShootSecond.end())
+                .lineToLinearHeading(new Pose2d(-8, -20, Math.toRadians(270)))
+                .build();
+
+        takeThirdBalls = drive.trajectorySequenceBuilder(goToTakeThirdBalls.end())
+                .lineTo(new Vector2d(-8, -50))
+                .build();
+
+        moveToShootThird = drive.trajectorySequenceBuilder(takeThirdBalls.end())
+                .lineToLinearHeading(new Pose2d(shootPose, Math.toRadians(306)))
+                .build();
+
+        goToTakeFourthBalls = drive.trajectorySequenceBuilder(moveToShootThird.end())
+                .lineToLinearHeading(new Pose2d(-32, -20, Math.toRadians(270)))
+                .build();
+
+        takeFourthBalls = drive.trajectorySequenceBuilder(goToTakeFourthBalls.end())
+                .lineTo(new Vector2d(-32, -50))
+                .build();
+
+        moveToShootFourth = drive.trajectorySequenceBuilder(takeFourthBalls.end())
+                .lineToLinearHeading(new Pose2d(shootPose, Math.toRadians(306)))
+                .build();
+
+        park = drive.trajectorySequenceBuilder(moveToShootFourth.end())
+                .lineTo(new Vector2d(10, -20))
+                .build();
     }
 
-    public TrajectorySequence moveToShoot() {
-        return moveToShoot;
+    public TrajectorySequence moveToShootFirst() {
+        return moveToShootFirst;
+    }
+
+    public TrajectorySequence goToTakeSecondBalls() {
+        return goToTakeSecondBalls;
+    }
+
+    public TrajectorySequence takeSecondBalls() {
+        return takeSecondBalls;
+    }
+
+    public TrajectorySequence moveToShootSecond() {
+        return moveToShootSecond;
+    }
+
+    public TrajectorySequence goToTakeThirdBalls() {
+        return goToTakeThirdBalls;
+    }
+
+    public TrajectorySequence takeThirdBalls() {
+        return takeThirdBalls;
+    }
+
+    public TrajectorySequence moveToShootThird() {
+        return moveToShootThird;
+    }
+
+    public TrajectorySequence goToTakeFourthBalls() {
+        return goToTakeFourthBalls;
+    }
+
+    public TrajectorySequence takeFourthBalls() {
+        return takeFourthBalls;
+    }
+
+    public TrajectorySequence moveToShootFourth() {
+        return moveToShootFourth;
     }
 
     public TrajectorySequence park() {

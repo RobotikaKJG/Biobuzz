@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Main.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 
 /**
@@ -23,23 +24,30 @@ public class LocalizationTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         ElapsedTime elapsedTime = new ElapsedTime();
+        GoBildaPinpointDriver pinpointImu = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointIMU");
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        pinpointImu.initialize();
+        pinpointImu.resetPosAndIMU();
 
         waitForStart();
 
         while (!isStopRequested()) {
+            pinpointImu.update();
+
             drive.setWeightedDrivePower(
                     new Pose2d(
                             -gamepad1.left_stick_y,
                             -gamepad1.left_stick_x,
-                            gamepad1.right_stick_x
+                            -gamepad1.right_stick_x
                     )
             );
 
             drive.update();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
+            telemetry.addData("encoder ticks", pinpointImu.getEncoderX());
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());

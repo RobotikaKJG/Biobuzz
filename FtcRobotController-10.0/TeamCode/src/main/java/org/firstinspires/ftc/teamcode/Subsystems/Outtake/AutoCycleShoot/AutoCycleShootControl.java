@@ -29,6 +29,9 @@ public class AutoCycleShootControl {
                 break;
             case stopTransfer:
                 IntakeStates.setTransferMotorState(TransferMotorStates.idle);
+                break;
+            case turnFeederBack:
+                OuttakeStates.setFeederMotorState(FeederMotorStates.backward);
                 IntakeStates.setMotorState(IntakeMotorStates.idle);
                 break;
             case deactivate:

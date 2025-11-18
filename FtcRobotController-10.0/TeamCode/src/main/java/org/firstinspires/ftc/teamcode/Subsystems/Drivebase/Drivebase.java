@@ -41,9 +41,9 @@ public class Drivebase {
 
     public void driverOrientedGamepadDrive(double maxSpeed) {
         selectGamepad();
-        double y = -currentGamepad.left_stick_y;
+        double y = currentGamepad.left_stick_y;
         double x = currentGamepad.left_stick_x;
-        double rotation = currentGamepad.right_stick_x * 1.1;
+        double rotation = currentGamepad.right_stick_x;
         driverOrientedGamepadDrive(y, x, rotation, maxSpeed);
     }
 
@@ -68,7 +68,7 @@ public class Drivebase {
         double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rotation), 1);
 
-        motorControl.setMotorSpeed(MotorConstants.allDrive, rotY);
+        motorControl.setMotorSpeed(MotorConstants.allDrive, -rotY);
 
         motorControl.addMotorSpeed(MotorConstants.leftDrive, rotation);
         motorControl.addMotorSpeed(MotorConstants.rightDrive, -rotation);

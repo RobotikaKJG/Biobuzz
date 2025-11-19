@@ -6,7 +6,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Autonomous.AutonomousControl;
 //import org.firstinspires.ftc.teamcode.Autonomous.NewSampleAuton;
-import org.firstinspires.ftc.teamcode.Autonomous.GoalAuton;
+import org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton;
+import org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAuton;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 
 public class AutonomousDependencies extends Dependencies {
@@ -24,11 +25,14 @@ public class AutonomousDependencies extends Dependencies {
         autonomousControl = createAutonomousControl();
     }
 
-    public GoalAuton createSpecimenAuton() {
+    public GoalAuton createGoalAuton() {
         return new GoalAuton(drive);
+    }
+    public AudienceAuton createAudienceAuton() {
+        return new AudienceAuton(drive);
     }
 
     public AutonomousControl createAutonomousControl() {
-        return new AutonomousControl(motorControl,createSpecimenAuton(),createIntakeControl(),createOuttakeControl(), sensorControl);
+        return new AutonomousControl(motorControl, createGoalAuton(), createAudienceAuton(),createIntakeControl(),createOuttakeControl(), sensorControl);
     }
 }

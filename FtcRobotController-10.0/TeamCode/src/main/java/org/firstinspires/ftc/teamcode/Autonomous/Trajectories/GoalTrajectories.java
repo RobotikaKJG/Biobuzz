@@ -4,7 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySequence;
 
-public interface Trajectories {
+public interface GoalTrajectories {
 
     // Abstract methods for each trajectory sequence to be implemented by subclasses
     TrajectorySequence moveToShootFirst();

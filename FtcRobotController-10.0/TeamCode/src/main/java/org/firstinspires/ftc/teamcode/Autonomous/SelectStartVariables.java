@@ -16,29 +16,31 @@ public class SelectStartVariables {
     EdgeDetection edgeDetection;
     private boolean risingTriangleEdge;
     private boolean risingSquareEdge;
+    private boolean risingDpadUpEdge;
+    private boolean risingDpadLeftEdge;
 
     public SelectStartVariables(Gamepad gamepad1, Telemetry telemetry) {
         this.gamepad1 = gamepad1;
         this.telemetry = telemetry;
         currentGamepad1.copy(this.gamepad1);
         edgeDetection = new EdgeDetection();
-//        selectAuton();
+        selectAuton();
         selectAlliance();
     }
 
-//    private void selectAuton() {
-//        while (!risingTriangleEdge && !risingSquareEdge) {
-//            calculateGamepadValues();
-//
-//            telemetry.addLine("Press triangle for SAMPLE, press square for SPECIMEN");
-//            telemetry.update();
-//            if (risingTriangleEdge)
-//                GlobalVariables.autonomousMode = AutonomousMode.sampleAuton;
-//            if (risingSquareEdge)
-//                GlobalVariables.autonomousMode = AutonomousMode.specimenAuton;
-//
-//        }
-//    }
+    private void selectAuton() {
+        while (!risingDpadUpEdge && !risingDpadLeftEdge) {
+            calculateGamepadValues();
+
+            telemetry.addLine("Press dpad up for audience side, dpad left for goal side");
+            telemetry.update();
+            if (risingDpadUpEdge)
+                GlobalVariables.autonomousMode = AutonomousMode.audienceSide;
+            if (risingDpadLeftEdge)
+                GlobalVariables.autonomousMode = AutonomousMode.goalSide;
+
+        }
+    }
 
     private void selectAlliance() {
         risingTriangleEdge = false;
@@ -62,5 +64,7 @@ public class SelectStartVariables {
         edgeDetection.refreshGamepadIndex(gamepad1, prevGamepad1);
         risingTriangleEdge = edgeDetection.rising(GamepadIndexValues.triangle);
         risingSquareEdge = edgeDetection.rising(GamepadIndexValues.square);
+        risingDpadUpEdge = edgeDetection.rising(GamepadIndexValues.dpadUp);
+        risingDpadLeftEdge = edgeDetection.rising(GamepadIndexValues.dpadLeft);
     }
 }

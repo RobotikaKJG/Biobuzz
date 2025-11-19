@@ -29,7 +29,7 @@ public class OuttakeMotorControl {
     public void updateStates() {
         switch (OuttakeStates.getMotorState()) {
             case forwardFull:
-                motorControl.setMotorRPM(MotorConstants.outtake, -1767);
+                motorControl.setMotorRPM(MotorConstants.outtake, -1000);
                 break;
             case backward:
                 motorControl.setMotorRPM(MotorConstants.outtake, 1300);

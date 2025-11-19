@@ -6,7 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySequence;
 
-public class RedTrajectories implements Trajectories{
+public class RedGoalTrajectories implements GoalTrajectories {
 
     SampleMecanumDrive drive;
     TrajectorySequence moveToShootFirst;
@@ -24,7 +24,7 @@ public class RedTrajectories implements Trajectories{
     private final Pose2d startPose = new Pose2d(60, -55,Math.toRadians(306));
     private final Vector2d shootPose = new Vector2d(30, -25);
 
-    public RedTrajectories(SampleMecanumDrive drive) {
+    public RedGoalTrajectories(SampleMecanumDrive drive) {
         this.drive = drive;
         fillVariables();
     }

@@ -168,7 +168,7 @@ public class MotorControl {
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             PIDFCoefficients pidf = new PIDFCoefficients(
-                    100.0,    // P
+                    20.0,    // P
                     10.0,     // I
                     5.0,     // D
                     16.0      //16.5 * (nominalVoltage / voltage) // F

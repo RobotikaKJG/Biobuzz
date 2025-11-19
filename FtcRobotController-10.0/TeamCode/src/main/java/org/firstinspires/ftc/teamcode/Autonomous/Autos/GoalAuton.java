@@ -1,8 +1,9 @@
-package org.firstinspires.ftc.teamcode.Autonomous;
+package org.firstinspires.ftc.teamcode.Autonomous.Autos;
 
-import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.BlueTrajectories;
-import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.RedTrajectories;
-import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.Trajectories;
+import org.firstinspires.ftc.teamcode.Autonomous.Auton;
+import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.BlueGoalTrajectories;
+import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.RedGoalTrajectories;
+import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.GoalTrajectories;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
@@ -13,17 +14,15 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMot
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 
-public class GoalAuton implements Auton{
+public class GoalAuton implements Auton {
     private final SampleMecanumDrive drive;
-    private Trajectories trajectories;
+    private GoalTrajectories trajectories;
     private ServoControl servoControl;
     private GoalAutonState goalAutonState = GoalAutonState.moveToShootFirst;
     private double currentWait = 0;
 
     public GoalAuton(SampleMecanumDrive drive) {
         this.drive = drive;
-
-        trajectories = new RedTrajectories(drive);
     }
 
     @Override
@@ -39,10 +38,10 @@ public class GoalAuton implements Auton{
     public void setTrajectorySide() {
         switch (GlobalVariables.alliance) {
             case Red:
-                trajectories = new RedTrajectories(drive);
+                trajectories = new RedGoalTrajectories(drive);
                 break;
             case Blue:
-                trajectories = new BlueTrajectories(drive);
+                trajectories = new BlueGoalTrajectories(drive);
                 break;
         }
     }

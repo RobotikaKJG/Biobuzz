@@ -17,10 +17,10 @@ public class MotorControl {
         public static final String backLeft = "backLeftMotor";
         public static final String frontRight = "frontRightMotor";
         public static final String backRight = "backRightMotor";
-        public static final String outtake = "outtakeMotor";
+        public static final String outtake1 = "outtake1Motor";
         public static final String intake = "intakeMotor";
         public static final String transfer = "transferMotor";
-        public static final String feeder = "feederMotor";
+        public static final String outtake2 = "outtake2Motor";
     }
 
     private final HardwareMap hardwareMap;
@@ -41,10 +41,10 @@ public class MotorControl {
                 hardwareMap.get(DcMotorEx.class, MotorNames.backLeft),
                 hardwareMap.get(DcMotorEx.class, MotorNames.frontRight),
                 hardwareMap.get(DcMotorEx.class, MotorNames.backRight),
-                hardwareMap.get(DcMotorEx.class, MotorNames.outtake),
+                hardwareMap.get(DcMotorEx.class, MotorNames.outtake1),
                 hardwareMap.get(DcMotorEx.class, MotorNames.intake),
                 hardwareMap.get(DcMotorEx.class, MotorNames.transfer),
-                hardwareMap.get(DcMotorEx.class, MotorNames.feeder),
+                hardwareMap.get(DcMotorEx.class, MotorNames.outtake2),
         };
 
         setMotorProperties();
@@ -54,12 +54,12 @@ public class MotorControl {
         motors[MotorConstants.frontLeft].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[MotorConstants.backLeft].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[MotorConstants.transfer].setDirection(DcMotorSimple.Direction.REVERSE);
-        motors[MotorConstants.feeder].setDirection(DcMotorSimple.Direction.REVERSE);
+        motors[MotorConstants.outtake2].setDirection(DcMotorSimple.Direction.REVERSE);
         setZeroPowerBehavior(MotorConstants.all, DcMotor.ZeroPowerBehavior.BRAKE);
-        setZeroPowerBehavior(MotorConstants.outtake, DcMotor.ZeroPowerBehavior.FLOAT);
+        setZeroPowerBehavior(MotorConstants.outtake1, DcMotor.ZeroPowerBehavior.FLOAT);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        setMotorMode(MotorConstants.outtake, DcMotor.RunMode.RUN_USING_ENCODER);
+        setMotorMode(MotorConstants.outtake1, DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void setZeroPowerBehavior(int index, DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
@@ -168,10 +168,10 @@ public class MotorControl {
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             PIDFCoefficients pidf = new PIDFCoefficients(
-                    20.0,    // P
-                    10.0,     // I
-                    5.0,     // D
-                    16.0      //16.5 * (nominalVoltage / voltage) // F
+                    0.00002,    // P
+                    0.0,     // I
+                    0.0,     // D
+                    20.5      //20.48 * (nominalVoltage / voltage) // F
             );
 
             motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);

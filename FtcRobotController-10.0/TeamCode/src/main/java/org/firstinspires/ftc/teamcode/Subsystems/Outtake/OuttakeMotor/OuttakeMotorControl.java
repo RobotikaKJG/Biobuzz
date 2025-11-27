@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class OuttakeMotorControl {
@@ -29,13 +28,15 @@ public class OuttakeMotorControl {
     public void updateStates() {
         switch (OuttakeStates.getMotorState()) {
             case forwardFull:
-                motorControl.setMotorRPM(MotorConstants.outtake, -1000);
+                motorControl.setMotorRPM(MotorConstants.outtake1, -1000);
+                motorControl.setMotorRPM(MotorConstants.outtake2, -1000);
                 break;
             case backward:
-                motorControl.setMotorRPM(MotorConstants.outtake, 1300);
+                motorControl.setMotorRPM(MotorConstants.outtake1, -1300);
+                motorControl.setMotorRPM(MotorConstants.outtake2, -1300);
                 break;
             case idle:
-                motorControl.setMotorRPM(MotorConstants.outtake, 0);
+                motorControl.setMotorRPM(MotorConstants.outtake1, 0);
                 break;
         }
 

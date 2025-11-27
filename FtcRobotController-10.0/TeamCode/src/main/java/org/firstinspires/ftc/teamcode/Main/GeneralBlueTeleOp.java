@@ -5,9 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 import java.util.List;
 
@@ -42,7 +40,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
             iterativeController.TeleOp();
 
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
-            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake));
+            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
             telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
             telemetry.addData("Transfer motor state", IntakeStates.getTransferMotorState());
             

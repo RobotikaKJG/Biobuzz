@@ -7,9 +7,11 @@ import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.GoalTrajectories;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoFeederIntake.AutoFeederIntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
@@ -30,8 +32,9 @@ public class GoalAuton implements Auton {
         setTrajectorySide();
         drive.setPoseEstimate(trajectories.getStartPose());
         drive.followTrajectorySequenceAsync(trajectories.moveToShootFirst());
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
         goalAutonState = GoalAutonState.moveToShootFirst;
+        addWaitTime(1);
     }
 
     @Override
@@ -67,6 +70,9 @@ public class GoalAuton implements Auton {
                 break;
             case takeSecondBalls:
                 takeSecondBalls();
+                break;
+            case goToRelease:
+                goToRelease();
                 break;
             case moveToShootSecond:
                 moveToShootSecond();
@@ -127,7 +133,7 @@ public class GoalAuton implements Auton {
 //AUTONOTE FILL IN THE LOGIC
 
     private void moveToShootFirst() {
-        if(drive.isBusy()) return;
+        if(drive.isBusy() || getSeconds() < currentWait) return;
         //activate shooting+
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shootFirstFirst;
@@ -158,18 +164,29 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.takeSecondBalls());
         IntakeStates.setMotorState(IntakeMotorStates.forward);
+        OuttakeStates.setFeederMotorState(FeederMotorStates.intake);
         goalAutonState = GoalAutonState.takeSecondBalls;
     }
 
     private void takeSecondBalls() {
         if(drive.isBusy()) return;
+        drive.followTrajectorySequenceAsync(trajectories.goToRelease());
+        IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
+        goalAutonState = GoalAutonState.goToRelease;
+        addWaitTime(3);
+    }
+
+    private void goToRelease() {
+        if(drive.isBusy() || getSeconds() < currentWait) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootSecond());
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
         goalAutonState = GoalAutonState.moveToShootSecond;
+        addWaitTime(1);
+
     }
 
     private void moveToShootSecond() {
-        if(drive.isBusy()) return;
+        if(drive.isBusy() || getSeconds() < currentWait) return;
         //activate shooting+
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shootSecondFirst;
@@ -201,18 +218,21 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.takeThirdBalls());
         IntakeStates.setMotorState(IntakeMotorStates.forward);
+        OuttakeStates.setFeederMotorState(FeederMotorStates.intake);
         goalAutonState = GoalAutonState.takeThirdBalls;
     }
 
     private void takeThirdBalls() {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootThird());
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
+        IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
         goalAutonState = GoalAutonState.moveToShootThird;
+        addWaitTime(1);
     }
 
     private void moveToShootThird() {
-        if(drive.isBusy()) return;
+        if(drive.isBusy() || getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shootThirdFirst;
     }
@@ -240,18 +260,21 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.takeFourthBalls());
         IntakeStates.setMotorState(IntakeMotorStates.forward);
+        OuttakeStates.setFeederMotorState(FeederMotorStates.intake);
         goalAutonState = GoalAutonState.takeFourthBalls;
     }
 
     private void takeFourthBalls() {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootFourth());
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
+        IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
         goalAutonState = GoalAutonState.moveToShootFourth;
+        addWaitTime(1);
     }
 
     private void moveToShootFourth() {
-        if(drive.isBusy()) return;
+        if(drive.isBusy() || getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shootFourthFirst;
     }
@@ -270,6 +293,7 @@ public class GoalAuton implements Auton {
 
     private void shootFourthThird() {
         if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
+        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
         drive.followTrajectorySequenceAsync(trajectories.park());
         goalAutonState = GoalAutonState.stop;
     }

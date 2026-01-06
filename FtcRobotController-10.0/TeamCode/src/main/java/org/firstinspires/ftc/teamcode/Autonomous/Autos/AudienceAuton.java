@@ -30,7 +30,7 @@ public class AudienceAuton implements Auton {
         setTrajectorySide();
         drive.setPoseEstimate(trajectories.getStartPose());
         drive.followTrajectorySequenceAsync(trajectories.moveToShootFirst());
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
         audienceAutonState = AudienceAutonState.moveToShootFirst;
         addWaitTime(AutonomousConstants.shooterToMaxSpeed);
     }
@@ -151,7 +151,7 @@ public class AudienceAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
         IntakeStates.setMotorState(IntakeMotorStates.idle);
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
         audienceAutonState = AudienceAutonState.moveToShootSecond;
     }
 
@@ -188,7 +188,7 @@ public class AudienceAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
         IntakeStates.setMotorState(IntakeMotorStates.idle);
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
         audienceAutonState = AudienceAutonState.moveToShootThird;
     }
 
@@ -222,7 +222,7 @@ public class AudienceAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
         IntakeStates.setMotorState(IntakeMotorStates.idle);
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFull);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
         audienceAutonState = AudienceAutonState.moveToShootFourth;
     }
 

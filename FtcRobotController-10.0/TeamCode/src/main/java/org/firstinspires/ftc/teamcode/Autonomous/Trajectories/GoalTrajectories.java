@@ -11,6 +11,7 @@ public interface GoalTrajectories {
 
     TrajectorySequence goToTakeSecondBalls();
     TrajectorySequence takeSecondBalls();
+    TrajectorySequence goToRelease();
     TrajectorySequence moveToShootSecond();
 
     TrajectorySequence goToTakeThirdBalls();

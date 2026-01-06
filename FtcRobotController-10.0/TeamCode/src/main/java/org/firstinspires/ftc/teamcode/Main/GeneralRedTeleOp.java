@@ -38,7 +38,8 @@ public class GeneralRedTeleOp extends LinearOpMode {
             if (gamepad1.triangle) break;
 
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
-            telemetry.addLine(" ");
+            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+            telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
             
             calculateLoopTime();
             telemetry.update();

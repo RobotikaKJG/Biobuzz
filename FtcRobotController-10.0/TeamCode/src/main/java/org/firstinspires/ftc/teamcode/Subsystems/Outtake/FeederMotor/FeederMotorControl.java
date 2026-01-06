@@ -24,13 +24,16 @@ public class FeederMotorControl {
     public void updateStates() {
         switch (OuttakeStates.getFeederMotorState()) {
             case forward:
-//                motorControl.setMotorSpeed(MotorConstants.outtake2, -1);
+                motorControl.setMotorSpeed(MotorConstants.feeder, -1);
+                break;
+            case intake:
+                motorControl.setMotorSpeed(MotorConstants.feeder, -0.5);
                 break;
             case backward:
-//                motorControl.setMotorSpeed(MotorConstants.outtake2, 1.0);
+                motorControl.setMotorSpeed(MotorConstants.feeder, 1.0);
                 break;
             case idle:
-//                motorControl.setMotorSpeed(MotorConstants.outtake2, 0);
+                motorControl.setMotorSpeed(MotorConstants.feeder, 0);
                 break;
         }
 

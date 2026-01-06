@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 
 public class ServoControl {
@@ -23,19 +22,16 @@ public class ServoControl {
 
     private void getServos() {
         crservos = new CRServo[]{
-                hardwareMap.get(CRServo.class, "transferCRServo")
+                hardwareMap.get(CRServo.class, "turretServo")
         };
-        servos = new Servo[]{
-                hardwareMap.get(Servo.class, "outtakeServo"),
-                hardwareMap.get(Servo.class, "transferServo")
-        };
+        servos = new Servo[]{        };
         analog = new AnalogInput[]{
-                hardwareMap.get(AnalogInput.class, "transferAnalog")
+                hardwareMap.get(AnalogInput.class, "turretAnalog")
+
         };
     }
 
     public void setServoStartPos() {
-        setServoPos(ServoConstants.outtakeServo, OuttakeConstants.outtakeDownServoMaxPos);
         for (int i = 0; i< crservos.length; i++) {
             crservos[i].setDirection(DcMotorSimple.Direction.FORWARD);
         }
@@ -57,5 +53,9 @@ public class ServoControl {
 
     public double getCRSPos(int index) {
         return analog[index].getVoltage() / analog[index].getMaxVoltage();
+    }
+
+    public double getCRSDegrees(int index) {
+        return getCRSPos(index) * 360.0;
     }
 }

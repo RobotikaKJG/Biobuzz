@@ -17,6 +17,8 @@ import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import java.util.List;
 
 
 public class SensorControl {
@@ -26,7 +28,7 @@ public class SensorControl {
     private final EdgeDetection edgeDetection;
     private final StandardTrackingWheelLocalizer localizer;
 //    public final NormalizedColorSensor colorSensor;
-//    public final LynxI2cColorRangeSensor rangeSensor;
+    public final LynxI2cColorRangeSensor rangeSensor;
     public final GoBildaPinpointDriver pinpointImu;
     public int currentColor;
     public int currentRed;
@@ -39,7 +41,7 @@ public class SensorControl {
 //        limitSwitches = getLimitSwitches(hardwareMap);
 
 //        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "ColorSensor");
-//        rangeSensor = hardwareMap.get(LynxI2cColorRangeSensor.class, "ColorSensor");
+        rangeSensor = hardwareMap.get(LynxI2cColorRangeSensor.class, "ColorSensor");
         pinpointImu = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointIMU");
 //        colorSensor.setGain(15);//2);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -106,6 +108,40 @@ public class SensorControl {
         return -1;
     }
 
+    public double getDisToCenter() {
+        LLResult result = limelightResult();
+
+        if (result != null && result.isValid()) {
+            // Prefer per-fiducial result if present (more specific for AprilTags)
+            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+            if (fiducials != null && !fiducials.isEmpty()) {
+                // use the first (primary) fiducial result
+                LLResultTypes.FiducialResult f = fiducials.get(0);
+                // getTargetXDegrees() gives horizontal offset in degrees (left/right)
+                return f.getTargetXDegrees();
+            }
+
+            // fallback to generic tx from parent result (also in degrees)
+            try {
+                return result.getTx();
+            } catch (Exception e) {
+                // in case getTx() isn't available in particular SDK build
+                return Double.NaN;
+            }
+        }
+
+        // no valid result
+        return Double.NaN;
+    }
+
+    public static double degreesToPixels(double offsetDegrees, double imageWidthPx, double cameraHFOVDegrees) {
+        if (Double.isNaN(offsetDegrees) || imageWidthPx <= 0 || cameraHFOVDegrees <= 0) return Double.NaN;
+        // fraction across horizontal FOV (center = 0)
+        double fraction = offsetDegrees / cameraHFOVDegrees;
+        // pixel offset from center
+        return fraction * imageWidthPx;
+    }
+
     public double getPinpointAngle() {
         resetPinpointAngle();
         pinpointImu.update();
@@ -153,9 +189,9 @@ public class SensorControl {
         currentBlue = 0;
     }
 
-//    public void updateDistance(){
-//        currentDistance = rangeSensor.getDistance(DistanceUnit.MM);
-//    }
+    public void updateDistance(){
+        currentDistance = rangeSensor.getDistance(DistanceUnit.MM);
+    }
 
     public void resetDistance(){
         currentDistance = 100;

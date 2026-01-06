@@ -1,10 +1,16 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 
+import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class AutoCycleShootLogic {
     private double currentWait = 0;
+    private SensorControl sensorControl;
+
+    public AutoCycleShootLogic(SensorControl sensorControl) {
+        this.sensorControl = sensorControl;
+    }
 
     public void update() {
         switch (OuttakeStates.getAutoCycleShootState()) {
@@ -41,7 +47,7 @@ public class AutoCycleShootLogic {
     }
 
     private void turnFeeder() {
-        if(currentWait > getSeconds()) return;
+        if(currentWait > getSeconds() || sensorControl.getDistance() < 90) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
         addWaitTime(OuttakeConstants.reverseFeederAfter);
     }

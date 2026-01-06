@@ -8,6 +8,7 @@ public enum GoalAutonState {
 
     goToTakeSecondBalls,
     takeSecondBalls,
+    goToRelease,
     moveToShootSecond,
     shootSecondFirst,
     shootSecondSecond,

@@ -157,17 +157,17 @@ public class SampleMecanumDrive extends MecanumDrive {
         return new TrajectoryBuilder(startPose, startHeading, VEL_CONSTRAINT, ACCEL_CONSTRAINT);
     }
 
-    public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose) {
+    public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPose, int maxVel) {
         return new TrajectorySequenceBuilder(
                 startPose,
-                VEL_CONSTRAINT, ACCEL_CONSTRAINT,
+                getVelocityConstraint(maxVel, MAX_ANG_VEL, TRACK_WIDTH), ACCEL_CONSTRAINT,
                 MAX_ANG_VEL, MAX_ANG_ACCEL
         );
     }
 
     public void turnAsync(double angle) {
         trajectorySequenceRunner.followTrajectorySequenceAsync(
-                trajectorySequenceBuilder(getPoseEstimate())
+                trajectorySequenceBuilder(getPoseEstimate(), 100)
                         .turn(angle)
                         .build()
         );
@@ -180,7 +180,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public void followTrajectoryAsync(Trajectory trajectory) {
         trajectorySequenceRunner.followTrajectorySequenceAsync(
-                trajectorySequenceBuilder(trajectory.start())
+                trajectorySequenceBuilder(trajectory.start(), 100)
                         .addTrajectory(trajectory)
                         .build()
         );

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Autonomous.Trajectories;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
+import org.firstinspires.ftc.teamcode.Roadrunner.DriveConstants;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySequence;
 
@@ -12,6 +13,7 @@ public class RedGoalTrajectories implements GoalTrajectories {
     TrajectorySequence moveToShootFirst;
     TrajectorySequence goToTakeSecondBalls;
     TrajectorySequence takeSecondBalls;
+    TrajectorySequence goToRelease;
     TrajectorySequence moveToShootSecond;
     TrajectorySequence goToTakeThirdBalls;
     TrajectorySequence takeThirdBalls;
@@ -22,7 +24,7 @@ public class RedGoalTrajectories implements GoalTrajectories {
     TrajectorySequence park;
 
     private final Pose2d startPose = new Pose2d(60, -55,Math.toRadians(306));
-    private final Vector2d shootPose = new Vector2d(30, -25);
+    private final Pose2d shootPose = new Pose2d(25, -22, Math.toRadians(315));
 
     public RedGoalTrajectories(SampleMecanumDrive drive) {
         this.drive = drive;
@@ -30,47 +32,52 @@ public class RedGoalTrajectories implements GoalTrajectories {
     }
 
     private void fillVariables() {
-        moveToShootFirst = drive.trajectorySequenceBuilder(startPose)
-                .lineTo(shootPose)
+        moveToShootFirst = drive.trajectorySequenceBuilder(startPose, 100)
+                .lineToLinearHeading(shootPose)
                 .build();
 
-        goToTakeSecondBalls = drive.trajectorySequenceBuilder(moveToShootFirst.end())
-                .lineToLinearHeading(new Pose2d(17, -20, Math.toRadians(270)))
+        goToTakeSecondBalls = drive.trajectorySequenceBuilder(moveToShootFirst.end(), 100)
+                .lineToLinearHeading(new Pose2d(18, -20, Math.toRadians(270)))
                 .build();
 
-        takeSecondBalls = drive.trajectorySequenceBuilder(goToTakeSecondBalls.end())
-                .lineTo(new Vector2d(17, -50))
+        takeSecondBalls = drive.trajectorySequenceBuilder(goToTakeSecondBalls.end(), 20)
+                .lineTo(new Vector2d(18, -55))
                 .build();
 
-        moveToShootSecond = drive.trajectorySequenceBuilder(takeSecondBalls.end())
-                .lineToLinearHeading(new Pose2d(shootPose, Math.toRadians(306)))
+        goToRelease = drive.trajectorySequenceBuilder(takeSecondBalls.end(), 100)
+                .lineTo(new Vector2d(10, -40))
+                .lineTo(new Vector2d(10, -60))
                 .build();
 
-        goToTakeThirdBalls = drive.trajectorySequenceBuilder(moveToShootSecond.end())
-                .lineToLinearHeading(new Pose2d(-8, -20, Math.toRadians(270)))
+        moveToShootSecond = drive.trajectorySequenceBuilder(goToRelease.end(), 100)
+                .lineToLinearHeading(shootPose)
                 .build();
 
-        takeThirdBalls = drive.trajectorySequenceBuilder(goToTakeThirdBalls.end())
-                .lineTo(new Vector2d(-8, -50))
+        goToTakeThirdBalls = drive.trajectorySequenceBuilder(moveToShootSecond.end(), 100)
+                .lineToLinearHeading(new Pose2d(-5, -20, Math.toRadians(270)))
                 .build();
 
-        moveToShootThird = drive.trajectorySequenceBuilder(takeThirdBalls.end())
-                .lineToLinearHeading(new Pose2d(shootPose, Math.toRadians(306)))
+        takeThirdBalls = drive.trajectorySequenceBuilder(goToTakeThirdBalls.end(), 20)
+                .lineTo(new Vector2d(-5, -55))
                 .build();
 
-        goToTakeFourthBalls = drive.trajectorySequenceBuilder(moveToShootThird.end())
-                .lineToLinearHeading(new Pose2d(-32, -20, Math.toRadians(270)))
+        moveToShootThird = drive.trajectorySequenceBuilder(takeThirdBalls.end(), 100)
+                .lineToLinearHeading(shootPose)
                 .build();
 
-        takeFourthBalls = drive.trajectorySequenceBuilder(goToTakeFourthBalls.end())
-                .lineTo(new Vector2d(-32, -50))
+        goToTakeFourthBalls = drive.trajectorySequenceBuilder(moveToShootThird.end(), 100)
+                .lineToLinearHeading(new Pose2d(-28, -20, Math.toRadians(270)))
                 .build();
 
-        moveToShootFourth = drive.trajectorySequenceBuilder(takeFourthBalls.end())
-                .lineToLinearHeading(new Pose2d(shootPose, Math.toRadians(306)))
+        takeFourthBalls = drive.trajectorySequenceBuilder(goToTakeFourthBalls.end(), 30)
+                .lineTo(new Vector2d(-28, -55))
                 .build();
 
-        park = drive.trajectorySequenceBuilder(moveToShootFourth.end())
+        moveToShootFourth = drive.trajectorySequenceBuilder(takeFourthBalls.end(), 100)
+                .lineToLinearHeading(shootPose)
+                .build();
+
+        park = drive.trajectorySequenceBuilder(moveToShootFourth.end(), 100)
                 .lineTo(new Vector2d(10, -20))
                 .build();
     }
@@ -85,6 +92,14 @@ public class RedGoalTrajectories implements GoalTrajectories {
 
     public TrajectorySequence takeSecondBalls() {
         return takeSecondBalls;
+    }
+
+    public TrajectorySequence goToRelease() {
+        return goToRelease;
+    }
+
+    public TrajectorySequence getGoToRelease() {
+        return goToRelease;
     }
 
     public TrajectorySequence moveToShootSecond() {

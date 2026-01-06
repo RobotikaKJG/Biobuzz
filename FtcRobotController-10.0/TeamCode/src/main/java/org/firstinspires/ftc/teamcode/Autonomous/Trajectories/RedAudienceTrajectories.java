@@ -23,19 +23,19 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
     }
 
     private void fillVariables() {
-        moveToShootFirst = drive.trajectorySequenceBuilder(startPose)
+        moveToShootFirst = drive.trajectorySequenceBuilder(startPose, 100)
                 .lineToLinearHeading(shootPose)
                 .build();
 
-        moveToShoot = drive.trajectorySequenceBuilder(takePose)
+        moveToShoot = drive.trajectorySequenceBuilder(takePose, 100)
                 .lineToLinearHeading(shootPose)
                 .build();
 
-        goToTakeBalls = drive.trajectorySequenceBuilder(shootPose)
+        goToTakeBalls = drive.trajectorySequenceBuilder(shootPose, 100)
                 .lineToLinearHeading(takePose)
                 .build();
 
-        park = drive.trajectorySequenceBuilder(moveToShoot.end())
+        park = drive.trajectorySequenceBuilder(moveToShoot.end(), 100)
                 .lineTo(new Vector2d(-55, -40))
                 .build();
     }

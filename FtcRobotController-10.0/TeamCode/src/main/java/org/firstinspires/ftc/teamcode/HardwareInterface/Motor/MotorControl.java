@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
 public class MotorControl {
 
@@ -53,7 +52,8 @@ public class MotorControl {
     private void setMotorProperties() {
         motors[MotorConstants.frontLeft].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[MotorConstants.backLeft].setDirection(DcMotorSimple.Direction.REVERSE);
-        motors[MotorConstants.transfer].setDirection(DcMotorSimple.Direction.REVERSE);
+        motors[MotorConstants.feeder].setDirection(DcMotorSimple.Direction.REVERSE);
+        motors[MotorConstants.outtake1].setDirection(DcMotorSimple.Direction.FORWARD);
         motors[MotorConstants.outtake2].setDirection(DcMotorSimple.Direction.REVERSE);
         setZeroPowerBehavior(MotorConstants.all, DcMotor.ZeroPowerBehavior.BRAKE);
         setZeroPowerBehavior(MotorConstants.outtake1, DcMotor.ZeroPowerBehavior.FLOAT);
@@ -90,7 +90,6 @@ public class MotorControl {
     public void setMotors(int index) {
         for (int i = 0; i < Utilities.configLength(index); i++)
             motors[Utilities.motorIndex(index, i)].setPower(motorSpeeds[Utilities.motorIndex(index, i)]);
-        System.out.println(IntakeStates.getTransferMotorState());
     }
 
     public void setMotorMode(int index, DcMotor.RunMode mode)
@@ -156,25 +155,16 @@ public class MotorControl {
     }
 
     public void setMotorRPM(int index, double rpm) {
-        double ticksPerRev = 103.6;
-//        double ticksPerSecond = (rpm / 60.0) * ticksPerRev;
-//        double nominalVoltage = 12.0;
-//        double voltage = getBatteryVoltage();
 
         for (int i = 0; i < Utilities.configLength(index); i++) {
             DcMotorEx motor = motors[Utilities.motorIndex(index, i)];
-
-            // Only set mode once when you first configure the motor elsewhere ideally
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            PIDFCoefficients pidf = new PIDFCoefficients(
-                    0.00002,    // P
-                    0.0,     // I
-                    0.0,     // D
-                    20.5      //20.48 * (nominalVoltage / voltage) // F
-            );
+            double F = 15;
 
+            PIDFCoefficients pidf = new PIDFCoefficients(5, 5, 0.5, F);
             motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
+
             motor.setVelocity(rpm);
         }
     }

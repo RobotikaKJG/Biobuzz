@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Circle;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoStates;
 
 public class CircleLogic {
     private final CircleControl circleControl = new CircleControl();
 
     public void update() {
-        if (turnOuttake()) return;
+        if (turretAdjust()) return;
+        stopTurret();
     }
 
     private void completeAction(){
@@ -16,10 +18,15 @@ public class CircleLogic {
         ButtonStates.setCircleState(CircleStates.idle);
     }
 
-    private boolean turnOuttake() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return false;
-        ButtonStates.setCircleState(CircleStates.turnOuttake);
+    private boolean turretAdjust() {
+        if(OuttakeStates.getTurretServoState() != TurretServoStates.idle) return false;
+        ButtonStates.setCircleState(CircleStates.turretAdjust);
         completeAction();
         return true;
+    }
+
+    private void stopTurret() {
+        ButtonStates.setCircleState(CircleStates.idle);
+        completeAction();
     }
 }

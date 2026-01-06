@@ -23,19 +23,19 @@ public class BlueAudienceTrajectories implements AudienceTrajectories {
     }
 
     private void fillVariables() {
-        moveToShootFirst = drive.trajectorySequenceBuilder(startPose)
+        moveToShootFirst = drive.trajectorySequenceBuilder(startPose, 100)
                 .lineToLinearHeading(shootPose)
                 .build();
 
-        moveToShoot = drive.trajectorySequenceBuilder(goToTakeBalls.end())
+        moveToShoot = drive.trajectorySequenceBuilder(goToTakeBalls.end(), 100)
                 .lineToLinearHeading(shootPose)
                 .build();
 
-        goToTakeBalls = drive.trajectorySequenceBuilder(moveToShoot.end())
+        goToTakeBalls = drive.trajectorySequenceBuilder(moveToShoot.end(), 100)
                 .lineToLinearHeading(takePose)
                 .build();
 
-        park = drive.trajectorySequenceBuilder(moveToShoot.end())
+        park = drive.trajectorySequenceBuilder(moveToShoot.end(), 100)
                 .lineTo(new Vector2d(10, -20))
                 .build();
     }

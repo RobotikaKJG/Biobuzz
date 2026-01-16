@@ -9,13 +9,17 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMot
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class OuttakeServoControl {
-    private final ServoControl servoControl;
-    private final SensorControl sensorControl;
-    private OuttakeServoStates prevServoStates = OuttakeServoStates.idle;
-
-
-
+    private OuttakeServoStates prevOuttakeServoState;
+    private ServoControl servoControl;
+    private SensorControl sensorControl;
+    private double max = OuttakeConstants.outtakeServoMaxPos;
+    private double min = OuttakeConstants.outtakeServoMinPos;
+    private double maxD = OuttakeConstants.maxDistance;
+    private double minD = OuttakeConstants.minDistance;
     private double currentWait = 0;
+    private boolean wasIfCalled = false;
+    double servoPos = min;
+    double distance = minD;
 
     public OuttakeServoControl(ServoControl servoControl, SensorControl sensorControl) {
         this.servoControl = servoControl;
@@ -23,22 +27,58 @@ public class OuttakeServoControl {
     }
 
     public void update() {
-        if(OuttakeStates.getOuttakeServoState() != prevServoStates) {
+        if (prevOuttakeServoState != OuttakeStates.getOuttakeServoState()) {
             updateStates();
-            prevServoStates = OuttakeStates.getOuttakeServoState();
-        } else if (OuttakeStates.getOuttakeServoState() == OuttakeServoStates.adjust) {
+            prevOuttakeServoState = OuttakeStates.getOuttakeServoState();
+        }
+        else if (OuttakeStates.getOuttakeServoState() == OuttakeServoStates.setPosAuto) {
             updateStates();
         }
     }
 
-    public void updateStates() {
+    private void updateStates() {
         switch (OuttakeStates.getOuttakeServoState()) {
-            case adjust:
+            case setPosAuto:
+                setPosAuto();
+                break;
+            case setPosFar:
+                setPosFar();
                 break;
             case idle:
                 break;
         }
+    }
 
+    private void setPosAuto() {
+
+        if(!wasIfCalled)
+        {
+            addWaitTime(0.1);
+            wasIfCalled = true;
+        }
+
+        if(currentWait > getSeconds()) return;
+
+        distance = sensorControl.getTagDistance();
+        if (distance <= 0) return;
+
+        servoPos = Math.min(
+                max,
+                Math.max(
+                        min,
+                        max - (distance - minD) * (max - min) / (maxD - minD)
+                )
+        );
+
+        System.out.println("servoPos: " + servoPos);
+
+        servoControl.setServoPos(ServoConstants.outtakeServo, servoPos);
+
+        wasIfCalled = false;
+    }
+
+    private void setPosFar() {
+        servoControl.setServoPos(ServoConstants.outtakeServo, OuttakeConstants.outtakeServoMaxPos);
     }
 
     private void addWaitTime(double waitTime) {

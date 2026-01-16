@@ -9,7 +9,7 @@ public class SquareLogic {
     private final SquareControl squareControl = new SquareControl();
 
     public void update() {
-        if (turnIntake()) return;
+        if (turnTurret()) return;
     }
 
     private void completeAction(){
@@ -17,9 +17,9 @@ public class SquareLogic {
         ButtonStates.setSquareState(SquareStates.idle);
     }
 
-    private boolean turnIntake() {
+    private boolean turnTurret() {
         if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return false;
-        ButtonStates.setSquareState(SquareStates.turnIntake);
+        ButtonStates.setSquareState(SquareStates.turnTurret);
         completeAction();
         return true;
     }

@@ -18,7 +18,7 @@ public class RightBumperLogic {
     }
 
     private boolean aimAuto() {
-        if (OuttakeStates.getOuttakeServoState() == OuttakeServoStates.adjust) return false;
+        if (OuttakeStates.getOuttakeServoState() == OuttakeServoStates.setPosAuto) return false;
         ButtonStates.setRightBumperState(RightBumperStates.aimAuto);
         completeAction();
         return true;

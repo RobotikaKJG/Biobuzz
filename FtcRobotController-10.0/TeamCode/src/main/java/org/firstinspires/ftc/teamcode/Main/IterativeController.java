@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class IterativeController {
@@ -35,6 +36,7 @@ public class IterativeController {
     private final OuttakeControl outtakeControl;
     private final IntakeControl intakeControl;
     private final SensorControl sensorControl;
+    private final TurretServoControl turretServoControl;
     private boolean colorSensorActive = true;
 
     public IterativeController(Dependencies dependencies) {
@@ -52,6 +54,7 @@ public class IterativeController {
         outtakeControl = dependencies.createOuttakeControl();
         intakeControl = dependencies.createIntakeControl();
         sensorControl = dependencies.sensorControl;
+        turretServoControl = dependencies.turretServoControl;
 
         sensorControl.initPinpoint();
         sensorControl.initLimelight(0);

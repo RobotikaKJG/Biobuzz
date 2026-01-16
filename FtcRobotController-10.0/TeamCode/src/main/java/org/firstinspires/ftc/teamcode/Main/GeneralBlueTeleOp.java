@@ -5,8 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 
 import java.util.List;
 
@@ -40,10 +42,13 @@ public class GeneralBlueTeleOp extends LinearOpMode {
         while (opModeIsActive()) {
             iterativeController.TeleOp();
 
+            dependencies.sensorControl.updateDistance();
+
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
             telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
             telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
-            telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());
+            telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
+            telemetry.addData("AutoCycle state", OuttakeStates.getAutoCycleShootState());
             
             if (gamepad1.triangle) break;
             calculateLoopTime();

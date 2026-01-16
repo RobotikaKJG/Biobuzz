@@ -24,7 +24,9 @@ public class ServoControl {
         crservos = new CRServo[]{
                 hardwareMap.get(CRServo.class, "turretServo")
         };
-        servos = new Servo[]{        };
+        servos = new Servo[]{
+                hardwareMap.get(Servo.class, "outtakeServo")
+        };
         analog = new AnalogInput[]{
                 hardwareMap.get(AnalogInput.class, "turretAnalog")
 
@@ -52,10 +54,12 @@ public class ServoControl {
     }
 
     public double getCRSPos(int index) {
+        System.out.println("getCRSPos: " + analog[index].getVoltage());
         return analog[index].getVoltage() / analog[index].getMaxVoltage();
     }
 
     public double getCRSDegrees(int index) {
+        System.out.println("getCRSDegrees: " + getCRSPos(index)*360);
         return getCRSPos(index) * 360.0;
     }
 }

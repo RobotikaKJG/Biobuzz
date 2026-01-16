@@ -12,7 +12,7 @@ public class RightTriggerControl {
         switch (ButtonStates.getRightTriggerState()) {
             case forward:
                 IntakeStates.setMotorState(IntakeMotorStates.forward);
-                OuttakeStates.setFeederMotorState(FeederMotorStates.intake);
+                OuttakeStates.setFeederMotorState(FeederMotorStates.forward);
                 break;
             case stop:
                 IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);

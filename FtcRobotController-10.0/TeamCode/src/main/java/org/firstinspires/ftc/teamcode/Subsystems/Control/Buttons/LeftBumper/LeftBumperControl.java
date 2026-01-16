@@ -11,6 +11,9 @@ public class LeftBumperControl {
             case shoot:
                 OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
                 break;
+            case stop:
+                OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
+                break;
             case idle:
                 break;
         }

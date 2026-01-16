@@ -1,96 +1,135 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo;
 
-import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 
 public class TurretServoControl {
-    private final ServoControl servoControl;
-    private final SensorControl sensorControl;
-    private TurretServoStates prevTurretServoState = TurretServoStates.idle;
 
-    private final int servoGear = 55;
-    private final int turretGear = 230;
+    private final ServoControl servo;
+    private final SensorControl sensor;
 
-    private double turretStartDeg = 0;
-    private boolean turretZeroed = false;
+    /* ================= CONFIG ================= */
 
-    public TurretServoControl(ServoControl servoControl, SensorControl sensorControl) {
+    // Maximum allowed rotation from zero (degrees)
+    private static final double MAX_TURRET_ANGLE_DEG = 85.0;
 
-        this.servoControl = servoControl;
-        this.sensorControl = sensorControl;
+    // Limelight proportional gain
+    private static final double KP = 0.01;
 
-        initTurretZero();
+    // Max CR servo speed
+    private static final double MAX_SERVO_SPEED = 0.5;
+
+    // Deadband in degrees
+    private static final double TARGET_TOLERANCE_DEG = 1.0;
+
+    private static final double GEAR_RATIO = 55.0 / 230.0; // turret / servo
+
+    /* ================= STATE ================= */
+
+    private double lastAnalog = 0.0;
+    private int rotationCount = 0;
+
+    // Continuous turret angle (0° = start of run)
+    private double turretAngleDeg = 0.0;
+
+    private double analogZero = 0.0;
+    private double servoAngleZeroDeg = 0.0;
+
+    private static final double AIM_OFFSET_DEG = 2.0;
+
+    /* ================= CONSTRUCTOR ================= */
+
+    public TurretServoControl(ServoControl servo, SensorControl sensor) {
+        this.servo = servo;
+        this.sensor = sensor;
+
+        // Zero turret at startup
+        analogZero = servo.getCRSPos(ServoConstants.turretAnalog);
+        lastAnalog = analogZero;
+        rotationCount = 0;
+
+        servoAngleZeroDeg = analogZero * 360.0;
+
+        turretAngleDeg = 0.0;
+
+
     }
 
+    /* ================= PUBLIC UPDATE ================= */
 
     public void update() {
-        if (OuttakeStates.getTurretServoState() != prevTurretServoState) {
-            updateStates();
-            prevTurretServoState = OuttakeStates.getTurretServoState();
-        }
-
-        // continuous control in adjust mode
-        if (OuttakeStates.getTurretServoState() == TurretServoStates.adjust) {
-            updateStates();
-        }
+        updateTurretAngle();
+        updateTurretControl();
     }
 
-    public void updateStates() {
-        switch (OuttakeStates.getTurretServoState()) {
-            case adjust:
-                updateTurretWithLimelight();
-                break;
-            case idle:
-                servoControl.setServoSpeed(ServoConstants.turretServo, 0);
-                break;
+    /* ================= ANGLE TRACKING ================= */
+
+    private void updateTurretAngle() {
+        double analog = servo.getCRSPos(ServoConstants.turretAnalog); // 0–1
+        double delta = analog - lastAnalog;
+
+        if (delta > 0.5) {
+            rotationCount--;
+        } else if (delta < -0.5) {
+            rotationCount++;
         }
 
+        lastAnalog = analog;
+
+        // Continuous SERVO angle
+        double servoAngleDeg =
+                rotationCount * 360.0 + analog * 360.0;
+
+        // Subtract startup angle, THEN apply gear ratio
+        turretAngleDeg =
+                (servoAngleDeg - servoAngleZeroDeg) * (55.0 / 230.0);
     }
 
-    private void updateTurretWithLimelight() {
-        initTurretZero();
 
-        double currentDeg = servoControl.getCRSDegrees(ServoConstants.turretServo);
-        double minDeg = turretStartDeg - OuttakeConstants.maxTurretAngle;
-        double maxDeg = turretStartDeg + OuttakeConstants.maxTurretAngle;
+    /* ================= CONTROL ================= */
 
-        double tx = sensorControl.getDisToCenter(); // degrees
+    private void updateTurretControl() {
+        double tx = sensor.getDisToCenter() + AIM_OFFSET_DEG;
 
-        // No valid target
+        // No target
         if (Double.isNaN(tx)) {
-            servoControl.setServoSpeed(ServoConstants.turretServo, 0);
+            servo.setServoSpeed(ServoConstants.turretServo, 0);
             return;
         }
 
         // Deadband
-        if (Math.abs(tx) < OuttakeConstants.turretTolerance) {
-            servoControl.setServoSpeed(ServoConstants.turretServo, 0);
+        if (Math.abs(tx) < TARGET_TOLERANCE_DEG) {
+            servo.setServoSpeed(ServoConstants.turretServo, 0);
             return;
         }
 
         // Proportional control
-        double power = tx * OuttakeConstants.kpTurret;
-        power = Math.max(-OuttakeConstants.turretServoMaxSpeed,
-                Math.min(OuttakeConstants.turretServoMaxSpeed, power));
+        double power = tx * KP;
+
+        // Clamp speed
+        power = Math.max(-MAX_SERVO_SPEED, Math.min(MAX_SERVO_SPEED, power));
 
         // Enforce limits
-        if ((currentDeg <= minDeg && power < 0) ||
-                (currentDeg >= maxDeg && power > 0)) {
+        if ((turretAngleDeg <= -MAX_TURRET_ANGLE_DEG && power > 0) ||
+                (turretAngleDeg >=  MAX_TURRET_ANGLE_DEG && power < 0)) {
             power = 0;
         }
 
-        servoControl.setServoSpeed(ServoConstants.turretServo, power);
+        servo.setServoSpeed(ServoConstants.turretServo, power);
     }
 
-    private void initTurretZero() {
-        if (!turretZeroed) {
-            turretStartDeg = servoControl.getCRSDegrees(ServoConstants.turretServo);
-            turretZeroed = true;
-        }
+    /* ================= GETTERS ================= */
+
+    public double getTurretAngleDeg() {
+        return turretAngleDeg;
+    }
+
+    public boolean atLeftLimit() {
+        return turretAngleDeg <= -MAX_TURRET_ANGLE_DEG;
+    }
+
+    public boolean atRightLimit() {
+        return turretAngleDeg >= MAX_TURRET_ANGLE_DEG;
     }
 }

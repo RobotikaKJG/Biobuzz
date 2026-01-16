@@ -9,6 +9,7 @@ public class LeftBumperLogic {
 
     public void update() {
         if(shoot()) return;
+        stop();
         return;
     }
 
@@ -17,6 +18,11 @@ public class LeftBumperLogic {
         ButtonStates.setLeftBumperState(LeftBumperStates.shoot);
         completeAction();
         return true;
+    }
+
+    private void stop() {
+        ButtonStates.setLeftBumperState(LeftBumperStates.stop);
+        completeAction();
     }
 
     private void completeAction(){

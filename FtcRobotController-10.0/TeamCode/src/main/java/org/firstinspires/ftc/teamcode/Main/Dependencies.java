@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoFeederIntake.AutoFee
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootLogic;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorControl;
@@ -32,6 +33,7 @@ public class Dependencies {
     public MotorControl motorControl;
     public SensorControl sensorControl;
     public ServoControl servoControl;
+    public TurretServoControl turretServoControl;
     public EdgeDetection edgeDetection = new EdgeDetection();
     public EdgeDetection gamepad2EdgeDetection = new EdgeDetection();
 
@@ -45,6 +47,7 @@ public class Dependencies {
         motorControl = new MotorControl(hardwareMap);
         sensorControl = new SensorControl(hardwareMap, edgeDetection, localizer);
         servoControl = new ServoControl(hardwareMap);
+        turretServoControl = new TurretServoControl(servoControl, sensorControl);
     }
 
     public Drivebase createDrivebase() {
@@ -64,7 +67,7 @@ public class Dependencies {
     }
 
     public OuttakeControl createOuttakeControl() {
-        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createFeederMotorControl(), createTurretServoControl(), createOuttakeServoControl());
+        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createFeederMotorControl(), createTurretServoControl(), createOuttakeServoControl(), createAutoOuttakeFarCloseControl());
     }
 
     private OuttakeMotorControl createOuttakeMotorControl() {
@@ -92,7 +95,7 @@ public class Dependencies {
     }
 
     private TurretServoControl createTurretServoControl() {
-        return new TurretServoControl(servoControl, sensorControl);
+        return turretServoControl;
     }
 
     private OuttakeServoControl createOuttakeServoControl() {
@@ -100,6 +103,10 @@ public class Dependencies {
     }
 
     private AutoCycleShootLogic createAutoCycleShootLogic() {
-        return new AutoCycleShootLogic(sensorControl);
+        return new AutoCycleShootLogic(sensorControl, motorControl);
+    }
+
+    private AutoOuttakeFarCloseControl createAutoOuttakeFarCloseControl() {
+        return new AutoOuttakeFarCloseControl(sensorControl);
     }
 }

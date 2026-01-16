@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 
+import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
@@ -7,9 +9,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 public class AutoCycleShootLogic {
     private double currentWait = 0;
     private SensorControl sensorControl;
+    private MotorControl motorControl;
 
-    public AutoCycleShootLogic(SensorControl sensorControl) {
+    public AutoCycleShootLogic(SensorControl sensorControl, MotorControl motorControl) {
         this.sensorControl = sensorControl;
+        this.motorControl = motorControl;
     }
 
     public void update() {
@@ -43,13 +47,13 @@ public class AutoCycleShootLogic {
 
     private void turnTransfer() {
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnFeeder);
-        addWaitTime(OuttakeConstants.stopTransferAfter);
+//        addWaitTime(OuttakeConstants.stopTransferAfter);
     }
 
     private void turnFeeder() {
-        if(currentWait > getSeconds() || sensorControl.getDistance() < 90) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
-        addWaitTime(OuttakeConstants.reverseFeederAfter);
+//        if(currentWait > getSeconds() || (motorControl.getMotorVelocity(MotorConstants.outtake1)<OuttakeConstants.outtakeVelFar-200 && motorControl.getMotorVelocity(MotorConstants.outtake1)>OuttakeConstants.outtakeVelClose+300)) return;
+//        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
+//        addWaitTime(OuttakeConstants.reverseFeederAfter);
     }
 
     private void stopTransfer() {

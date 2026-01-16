@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 import java.util.List;
 
@@ -40,6 +42,8 @@ public class GeneralRedTeleOp extends LinearOpMode {
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
             telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
             telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
+            telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
+            telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());
             
             calculateLoopTime();
             telemetry.update();

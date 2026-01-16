@@ -2,31 +2,23 @@ package org.firstinspires.ftc.teamcode.Autonomous.Autos;
 
 public enum GoalAutonState {
     moveToShootFirst,
-    shootFirstFirst,
-    shootFirstSecond,
-    shootFirstThird,
+    shootBallsFirst,
 
     goToTakeSecondBalls,
     takeSecondBalls,
     goToRelease,
     moveToShootSecond,
-    shootSecondFirst,
-    shootSecondSecond,
-    shootSecondThird,
+    shootBallsSecond,
 
     goToTakeThirdBalls,
     takeThirdBalls,
     moveToShootThird,
-    shootThirdFirst,
-    shootThirdSecond,
-    shootThirdThird,
+    shootBallsThird,
 
     goToTakeFourthBalls,
     takeFourthBalls,
     moveToShootFourth,
-    shootFourthFirst,
-    shootFourthSecond,
-    shootFourthThird,
+    shootBallsFourth,
 
     stop,
     idle

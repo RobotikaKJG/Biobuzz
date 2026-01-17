@@ -24,7 +24,7 @@ public class RedGoalTrajectories implements GoalTrajectories {
     TrajectorySequence park;
 
     private final Pose2d startPose = new Pose2d(60, -55,Math.toRadians(306));
-    private final Pose2d shootPose = new Pose2d(17, -10, Math.toRadians(315));
+    private final Pose2d shootPose = new Pose2d(23, -12, Math.toRadians(315));
 
     public RedGoalTrajectories(SampleMecanumDrive drive) {
         this.drive = drive;
@@ -37,7 +37,7 @@ public class RedGoalTrajectories implements GoalTrajectories {
                 .build();
 
         goToTakeSecondBalls = drive.trajectorySequenceBuilder(moveToShootFirst.end(), 90)
-                .lineToLinearHeading(new Pose2d(25, -10, Math.toRadians(270)))
+                .lineToLinearHeading(new Pose2d(25, -0, Math.toRadians(270)))
                 .build();
 
         takeSecondBalls = drive.trajectorySequenceBuilder(goToTakeSecondBalls.end(), 18)
@@ -45,8 +45,8 @@ public class RedGoalTrajectories implements GoalTrajectories {
                 .build();
 
         goToRelease = drive.trajectorySequenceBuilder(takeSecondBalls.end(), 100)
-                .lineTo(new Vector2d(18, -40))
-                .lineTo(new Vector2d(18, -65))
+                .lineTo(new Vector2d(16, -40))
+                .lineTo(new Vector2d(16, -65))
                 .build();
 
         moveToShootSecond = drive.trajectorySequenceBuilder(goToRelease.end(), 100)

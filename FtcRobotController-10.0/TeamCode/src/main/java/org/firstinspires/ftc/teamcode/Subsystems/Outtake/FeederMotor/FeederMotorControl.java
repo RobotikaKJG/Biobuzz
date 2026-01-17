@@ -24,7 +24,7 @@ public class FeederMotorControl {
     public void updateStates() {
         switch (OuttakeStates.getFeederMotorState()) {
             case forward:
-                motorControl.setMotorSpeed(MotorConstants.feeder, 1);
+                motorControl.setMotorSpeed(MotorConstants.feeder, 0.9);
                 break;
             case intake:
                 motorControl.setMotorSpeed(MotorConstants.feeder, 0.5);

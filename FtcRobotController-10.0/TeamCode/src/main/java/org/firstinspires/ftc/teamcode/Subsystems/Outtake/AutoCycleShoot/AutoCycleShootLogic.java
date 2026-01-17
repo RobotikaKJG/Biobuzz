@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
+import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class AutoCycleShootLogic {
     private double currentWait = 0;
+    private boolean wasIfCalled = false;
     private SensorControl sensorControl;
     private MotorControl motorControl;
 
@@ -42,6 +44,14 @@ public class AutoCycleShootLogic {
     }
 
     private void activate() {
+        if(!wasIfCalled) {
+            wasIfCalled = true;
+            if (GlobalVariables.isAutonomous) {
+                addWaitTime(1);
+            }
+        }
+        if(currentWait > getSeconds()) return;
+        wasIfCalled = false;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
     }
 

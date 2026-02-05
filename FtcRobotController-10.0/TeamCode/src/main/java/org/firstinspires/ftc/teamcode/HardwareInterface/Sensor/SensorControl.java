@@ -20,6 +20,12 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import java.util.List;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.BallDetectionPipeline;
+
 
 public class SensorControl {
 
@@ -36,6 +42,11 @@ public class SensorControl {
     public int currentBlue;
     private double currentDistance;
     double y = 0;
+
+    private OpenCvCamera webcam;
+    private BallDetectionPipeline ballPipeline;
+    private double cameraHFOVDegrees = 78.0; // Logitech C720 approx HFOV
+    private int cameraWidthPx = 640;
 
     public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection,  StandardTrackingWheelLocalizer localizer) {
 //        limitSwitches = getLimitSwitches(hardwareMap);
@@ -78,6 +89,29 @@ public class SensorControl {
         pinpointImu.resetPosAndIMU();
     }
 
+    public void initBallCamera(HardwareMap hardwareMap) {
+        int camMonitorViewId = hardwareMap.appContext.getResources()
+                .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class, "Webcam 1"), camMonitorViewId);
+
+        ballPipeline = new BallDetectionPipeline();
+        webcam.setPipeline(ballPipeline);
+
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                // Handle camera error
+            }
+        });
+    }
+
     public void initLimelight(int pipelineNr) {
         limelight.start();
         limelight.pipelineSwitch(pipelineNr);
@@ -90,20 +124,30 @@ public class SensorControl {
     public double getTagDistance() {
         LLResult result = limelightResult();
 
+        int targetID = (GlobalVariables.alliance == Alliance.Red) ? 24 : 20;
+
         if (result != null && result.isValid()) {
-            // Get botpose relative to field (make sure your Limelight is configured to Field mode)
-            Pose3D botpose = result.getBotpose();
 
-            if (GlobalVariables.alliance == Alliance.Red)
-                y = botpose.getPosition().y - 1.7;
-            else
-                y = botpose.getPosition().y + 1.7;
-            double x = botpose.getPosition().x + 1.7;
+            // Prefer per-fiducial result if present
+            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+            if (fiducials != null) {
+                for (LLResultTypes.FiducialResult f : fiducials) {
+                    if (f.getFiducialId() == targetID) {
+                        Pose3D botpose = result.getBotpose();
 
-            // red: x+ y-    blue: x+ y+
+                        if (GlobalVariables.alliance == Alliance.Red)
+                            y = botpose.getPosition().y - 1.7;
+                        else
+                            y = botpose.getPosition().y + 1.7;
+                        double x = botpose.getPosition().x + 1.7;
 
-            // Calculate distance to tag (in meters)
-            return Math.sqrt(x * x + y * y);
+                        // red: x+ y-    blue: x+ y+
+
+                        // Calculate distance to tag (in meters)
+                        return Math.sqrt(x * x + y * y);
+                    }
+                }
+            }
         }
         return -1;
     }
@@ -111,27 +155,41 @@ public class SensorControl {
     public double getDisToCenter() {
         LLResult result = limelightResult();
 
+        int targetID = (GlobalVariables.alliance == Alliance.Red) ? 24 : 20;
+
         if (result != null && result.isValid()) {
-            // Prefer per-fiducial result if present (more specific for AprilTags)
+
+            // Prefer per-fiducial result if present
             List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
             if (fiducials != null && !fiducials.isEmpty()) {
-                // use the first (primary) fiducial result
-                LLResultTypes.FiducialResult f = fiducials.get(0);
-                // getTargetXDegrees() gives horizontal offset in degrees (left/right)
-                return f.getTargetXDegrees();
+                for (LLResultTypes.FiducialResult f : fiducials) {
+                    if (f.getFiducialId() == targetID) {
+                        // getTargetXDegrees() gives horizontal offset in degrees
+                        return f.getTargetXDegrees();
+                    }
+                }
             }
 
-            // fallback to generic tx from parent result (also in degrees)
+            // fallback to generic tx ONLY if no fiducials match target ID
             try {
                 return result.getTx();
             } catch (Exception e) {
-                // in case getTx() isn't available in particular SDK build
                 return Double.NaN;
             }
         }
 
-        // no valid result
         return Double.NaN;
+    }
+
+    public double getBallOffsetPx() {
+        if (ballPipeline == null) return Double.NaN;
+        return ballPipeline.getCenterOffsetPx();
+    }
+
+    public double getBallOffsetDegrees() {
+        double px = getBallOffsetPx();
+        if (Double.isNaN(px)) return Double.NaN;
+        return (px / cameraWidthPx) * cameraHFOVDegrees;
     }
 
     public static double degreesToPixels(double offsetDegrees, double imageWidthPx, double cameraHFOVDegrees) {

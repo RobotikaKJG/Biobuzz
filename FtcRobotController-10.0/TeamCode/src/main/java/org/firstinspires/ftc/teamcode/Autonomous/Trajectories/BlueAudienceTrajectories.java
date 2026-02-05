@@ -9,6 +9,8 @@ import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySe
 public class BlueAudienceTrajectories implements AudienceTrajectories {
     SampleMecanumDrive drive;
     TrajectorySequence moveToShootFirst;
+    TrajectorySequence goToTakeFirst;
+    TrajectorySequence takeFirst;
     TrajectorySequence moveToShoot;
     TrajectorySequence goToTakeBalls;
     TrajectorySequence park;
@@ -27,6 +29,15 @@ public class BlueAudienceTrajectories implements AudienceTrajectories {
                 .lineToLinearHeading(shootPose)
                 .build();
 
+        goToTakeFirst = drive.trajectorySequenceBuilder(shootPose, 100)
+                .lineToLinearHeading(new Pose2d(-30, 30, Math.toRadians(90)))
+                .build();
+
+        takeFirst = drive.trajectorySequenceBuilder(goToTakeFirst.end(), 50)
+                .lineToLinearHeading(new Pose2d(-30, 50, Math.toRadians(90)))
+                .build();
+
+
         moveToShoot = drive.trajectorySequenceBuilder(goToTakeBalls.end(), 100)
                 .lineToLinearHeading(shootPose)
                 .build();
@@ -44,6 +55,12 @@ public class BlueAudienceTrajectories implements AudienceTrajectories {
     public TrajectorySequence moveToShootFirst() {
         return moveToShootFirst;
     }
+
+    @Override
+    public TrajectorySequence goToTakeFirst() { return goToTakeFirst; }
+
+    @Override
+    public TrajectorySequence takeFirst() { return takeFirst; }
 
     @Override
     public TrajectorySequence moveToShoot() {

@@ -54,12 +54,10 @@ public class ServoControl {
     }
 
     public double getCRSPos(int index) {
-        System.out.println("getCRSPos: " + analog[index].getVoltage());
         return analog[index].getVoltage() / analog[index].getMaxVoltage();
     }
 
     public double getCRSDegrees(int index) {
-        System.out.println("getCRSDegrees: " + getCRSPos(index)*360);
         return getCRSPos(index) * 360.0;
     }
 }

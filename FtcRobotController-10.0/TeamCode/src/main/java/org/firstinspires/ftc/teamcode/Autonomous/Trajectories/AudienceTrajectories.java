@@ -6,6 +6,8 @@ import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySe
 
 public interface AudienceTrajectories {
     TrajectorySequence moveToShootFirst();
+    TrajectorySequence goToTakeFirst();
+    TrajectorySequence takeFirst();
     TrajectorySequence moveToShoot();
     TrajectorySequence goToTakeBalls();
 

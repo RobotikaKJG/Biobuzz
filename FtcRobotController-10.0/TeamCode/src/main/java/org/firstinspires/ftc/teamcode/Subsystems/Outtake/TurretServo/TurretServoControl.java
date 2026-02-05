@@ -1,8 +1,12 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo;
 
+import android.provider.Settings;
+
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
+import org.firstinspires.ftc.teamcode.Main.Alliance;
+import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 
 public class TurretServoControl {
 
@@ -90,7 +94,13 @@ public class TurretServoControl {
     /* ================= CONTROL ================= */
 
     private void updateTurretControl() {
-        double tx = sensor.getDisToCenter() + AIM_OFFSET_DEG;
+        double tx = 0;
+        if (GlobalVariables.alliance == Alliance.Red) {
+            tx = sensor.getDisToCenter() + AIM_OFFSET_DEG;
+        }
+        else {
+            tx = sensor.getDisToCenter() - AIM_OFFSET_DEG;
+        }
 
         // No target
         if (Double.isNaN(tx)) {

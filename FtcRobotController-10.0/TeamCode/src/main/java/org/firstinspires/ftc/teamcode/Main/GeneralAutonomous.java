@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 //import org.firstinspires.ftc.teamcode.Autonomous.AutonomousControl;
 import org.firstinspires.ftc.teamcode.Autonomous.AutonomousControl;
+import org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton;
 import org.firstinspires.ftc.teamcode.Autonomous.SelectStartVariables;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
@@ -26,6 +27,7 @@ public class GeneralAutonomous extends LinearOpMode {
 //        Dependencies dependencies = new Dependencies(hardwareMap, gamepad1, gamepad2, telemetry);
 //
 //        dependencies.sensorControl.initPinpoint();
+        dependencies.sensorControl.initBallCamera(hardwareMap);
 
         while (!isStarted() && !isStopRequested()) {
             updateAutonData();
@@ -36,9 +38,12 @@ public class GeneralAutonomous extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-            //Emergency stop
+            //Emergency stop.
+
             if (gamepad1.triangle)
                 break;
+
+            telemetry.addData("Webcam px", dependencies.sensorControl.getBallOffsetPx());
             autonomousControl.runAutonomous();
             drive.update();
             telemetry.update();
@@ -76,7 +81,6 @@ public class GeneralAutonomous extends LinearOpMode {
     }
 
     private void begin() {
-        //Camera can be stopped as it is no longer needed
         autonomousControl.startAutonomous();
 
         //Update variable that autonomous happened for the driver oriented rotation after it

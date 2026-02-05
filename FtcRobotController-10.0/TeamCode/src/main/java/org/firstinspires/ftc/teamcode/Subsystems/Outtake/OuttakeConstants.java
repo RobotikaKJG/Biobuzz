@@ -24,6 +24,6 @@ public class OuttakeConstants {
     public static double stopFeederWait = 0;
 
     public static int outtakeVelStart = 1400;
-    public static int outtakeVelFar = 2100;
-    public static int outtakeVelClose = 1700;
+    public static int outtakeVelFar = 2200;
+    public static int outtakeVelClose = 2200;
 }

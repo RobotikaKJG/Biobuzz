@@ -29,7 +29,7 @@ public class AutonomousDependencies extends Dependencies {
         return new GoalAuton(drive);
     }
     public AudienceAuton createAudienceAuton() {
-        return new AudienceAuton(drive);
+        return new AudienceAuton(drive, sensorControl);
     }
 
     public AutonomousControl createAutonomousControl() {

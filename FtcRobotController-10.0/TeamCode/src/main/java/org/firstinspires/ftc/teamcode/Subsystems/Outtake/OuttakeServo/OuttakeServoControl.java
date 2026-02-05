@@ -70,8 +70,6 @@ public class OuttakeServoControl {
                 )
         );
 
-        System.out.println("servoPos: " + servoPos);
-
         servoControl.setServoPos(ServoConstants.outtakeServo, servoPos);
 
         wasIfCalled = false;

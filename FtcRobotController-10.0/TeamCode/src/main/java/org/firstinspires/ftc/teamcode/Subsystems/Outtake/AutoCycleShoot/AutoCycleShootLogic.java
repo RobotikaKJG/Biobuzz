@@ -47,7 +47,7 @@ public class AutoCycleShootLogic {
         if(!wasIfCalled) {
             wasIfCalled = true;
             if (GlobalVariables.isAutonomous) {
-                addWaitTime(1);
+                addWaitTime(0.2);
             }
         }
         if(currentWait > getSeconds()) return;

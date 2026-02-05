@@ -9,13 +9,15 @@ import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySe
 public class RedAudienceTrajectories implements AudienceTrajectories {
     SampleMecanumDrive drive;
     TrajectorySequence moveToShootFirst;
+    TrajectorySequence goToTakeFirst;
+    TrajectorySequence takeFirst;
     TrajectorySequence moveToShoot;
     TrajectorySequence goToTakeBalls;
     TrajectorySequence park;
 
     private final Pose2d startPose = new Pose2d(-60, -15,Math.toRadians(360));
-    private final Pose2d shootPose = new Pose2d(-55, -20, Math.toRadians(333.5));
-    private final Pose2d takePose = new Pose2d(-55, -65, Math.toRadians(271));
+    private final Pose2d shootPose = new Pose2d(-50, -20, Math.toRadians(360));
+    private final Pose2d takePose = new Pose2d(-0, -40, Math.toRadians(271));
 
     public RedAudienceTrajectories(SampleMecanumDrive drive) {
         this.drive = drive;
@@ -27,7 +29,15 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
                 .lineToLinearHeading(shootPose)
                 .build();
 
-        moveToShoot = drive.trajectorySequenceBuilder(takePose, 100)
+        goToTakeFirst = drive.trajectorySequenceBuilder(shootPose, 100)
+                .lineToLinearHeading(new Pose2d(-20, -40, Math.toRadians(270)))
+                .build();
+
+        takeFirst = drive.trajectorySequenceBuilder(goToTakeFirst.end(), 40)
+                .lineToLinearHeading(new Pose2d(-20, -70, Math.toRadians(270)))
+                .build();
+
+        moveToShoot = drive.trajectorySequenceBuilder(takeFirst.end(), 50)
                 .lineToLinearHeading(shootPose)
                 .build();
 
@@ -44,6 +54,12 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
     public TrajectorySequence moveToShootFirst() {
         return moveToShootFirst;
     }
+
+    @Override
+    public TrajectorySequence goToTakeFirst() { return goToTakeFirst; }
+
+    @Override
+    public TrajectorySequence takeFirst() { return takeFirst; }
 
     @Override
     public TrajectorySequence moveToShoot() {

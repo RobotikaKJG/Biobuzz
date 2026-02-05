@@ -1,28 +1,50 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Autos;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Autonomous.Auton;
 import org.firstinspires.ftc.teamcode.Autonomous.AutonomousConstants;
 import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.AudienceTrajectories;
 import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.BlueAudienceTrajectories;
 import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.RedAudienceTrajectories;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.BallDetectionPipeline;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoFeederIntake.AutoFeederIntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 public class AudienceAuton implements Auton {
     private final SampleMecanumDrive drive;
     private AudienceTrajectories trajectories;
     private ServoControl servoControl;
+    private SensorControl sensorControl;
     private AudienceAutonState audienceAutonState = AudienceAutonState.moveToShootFirst;
     private double currentWait = 0;
+    private BallDetectionPipeline pipeline;
+    private OpenCvCamera webcam;
+    private boolean wasIfCalled = false;
 
-    public AudienceAuton(SampleMecanumDrive drive) {
+    private static final double CENTERING_THRESHOLD_PX = 10;
+    private static final double STRAFE_KP = 0.002;
+    private static final double SEARCH_STRAFE_POWER = 0.2;
+    private static final double FORWARD_POWER = 0.4;
+    private static final double TARGET_Y = -60;
+    private static final double STRAFE_STEP = 3; // inches
+    private static final double FORWARD_STEP = 5; // inches
+
+    public AudienceAuton(SampleMecanumDrive drive, SensorControl sensorControl) {
         this.drive = drive;
+        this.sensorControl = sensorControl;
     }
 
     @Override
@@ -30,10 +52,11 @@ public class AudienceAuton implements Auton {
         setTrajectorySide();
         drive.setPoseEstimate(trajectories.getStartPose());
         drive.followTrajectorySequenceAsync(trajectories.moveToShootFirst());
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
         audienceAutonState = AudienceAutonState.moveToShootFirst;
         addWaitTime(AutonomousConstants.shooterToMaxSpeed);
     }
+
 
     @Override
     public void setTrajectorySide() {
@@ -54,205 +77,190 @@ public class AudienceAuton implements Auton {
             case moveToShootFirst:
                 moveToShootFirst();
                 break;
-            case shootFirstFirst:
-                shootFirstFirst();
+            case shootFirst:
+                shootFirst();
                 break;
-            case shootFirstSecond:
-                shootFirstSecond();
+            case goToTakeFirst:
+                goToTakeFirst();
                 break;
-            case shootFirstThird:
-                shootFirstThird();
-                break;
-            case goToTakeSecondBalls:
-                goToTakeSecondBalls();
+            case takeFirst:
+                takeFirst();
                 break;
             case moveToShootSecond:
                 moveToShootSecond();
                 break;
-            case shootSecondFirst:
-                shootSecondFirst();
+            case shootSecond:
+                shootSecond();
                 break;
-            case shootSecondSecond:
-                shootSecondSecond();
+            case goToTake:
+                goToTake();
                 break;
-            case shootSecondThird:
-                shootSecondThird();
+            case searchForBall:
+                searchForBall();
                 break;
-            case goToTakeThirdBalls:
-                goToTakeThirdBalls();
+            case centerOnBall:
+                centerOnBall();
                 break;
-            case moveToShootThird:
-                moveToShootThird();
+            case driveToBall:
+                driveToBall();
                 break;
-            case shootThirdFirst:
-                shootThirdFirst();
+            case moveToShoot:
+                moveToShoot();
                 break;
-            case shootThirdSecond:
-                shootThirdSecond();
-                break;
-            case shootThirdThird:
-                shootThirdThird();
-                break;
-            case goToTakeFourthBalls:
-                goToTakeFourthBalls();
-                break;
-            case moveToShootFourth:
-                moveToShootFourth();
-                break;
-            case shootFourthFirst:
-                shootFourthFirst();
-                break;
-            case shootFourthSecond:
-                shootFourthSecond();
-                break;
-            case shootFourthThird:
-                shootFourthThird();
-                break;
-            case stop:
-                stop();
+            case shoot:
+                shoot();
                 break;
             case idle:
                 break;
         }
     }
 
-//AUTONOTE FILL IN THE LOGIC
-
     private void moveToShootFirst() {
         if(drive.isBusy() || getSeconds() < currentWait) return;
         //activate shooting
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootFirstFirst;
+        audienceAutonState = AudienceAutonState.shootFirst;
+        addWaitTime(AutonomousConstants.shootTime);
     }
 
-    private void shootFirstFirst() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        //activate shooting
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootFirstSecond;
+    private void shootFirst() {
+        if(getSeconds() < currentWait) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
+        drive.followTrajectorySequenceAsync(trajectories.goToTakeFirst());
+        audienceAutonState = AudienceAutonState.goToTakeFirst;
     }
 
-    private void shootFirstSecond() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        //activate shooting
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootFirstThird;
+    private void goToTakeFirst() {
+        if(drive.isBusy()) return;
+        drive.followTrajectorySequenceAsync(trajectories.takeFirst());
+        IntakeStates.setMotorState(IntakeMotorStates.forward);
+        audienceAutonState = AudienceAutonState.takeFirst;
     }
 
-    private void shootFirstThird() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
-        drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
-        audienceAutonState = AudienceAutonState.goToTakeSecondBalls;
-        IntakeStates.setMotorState(IntakeMotorStates.idle);
-    }
-
-    private void goToTakeSecondBalls() {
+    private void takeFirst() {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
-        IntakeStates.setMotorState(IntakeMotorStates.idle);
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
+        IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
         audienceAutonState = AudienceAutonState.moveToShootSecond;
     }
+
 
     private void moveToShootSecond() {
         if(drive.isBusy()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootSecondFirst;
-
+        audienceAutonState = AudienceAutonState.shootSecond;
+        addWaitTime(AutonomousConstants.shootTime);
     }
 
-    private void shootSecondFirst() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        //activate shooting
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootSecondSecond;
-    }
 
-    private void shootSecondSecond() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        //activate shooting
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootSecondThird;
-    }
-
-    private void shootSecondThird() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
+    private void shootSecond() {
+        if(getSeconds() < currentWait) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
         drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
-        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
+        audienceAutonState = AudienceAutonState.goToTake;
+    }
+
+    private void goToTake() {
+        if (drive.isBusy()) return;
+
         IntakeStates.setMotorState(IntakeMotorStates.forward);
-        audienceAutonState = AudienceAutonState.goToTakeThirdBalls;
+        audienceAutonState = AudienceAutonState.searchForBall;
     }
 
-    private void goToTakeThirdBalls() {
-        if(drive.isBusy()) return;
-        drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
-        IntakeStates.setMotorState(IntakeMotorStates.idle);
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
-        audienceAutonState = AudienceAutonState.moveToShootThird;
+    private void searchForBall() {
+        double offsetPx = sensorControl.getBallOffsetPx();
+
+        if (!Double.isNaN(offsetPx)) {
+            audienceAutonState = AudienceAutonState.centerOnBall;
+            return;
+        }
+
+        Pose2d pose = drive.getPoseEstimate();
+        Pose2d target = new Pose2d(
+                pose.getX() - STRAFE_STEP,
+                pose.getY(),
+                pose.getHeading()
+        );
+
+        drive.followTrajectorySequenceAsync(
+                drive.trajectorySequenceBuilder(pose, 50)
+                        .lineToLinearHeading(target)
+                        .build()
+        );
     }
 
-    private void moveToShootThird() {
-        if(drive.isBusy()) return;
+    private void centerOnBall() {
+//        if (drive.isBusy()) return;
+
+        double offsetPx = sensorControl.getBallOffsetPx();
+        if (Double.isNaN(offsetPx)) {
+            audienceAutonState = AudienceAutonState.searchForBall;
+            return;
+        }
+
+        if (Math.abs(offsetPx) <= CENTERING_THRESHOLD_PX) {
+            audienceAutonState = AudienceAutonState.driveToBall;
+            return;
+        }
+
+        Pose2d pose = drive.getPoseEstimate();
+        double correctionInches = offsetPx * 0.02; // tuning factor
+
+        Pose2d target = new Pose2d(
+                pose.getX() - correctionInches,
+                pose.getY(),
+                pose.getHeading()
+        );
+
+        drive.followTrajectorySequenceAsync(
+                drive.trajectorySequenceBuilder(pose, 50)
+                        .lineToLinearHeading(target)
+                        .build()
+        );
+    }
+
+    private void driveToBall() {
+//        if (drive.isBusy()) return;
+
+        Pose2d pose = drive.getPoseEstimate();
+
+        Pose2d target = new Pose2d(
+                pose.getX(),
+                TARGET_Y,
+                pose.getHeading()
+        );
+
+        drive.followTrajectorySequenceAsync(
+                drive.trajectorySequenceBuilder(pose, 20)
+                        .lineToLinearHeading(target)
+                        .build()
+        );
+
+        audienceAutonState = AudienceAutonState.moveToShoot;
+    }
+
+    private void moveToShoot() {
+        if (!wasIfCalled) {
+            IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
+            OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
+            drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
+            wasIfCalled = true;
+        }
+        if (drive.isBusy()) return;
+        wasIfCalled = false;
+
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootThirdFirst;
+        audienceAutonState = AudienceAutonState.shoot;
+        addWaitTime(AutonomousConstants.shootTime);
     }
 
-    private void shootThirdFirst() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootThirdSecond;
-    }
+    private void shoot() {
+        if (getSeconds() < currentWait) return;
 
-    private void shootThirdSecond() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootThirdThird;
-    }
-
-    private void shootThirdThird() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
         drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
-        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
-        IntakeStates.setMotorState(IntakeMotorStates.forward);
-        audienceAutonState = AudienceAutonState.goToTakeFourthBalls;
-    }
-
-    private void goToTakeFourthBalls() {
-        if(drive.isBusy()) return;
-        drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
-        IntakeStates.setMotorState(IntakeMotorStates.idle);
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
-        audienceAutonState = AudienceAutonState.moveToShootFourth;
-    }
-
-    private void moveToShootFourth() {
-        if(drive.isBusy()) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootFourthFirst;
-    }
-
-    private void shootFourthFirst() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootFourthSecond;
-    }
-
-    private void shootFourthSecond() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shootFourthThird;
-    }
-
-    private void shootFourthThird() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return;
-        drive.followTrajectorySequenceAsync(trajectories.park());
-        audienceAutonState = AudienceAutonState.stop;
-    }
-
-    private void stop() {
-        if(drive.isBusy()) return;
-        audienceAutonState = AudienceAutonState.idle;
+        audienceAutonState = AudienceAutonState.goToTake;
     }
 
     private void addWaitTime(double waitTime) {

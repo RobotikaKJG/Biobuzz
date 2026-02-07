@@ -28,7 +28,7 @@ public class GeneralAutonomous extends LinearOpMode {
 //        Dependencies dependencies = new Dependencies(hardwareMap, gamepad1, gamepad2, telemetry);
 //
 //        dependencies.sensorControl.initPinpoint();
-        dependencies.sensorControl.initBallCamera(hardwareMap);
+//        dependencies.sensorControl.initBallCamera(hardwareMap);
 
         while (!isStarted() && !isStopRequested()) {
             updateAutonData();
@@ -44,7 +44,7 @@ public class GeneralAutonomous extends LinearOpMode {
             if (gamepad1.triangle)
                 break;
 
-            telemetry.addData("Webcam px", dependencies.sensorControl.getBallOffsetPx());
+//            telemetry.addData("Webcam px", dependencies.sensorControl.getBallOffsetPx());
             autonomousControl.runAutonomous();
             drive.update();
             telemetry.update();

@@ -2,24 +2,27 @@ package org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class OuttakeMotorControl {
     private final MotorControl motorControl;
+    private final SensorControl sensorControl;
     private OuttakeMotorStates prevMotorStates = OuttakeMotorStates.idle;
     private double currentWait = 0;
 
-    public OuttakeMotorControl(MotorControl motorControl) {
+    public OuttakeMotorControl(MotorControl motorControl, SensorControl sensorControl) {
         this.motorControl = motorControl;
+        this.sensorControl = sensorControl;
     }
 
     public void update() {
         if(OuttakeStates.getMotorState() != prevMotorStates) {
             updateStates();
             prevMotorStates = OuttakeStates.getMotorState();
-        } else if (OuttakeStates.getMotorState() == OuttakeMotorStates.forwardClose || OuttakeStates.getMotorState() == OuttakeMotorStates.forwardFar) {
+        } else if (OuttakeStates.getMotorState() == OuttakeMotorStates.forwardClose) {
             updateStates();
         }
 
@@ -27,26 +30,50 @@ public class OuttakeMotorControl {
 
     public void updateStates() {
         switch (OuttakeStates.getMotorState()) {
-            case forwardStart:
-//                motorControl.setMotorRPM(MotorConstants.outtake1, OuttakeConstants.outtakeVelStart);
-//                motorControl.setMotorRPM(MotorConstants.outtake2, OuttakeConstants.outtakeVelStart);
-//                if (motorControl.getMotorVelocity(MotorConstants.outtake1) > OuttakeConstants.outtakeVelStart - 150)
-//                    OuttakeStates.setAutoOuttakeFarCloseState(AutoOuttakeFarCloseStates.cycle);
-                break;
             case forwardFar:
-                motorControl.setMotorRPM(MotorConstants.outtake1, OuttakeConstants.outtakeVelFar);
-                motorControl.setMotorRPM(MotorConstants.outtake2, OuttakeConstants.outtakeVelFar);
+                motorControl.setMotorSpeed(MotorConstants.outtake1, OuttakeConstants.outtakeSpeedFar);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedFar);
                 break;
             case forwardClose:
-                motorControl.setMotorRPM(MotorConstants.outtake1, OuttakeConstants.outtakeVelClose);
-                motorControl.setMotorRPM(MotorConstants.outtake2, OuttakeConstants.outtakeVelClose);
+                double distance = sensorControl.getTagDistance();
+
+                double minD = OuttakeConstants.minDistance;
+                double maxD = OuttakeConstants.maxDistance;
+
+                double speed;
+
+                // If no valid tag detected, default to closeClose speed
+                if (distance < 0) {
+                    speed = OuttakeConstants.outtakeSpeedCloseClose;
+                }
+                // Closer than minimum → use closeClose speed
+                else if (distance <= minD) {
+                    speed = OuttakeConstants.outtakeSpeedCloseClose;
+                }
+                // Farther than maximum → use closeFar speed
+                else if (distance >= maxD) {
+                    speed = OuttakeConstants.outtakeSpeedCloseFar;
+                }
+                // Between min and max → interpolate
+                else {
+                    double t = (distance - minD) / (maxD - minD); // 0 → 1
+                    speed = OuttakeConstants.outtakeSpeedCloseClose +
+                            t * (OuttakeConstants.outtakeSpeedCloseFar -
+                                    OuttakeConstants.outtakeSpeedCloseClose);
+                }
+
+                motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
                 break;
             case backward:
-                motorControl.setMotorRPM(MotorConstants.outtake1, -OuttakeConstants.outtakeVelStart);
-                motorControl.setMotorRPM(MotorConstants.outtake2, -OuttakeConstants.outtakeVelStart);
+                motorControl.setMotorSpeed(MotorConstants.outtake1, -0.5);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, -0.5);
                 break;
             case idle:
-                motorControl.setMotorRPM(MotorConstants.outtake1, 0);
+                motorControl.setMotorSpeed(MotorConstants.outtake1, 0);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, 0);
+                motorControl.setMotors(MotorConstants.outtake1);
+                motorControl.setMotors(MotorConstants.outtake2);
                 break;
         }
     }

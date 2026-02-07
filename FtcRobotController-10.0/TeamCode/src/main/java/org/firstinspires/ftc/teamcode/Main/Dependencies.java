@@ -69,7 +69,7 @@ public class Dependencies {
     }
 
     private OuttakeMotorControl createOuttakeMotorControl() {
-        return new OuttakeMotorControl(motorControl);
+        return new OuttakeMotorControl(motorControl, sensorControl);
     }
 
     public IntakeControl createIntakeControl() {

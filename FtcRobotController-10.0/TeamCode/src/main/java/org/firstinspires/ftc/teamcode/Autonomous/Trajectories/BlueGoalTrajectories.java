@@ -36,11 +36,11 @@ public class BlueGoalTrajectories implements GoalTrajectories {
                 .build();
 
         goToTakeSecondBalls = drive.trajectorySequenceBuilder(moveToShootFirst.end(), 100)
-                .lineToLinearHeading(new Pose2d(25, 20, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(20, 20, Math.toRadians(90)))
                 .build();
 
         takeSecondBalls = drive.trajectorySequenceBuilder(goToTakeSecondBalls.end(), 20)
-                .lineTo(new Vector2d(25, 60))
+                .lineTo(new Vector2d(20, 60))
                 .build();
 
         goToRelease = drive.trajectorySequenceBuilder(takeSecondBalls.end(), 100)
@@ -53,11 +53,11 @@ public class BlueGoalTrajectories implements GoalTrajectories {
                 .build();
 
         goToTakeThirdBalls = drive.trajectorySequenceBuilder(moveToShootSecond.end(), 100)
-                .lineToLinearHeading(new Pose2d(0, 15, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-10, 15, Math.toRadians(90)))
                 .build();
 
         takeThirdBalls = drive.trajectorySequenceBuilder(goToTakeThirdBalls.end(), 20)
-                .lineTo(new Vector2d(0, 60))
+                .lineTo(new Vector2d(-10, 60))
                 .build();
 
         moveToShootThird = drive.trajectorySequenceBuilder(takeThirdBalls.end(), 100)
@@ -65,11 +65,11 @@ public class BlueGoalTrajectories implements GoalTrajectories {
                 .build();
 
         goToTakeFourthBalls = drive.trajectorySequenceBuilder(moveToShootThird.end(), 100)
-                .lineToLinearHeading(new Pose2d(-23, -15, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-30, 15, Math.toRadians(90)))
                 .build();
 
         takeFourthBalls = drive.trajectorySequenceBuilder(goToTakeFourthBalls.end(), 20)
-                .lineTo(new Vector2d(-23, 60))
+                .lineTo(new Vector2d(-30, 60))
                 .build();
 
         moveToShootFourth = drive.trajectorySequenceBuilder(takeFourthBalls.end(), 100)

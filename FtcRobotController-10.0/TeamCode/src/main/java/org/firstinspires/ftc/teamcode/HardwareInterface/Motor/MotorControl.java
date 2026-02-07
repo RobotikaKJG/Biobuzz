@@ -60,6 +60,7 @@ public class MotorControl {
         setMotorMode(MotorConstants.all, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         setMotorMode(MotorConstants.outtake1, DcMotor.RunMode.RUN_USING_ENCODER);
+        setMotorMode(MotorConstants.outtake2, DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void setZeroPowerBehavior(int index, DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
@@ -154,18 +155,21 @@ public class MotorControl {
         return result;
     }
 
-    public void setMotorRPM(int index, double rpm) {
-
+    public void setMotorRPM(int index, double velocityTicksPerSecond) {
         for (int i = 0; i < Utilities.configLength(index); i++) {
             DcMotorEx motor = motors[Utilities.motorIndex(index, i)];
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            double F = 15;
+            PIDFCoefficients pidf = new PIDFCoefficients(
+                    0.02,   // P ↓ (lower to stop overshoot)
+                    0.0,     // I off
+                    0.03,   // D ↑ (more damping)
+                    15.0     // F unchanged
+            );
 
-            PIDFCoefficients pidf = new PIDFCoefficients(5, 5, 0.5, F);
             motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
-
-            motor.setVelocity(rpm);
+            motor.setVelocity(velocityTicksPerSecond);
         }
     }
+
 }

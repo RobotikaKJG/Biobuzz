@@ -17,7 +17,7 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
 
     private final Pose2d startPose = new Pose2d(-60, -15,Math.toRadians(360));
     private final Pose2d shootPose = new Pose2d(-50, -20, Math.toRadians(360));
-    private final Pose2d takePose = new Pose2d(-0, -40, Math.toRadians(271));
+    private final Pose2d takePose = new Pose2d(-10, -40, Math.toRadians(271));
 
     public RedAudienceTrajectories(SampleMecanumDrive drive) {
         this.drive = drive;
@@ -30,11 +30,11 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
                 .build();
 
         goToTakeFirst = drive.trajectorySequenceBuilder(shootPose, 100)
-                .lineToLinearHeading(new Pose2d(-20, -40, Math.toRadians(270)))
+                .lineToLinearHeading(new Pose2d(-25, -40, Math.toRadians(90)))
                 .build();
 
         takeFirst = drive.trajectorySequenceBuilder(goToTakeFirst.end(), 40)
-                .lineToLinearHeading(new Pose2d(-20, -70, Math.toRadians(270)))
+                .lineToLinearHeading(new Pose2d(-25, -70, Math.toRadians(90)))
                 .build();
 
         moveToShoot = drive.trajectorySequenceBuilder(takeFirst.end(), 50)

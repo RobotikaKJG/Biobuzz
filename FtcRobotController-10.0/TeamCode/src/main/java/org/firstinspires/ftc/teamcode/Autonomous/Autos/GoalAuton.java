@@ -135,7 +135,6 @@ public class GoalAuton implements Auton {
     private void takeSecondBalls() {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.goToRelease());
-        IntakeStates.setMotorState(IntakeMotorStates.idle);
         OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
         goalAutonState = GoalAutonState.goToRelease;
         addWaitTime(3);
@@ -179,7 +178,6 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootThird());
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
-        IntakeStates.setMotorState(IntakeMotorStates.idle);
         OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
         goalAutonState = GoalAutonState.moveToShootThird;
         addWaitTime(1);
@@ -211,7 +209,6 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootFourth());
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
-        IntakeStates.setMotorState(IntakeMotorStates.idle);
         OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
         goalAutonState = GoalAutonState.moveToShootFourth;
         addWaitTime(1);

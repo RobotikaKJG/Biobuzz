@@ -16,8 +16,8 @@ public class BlueAudienceTrajectories implements AudienceTrajectories {
     TrajectorySequence park;
 
     private final Pose2d startPose = new Pose2d(-60, 15,Math.toRadians(0));
-    private final Pose2d shootPose = new Pose2d(-55, 20, Math.toRadians(26.5));
-    private final Pose2d takePose = new Pose2d(-55, 55, Math.toRadians(90));
+    private final Pose2d shootPose = new Pose2d(-50, 20, Math.toRadians(26.5));
+    private final Pose2d takePose = new Pose2d(-10, 40, Math.toRadians(90));
 
     public BlueAudienceTrajectories(SampleMecanumDrive drive) {
         this.drive = drive;
@@ -30,24 +30,23 @@ public class BlueAudienceTrajectories implements AudienceTrajectories {
                 .build();
 
         goToTakeFirst = drive.trajectorySequenceBuilder(shootPose, 100)
-                .lineToLinearHeading(new Pose2d(-30, 30, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-25, 40, Math.toRadians(90)))
                 .build();
 
-        takeFirst = drive.trajectorySequenceBuilder(goToTakeFirst.end(), 50)
-                .lineToLinearHeading(new Pose2d(-30, 50, Math.toRadians(90)))
+        takeFirst = drive.trajectorySequenceBuilder(goToTakeFirst.end(), 40)
+                .lineToLinearHeading(new Pose2d(-25, 70, Math.toRadians(90)))
                 .build();
 
-
-        moveToShoot = drive.trajectorySequenceBuilder(goToTakeBalls.end(), 100)
+        moveToShoot = drive.trajectorySequenceBuilder(takeFirst.end(), 50)
                 .lineToLinearHeading(shootPose)
                 .build();
 
-        goToTakeBalls = drive.trajectorySequenceBuilder(moveToShoot.end(), 100)
+        goToTakeBalls = drive.trajectorySequenceBuilder(shootPose, 100)
                 .lineToLinearHeading(takePose)
                 .build();
 
         park = drive.trajectorySequenceBuilder(moveToShoot.end(), 100)
-                .lineTo(new Vector2d(10, -20))
+                .lineTo(new Vector2d(-55, 40))
                 .build();
     }
 

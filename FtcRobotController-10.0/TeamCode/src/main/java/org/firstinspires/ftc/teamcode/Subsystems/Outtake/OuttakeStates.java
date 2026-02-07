@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
@@ -14,7 +13,6 @@ public class OuttakeStates {
     private static AutoCycleShootStates autoCycleShootStates = AutoCycleShootStates.idle;
     private static FeederMotorStates feederMotorState = FeederMotorStates.idle;
     private static TurretServoStates turretServoState = TurretServoStates.idle;
-    private static OuttakeServoStates outtakeServoState = OuttakeServoStates.idle;
     private static AutoOuttakeFarCloseStates autoOuttakeFarCloseState = AutoOuttakeFarCloseStates.idle;
 
     public static void setInitialStates() {
@@ -23,7 +21,6 @@ public class OuttakeStates {
         autoCycleShootStates = AutoCycleShootStates.idle;
         feederMotorState = FeederMotorStates.idle;
         turretServoState = TurretServoStates.idle;
-        outtakeServoState = OuttakeServoStates.idle;
         autoOuttakeFarCloseState = AutoOuttakeFarCloseStates.idle;
     }
 
@@ -59,14 +56,6 @@ public class OuttakeStates {
 
     public static void setTurretServoState(TurretServoStates state) {
         turretServoState = state;
-    }
-
-    public static OuttakeServoStates getOuttakeServoState() {
-        return outtakeServoState;
-    }
-
-    public static void setOuttakeServoState(OuttakeServoStates state) {
-        outtakeServoState = state;
     }
 
     public static void setAutoOuttakeFarCloseState(AutoOuttakeFarCloseStates state) {

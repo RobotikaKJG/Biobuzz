@@ -20,10 +20,10 @@ public class OuttakeConstants {
 
     public static double stopTransferAfter = 1;
     public static double reverseFeederAfter = 0.1;
-    public static double stopFeederAfter = 0.1;
+    public static double stopFeederAfter = 0.3;
     public static double stopFeederWait = 0;
 
     public static int outtakeVelStart = 1400;
-    public static int outtakeVelFar = 2200;
-    public static int outtakeVelClose = 2200;
+    public static int outtakeVelFar = 2100;
+    public static int outtakeVelClose = 1700;
 }

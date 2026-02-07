@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.GoalTrajectories;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoFeederIntake.AutoFeederIntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
@@ -136,7 +135,8 @@ public class GoalAuton implements Auton {
     private void takeSecondBalls() {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.goToRelease());
-        IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
+        OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
         goalAutonState = GoalAutonState.goToRelease;
         addWaitTime(3);
     }
@@ -179,7 +179,8 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootThird());
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
-        IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
+        OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
         goalAutonState = GoalAutonState.moveToShootThird;
         addWaitTime(1);
     }
@@ -210,7 +211,8 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootFourth());
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
-        IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
+        OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
         goalAutonState = GoalAutonState.moveToShootFourth;
         addWaitTime(1);
     }

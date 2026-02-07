@@ -6,6 +6,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Control;
 //import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadUp.DpadUpStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Circle.CircleLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Circle.CircleStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadRight.DpadRightStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadUp.DpadUpStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftBumper.LeftBumperStates;
 //import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftTrigger.LeftTriggerStates;
@@ -21,7 +22,7 @@ public class ButtonStates {
     private static RightTriggerStates rightTriggerStates = RightTriggerStates.idle;
     private static SquareStates squareStates = SquareStates.idle;
     private static CircleStates circleStates = CircleStates.idle;
-//    private static DpadRightStates dpadRightStates = DpadRightStates.idle;
+    private static DpadRightStates dpadRightStates = DpadRightStates.idle;
 //    private static DpadDownStates dpadDownStates = DpadDownStates.idle;
     private static DpadUpStates dpadUpStates = DpadUpStates.idle;
 //    private static DpadLeftStates dpadLeftStates = DpadLeftStates.idle;
@@ -33,7 +34,7 @@ public class ButtonStates {
         rightTriggerStates = RightTriggerStates.idle;
         squareStates = SquareStates.idle;
         circleStates = CircleStates.idle;
-//        dpadRightStates = DpadRightStates.idle;
+        dpadRightStates = DpadRightStates.idle;
 //        dpadDownStates = DpadDownStates.idle;
         dpadUpStates = DpadUpStates.idle;
 //        dpadLeftStates = DpadLeftStates.idle;
@@ -88,13 +89,13 @@ public class ButtonStates {
         circleStates = state;
     }
 
-//    public static DpadRightStates getDpadRightState() {
-//        return dpadRightStates;
-//    }
+    public static DpadRightStates getDpadRightState() {
+        return dpadRightStates;
+    }
 
-//    public static void setDpadRightState(DpadRightStates state) {
-//        dpadRightStates = state;
-//    }
+    public static void setDpadRightState(DpadRightStates state) {
+        dpadRightStates = state;
+    }
 
 //    public static DpadDownStates getDpadDownState() {
 //        return dpadDownStates;

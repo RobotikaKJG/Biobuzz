@@ -49,6 +49,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
             telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
             telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
             telemetry.addData("AutoCycle state", OuttakeStates.getAutoCycleShootState());
+            telemetry.addData("LockServo", IntakeStates.getLockServoState());
             
             if (gamepad1.triangle) break;
             calculateLoopTime();

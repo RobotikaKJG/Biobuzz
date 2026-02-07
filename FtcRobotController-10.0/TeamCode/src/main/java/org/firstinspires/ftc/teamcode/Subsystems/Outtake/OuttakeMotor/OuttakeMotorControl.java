@@ -32,7 +32,7 @@ public class OuttakeMotorControl {
 //                motorControl.setMotorRPM(MotorConstants.outtake2, OuttakeConstants.outtakeVelStart);
 //                if (motorControl.getMotorVelocity(MotorConstants.outtake1) > OuttakeConstants.outtakeVelStart - 150)
 //                    OuttakeStates.setAutoOuttakeFarCloseState(AutoOuttakeFarCloseStates.cycle);
-//                break;
+                break;
             case forwardFar:
                 motorControl.setMotorRPM(MotorConstants.outtake1, OuttakeConstants.outtakeVelFar);
                 motorControl.setMotorRPM(MotorConstants.outtake2, OuttakeConstants.outtakeVelFar);

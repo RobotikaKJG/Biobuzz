@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftBumper;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class LeftBumperLogic {
@@ -14,7 +15,7 @@ public class LeftBumperLogic {
     }
 
     private boolean shoot() {
-        if(OuttakeStates.getAutoCycleShootState() !=  AutoCycleShootStates.idle) return false;
+        if(OuttakeStates.getAutoCycleShootState() !=  AutoCycleShootStates.idle || OuttakeStates.getMotorState() == OuttakeMotorStates.idle) return false;
         ButtonStates.setLeftBumperState(LeftBumperStates.shoot);
         completeAction();
         return true;

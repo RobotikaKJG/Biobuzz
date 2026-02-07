@@ -1,25 +1,21 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Intake;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoFeederIntake.AutoFeederIntakeControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoFeederIntake.AutoFeederIntakeLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class IntakeControl {
     private final IntakeMotorControl intakeMotorControl;
-    private final AutoFeederIntakeControl autoFeederIntakeControl;
-    private final AutoFeederIntakeLogic autoFeederIntakeLogic;
+    private final LockServoControl lockServoControl;
 
-    public IntakeControl(IntakeMotorControl intakeMotorControl, AutoFeederIntakeControl autoFeederIntakeControl, AutoFeederIntakeLogic autoFeederIntakeLogic) {
+    public IntakeControl(IntakeMotorControl intakeMotorControl, LockServoControl lockServoControl) {
         this.intakeMotorControl = intakeMotorControl;
-        this.autoFeederIntakeControl = autoFeederIntakeControl;
-        this.autoFeederIntakeLogic = autoFeederIntakeLogic;
+        this.lockServoControl = lockServoControl;
     }
 
     public void update() {
         intakeMotorControl.update();
-        autoFeederIntakeControl.update();
-        autoFeederIntakeLogic.update();
+        lockServoControl.update();
 
         updateIntakeState();
     }

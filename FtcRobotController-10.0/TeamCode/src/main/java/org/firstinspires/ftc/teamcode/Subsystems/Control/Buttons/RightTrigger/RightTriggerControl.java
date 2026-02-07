@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.RightTrigger;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoFeederIntake.AutoFeederIntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
@@ -15,7 +14,8 @@ public class RightTriggerControl {
                 OuttakeStates.setFeederMotorState(FeederMotorStates.forward);
                 break;
             case stop:
-                IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
+                IntakeStates.setMotorState(IntakeMotorStates.idle);
+                OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
                 break;
             case idle:
                 break;

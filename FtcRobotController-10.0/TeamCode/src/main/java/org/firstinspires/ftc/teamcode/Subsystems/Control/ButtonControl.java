@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 //import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadRight.DpadRightLogic;
 //import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadUp.DpadUpLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Circle.CircleLogic;
+import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadRight.DpadRightLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadUp.DpadUpLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftBumper.LeftBumperLogic;
 //import org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftTrigger.LeftTriggerLogic;
@@ -25,7 +26,7 @@ public class ButtonControl {
     private final LeftBumperLogic leftBumperLogic = new LeftBumperLogic();
     private final SquareLogic squareLogic = new SquareLogic();
     private final CircleLogic circleLogic = new CircleLogic();
-//    private final DpadRightLogic dpadRightLogic = new DpadRightLogic();
+    private final DpadRightLogic dpadRightLogic = new DpadRightLogic();
 //    private final DpadDownLogic dpadDownLogic = new DpadDownLogic();
     private final DpadUpLogic dpadUpLogic = new DpadUpLogic();
 //    private final DpadLeftLogic dpadLeftLogic = new DpadLeftLogic();
@@ -40,8 +41,8 @@ public class ButtonControl {
 
     private void updateLogic(){
 
-//        if(edgeDetection.rising(GamepadIndexValues.dpadRight))
-//            dpadRightLogic.update();
+        if(edgeDetection.rising(GamepadIndexValues.dpadRight))
+            dpadRightLogic.update();
 //
 //        if(edgeDetection.rising(GamepadIndexValues.dpadDown))
 //            dpadDownLogic.update();

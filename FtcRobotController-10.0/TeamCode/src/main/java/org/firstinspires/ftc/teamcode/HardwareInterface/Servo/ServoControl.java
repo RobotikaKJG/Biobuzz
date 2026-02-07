@@ -25,7 +25,7 @@ public class ServoControl {
                 hardwareMap.get(CRServo.class, "turretServo")
         };
         servos = new Servo[]{
-                hardwareMap.get(Servo.class, "outtakeServo")
+                hardwareMap.get(Servo.class, "lockServo")
         };
         analog = new AnalogInput[]{
                 hardwareMap.get(AnalogInput.class, "turretAnalog")

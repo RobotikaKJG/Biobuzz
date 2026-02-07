@@ -46,9 +46,7 @@ public class AutoCycleShootLogic {
     private void activate() {
         if(!wasIfCalled) {
             wasIfCalled = true;
-            if (GlobalVariables.isAutonomous) {
-                addWaitTime(0.2);
-            }
+            addWaitTime(0.2);
         }
         if(currentWait > getSeconds()) return;
         wasIfCalled = false;
@@ -57,14 +55,9 @@ public class AutoCycleShootLogic {
 
     private void turnTransfer() {
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnFeeder);
-//        addWaitTime(OuttakeConstants.stopTransferAfter);
     }
 
-    private void turnFeeder() {
-//        if(currentWait > getSeconds() || (motorControl.getMotorVelocity(MotorConstants.outtake1)<OuttakeConstants.outtakeVelFar-200 && motorControl.getMotorVelocity(MotorConstants.outtake1)>OuttakeConstants.outtakeVelClose+300)) return;
-//        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
-//        addWaitTime(OuttakeConstants.reverseFeederAfter);
-    }
+    private void turnFeeder() {    }
 
     private void stopTransfer() {
         if(currentWait > getSeconds()) return;

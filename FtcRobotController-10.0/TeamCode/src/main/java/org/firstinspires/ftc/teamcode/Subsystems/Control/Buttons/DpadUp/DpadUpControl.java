@@ -24,6 +24,9 @@ public class DpadUpControl {
             case backward:
                 IntakeStates.setMotorState(IntakeMotorStates.forward);
                 break;
+            case idle:
+                IntakeStates.setMotorState(IntakeMotorStates.backward);
+                break;
         }
     }
 }

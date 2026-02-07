@@ -13,34 +13,21 @@ public class TurretServoControl {
     private final ServoControl servo;
     private final SensorControl sensor;
 
-    /* ================= CONFIG ================= */
+    private double currentWait = 0;
+    private boolean wasIfCalled = false;
 
-    // Maximum allowed rotation from zero (degrees)
     private static final double MAX_TURRET_ANGLE_DEG = 85.0;
-
-    // Limelight proportional gain
     private static final double KP = 0.01;
-
-    // Max CR servo speed
     private static final double MAX_SERVO_SPEED = 0.5;
-
-    // Deadband in degrees
     private static final double TARGET_TOLERANCE_DEG = 1.0;
-
     private static final double GEAR_RATIO = 55.0 / 230.0; // turret / servo
-
-    /* ================= STATE ================= */
 
     private double lastAnalog = 0.0;
     private int rotationCount = 0;
-
-    // Continuous turret angle (0° = start of run)
     private double turretAngleDeg = 0.0;
-
     private double analogZero = 0.0;
     private double servoAngleZeroDeg = 0.0;
-
-    private static final double AIM_OFFSET_DEG = 2.0;
+    private static double AIM_OFFSET_DEG = 1;
 
     /* ================= CONSTRUCTOR ================= */
 
@@ -63,8 +50,16 @@ public class TurretServoControl {
     /* ================= PUBLIC UPDATE ================= */
 
     public void update() {
+        if (!wasIfCalled) {
+            addWaitTime(0.1);
+            wasIfCalled = true;
+        }
+
+        if (currentWait > getSeconds()) return;
+
         updateTurretAngle();
         updateTurretControl();
+        wasIfCalled = false;
     }
 
     /* ================= ANGLE TRACKING ================= */
@@ -95,6 +90,14 @@ public class TurretServoControl {
 
     private void updateTurretControl() {
         double tx = 0;
+
+        if (GlobalVariables.far) {
+            AIM_OFFSET_DEG = 2;
+        }
+        else {
+            AIM_OFFSET_DEG = 1;
+        }
+
         if (GlobalVariables.alliance == Alliance.Red) {
             tx = sensor.getDisToCenter() + AIM_OFFSET_DEG;
         }
@@ -121,9 +124,21 @@ public class TurretServoControl {
         power = Math.max(-MAX_SERVO_SPEED, Math.min(MAX_SERVO_SPEED, power));
 
         // Enforce limits
-        if ((turretAngleDeg <= -MAX_TURRET_ANGLE_DEG && power > 0) ||
-                (turretAngleDeg >=  MAX_TURRET_ANGLE_DEG && power < 0)) {
-            power = 0;
+        if (GlobalVariables.isAutonomous) {
+            if ((turretAngleDeg <= -MAX_TURRET_ANGLE_DEG && power > 0) ||
+                    (turretAngleDeg >= MAX_TURRET_ANGLE_DEG && power < 0)) {
+                power = 0;
+            }
+        }
+        else {
+            if ((turretAngleDeg <= -MAX_TURRET_ANGLE_DEG - GlobalVariables.lastTurretAngle && power > 0) ||
+                    (turretAngleDeg >= MAX_TURRET_ANGLE_DEG - GlobalVariables.lastTurretAngle && power < 0)) {
+                power = 0;
+            }
+        }
+
+        if (GlobalVariables.isAutonomous) {
+            GlobalVariables.lastTurretAngle = turretAngleDeg;
         }
 
         servo.setServoSpeed(ServoConstants.turretServo, power);
@@ -135,11 +150,11 @@ public class TurretServoControl {
         return turretAngleDeg;
     }
 
-    public boolean atLeftLimit() {
-        return turretAngleDeg <= -MAX_TURRET_ANGLE_DEG;
+    private void addWaitTime(double waitTime) {
+        currentWait = getSeconds() + waitTime;
     }
 
-    public boolean atRightLimit() {
-        return turretAngleDeg >= MAX_TURRET_ANGLE_DEG;
+    private double getSeconds() {
+        return System.currentTimeMillis() / 1000.0;
     }
 }

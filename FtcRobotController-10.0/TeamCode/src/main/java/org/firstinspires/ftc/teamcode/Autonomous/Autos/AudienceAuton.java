@@ -13,10 +13,10 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoFeederIntake.AutoFeederIntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -140,7 +140,8 @@ public class AudienceAuton implements Auton {
     private void takeFirst() {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
-        IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
+        OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
         audienceAutonState = AudienceAutonState.moveToShootSecond;
     }
@@ -242,7 +243,8 @@ public class AudienceAuton implements Auton {
 
     private void moveToShoot() {
         if (!wasIfCalled) {
-            IntakeStates.setAutoFeederIntakeState(AutoFeederIntakeStates.stop);
+            IntakeStates.setMotorState(IntakeMotorStates.idle);
+            OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
             OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
             drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
             wasIfCalled = true;

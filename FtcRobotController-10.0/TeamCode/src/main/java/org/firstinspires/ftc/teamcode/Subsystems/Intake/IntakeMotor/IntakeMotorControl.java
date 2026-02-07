@@ -23,10 +23,10 @@ public class IntakeMotorControl {
     public void updateStates() {
         switch (IntakeStates.getMotorState()) {
             case forward:
-                motorControl.setMotorSpeed(MotorConstants.intake, -1.0);
+                motorControl.setMotorSpeed(MotorConstants.intake, 1.0);
                 break;
             case backward:
-                motorControl.setMotorSpeed(MotorConstants.intake, 1.0);
+                motorControl.setMotorSpeed(MotorConstants.intake, -1.0);
                 break;
             case idle:
                 motorControl.setMotorSpeed(MotorConstants.intake, 0);

@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.RightBumper;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class RightBumperLogic {
@@ -18,14 +17,14 @@ public class RightBumperLogic {
     }
 
     private boolean aimAuto() {
-        if (OuttakeStates.getOuttakeServoState() == OuttakeServoStates.setPosAuto) return false;
-        ButtonStates.setRightBumperState(RightBumperStates.aimAuto);
-        completeAction();
+//        if (OuttakeStates.getOuttakeServoState() == OuttakeServoStates.setPosAuto) return false;
+//        ButtonStates.setRightBumperState(RightBumperStates.aimAuto);
+//        completeAction();
         return true;
     }
 
     private void aimFar() {
-        ButtonStates.setRightBumperState(RightBumperStates.aimFar);
-        completeAction();
+//        ButtonStates.setRightBumperState(RightBumperStates.aimFar);
+//        completeAction();
     }
 }

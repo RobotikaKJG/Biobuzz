@@ -20,7 +20,7 @@ public class TurretServoControl {
     private static final double KP = 0.01;
     private static final double MAX_SERVO_SPEED = 0.5;
     private static final double TARGET_TOLERANCE_DEG = 1.0;
-    private static final double GEAR_RATIO = 55.0 / 230.0; // turret / servo
+    private static final double GEAR_RATIO = 40.0 / 120.0;
 
     private double lastAnalog = 0.0;
     private int rotationCount = 0;
@@ -50,13 +50,6 @@ public class TurretServoControl {
     /* ================= PUBLIC UPDATE ================= */
 
     public void update() {
-        if (!wasIfCalled) {
-            addWaitTime(0.1);
-            wasIfCalled = true;
-        }
-
-        if (currentWait > getSeconds()) return;
-
         updateTurretAngle();
         updateTurretControl();
         wasIfCalled = false;
@@ -82,7 +75,7 @@ public class TurretServoControl {
 
         // Subtract startup angle, THEN apply gear ratio
         turretAngleDeg =
-                (servoAngleDeg - servoAngleZeroDeg) * (55.0 / 230.0);
+                (servoAngleDeg - servoAngleZeroDeg) * GEAR_RATIO;
     }
 
 

@@ -165,104 +165,104 @@ public class AudienceAuton implements Auton {
         if (drive.isBusy()) return;
 
         IntakeStates.setMotorState(IntakeMotorStates.forward);
-        audienceAutonState = AudienceAutonState.idle;
+        audienceAutonState = AudienceAutonState.searchForBall;
     }
-//
-//    private void searchForBall() {
-//        double offsetPx = sensorControl.getBallOffsetPx();
-//
-//        if (!Double.isNaN(offsetPx)) {
-//            audienceAutonState = AudienceAutonState.centerOnBall;
-//            return;
-//        }
-//
-//        Pose2d pose = drive.getPoseEstimate();
-//        Pose2d target = new Pose2d(
-//                pose.getX() - STRAFE_STEP,
-//                pose.getY(),
-//                pose.getHeading()
-//        );
-//
-//        drive.followTrajectorySequenceAsync(
-//                drive.trajectorySequenceBuilder(pose, 50)
-//                        .lineToLinearHeading(target)
-//                        .build()
-//        );
-//    }
-//
-//    private void centerOnBall() {
-////        if (drive.isBusy()) return;
-//
-//        double offsetPx = sensorControl.getBallOffsetPx();
-//        if (Double.isNaN(offsetPx)) {
-//            audienceAutonState = AudienceAutonState.searchForBall;
-//            return;
-//        }
-//
-//        if (Math.abs(offsetPx) <= CENTERING_THRESHOLD_PX) {
-//            audienceAutonState = AudienceAutonState.driveToBall;
-//            return;
-//        }
-//
-//        Pose2d pose = drive.getPoseEstimate();
-//        double correctionInches = offsetPx * 0.02; // tuning factor
-//
-//        Pose2d target = new Pose2d(
-//                pose.getX() - correctionInches,
-//                pose.getY(),
-//                pose.getHeading()
-//        );
-//
-//        drive.followTrajectorySequenceAsync(
-//                drive.trajectorySequenceBuilder(pose, 50)
-//                        .lineToLinearHeading(target)
-//                        .build()
-//        );
-//    }
-//
-//    private void driveToBall() {
-////        if (drive.isBusy()) return;
-//
-//        Pose2d pose = drive.getPoseEstimate();
-//
-//        Pose2d target = new Pose2d(
-//                pose.getX(),
-//                TARGET_Y,
-//                pose.getHeading()
-//        );
-//
-//        drive.followTrajectorySequenceAsync(
-//                drive.trajectorySequenceBuilder(pose, 20)
-//                        .lineToLinearHeading(target)
-//                        .build()
-//        );
-//
-//        audienceAutonState = AudienceAutonState.moveToShoot;
-//    }
-//
-//    private void moveToShoot() {
-//        if (!wasIfCalled) {
-//            IntakeStates.setMotorState(IntakeMotorStates.idle);
-//            OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
-//            OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
-//            drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
-//            wasIfCalled = true;
-//        }
+
+    private void searchForBall() {
+        double offsetPx = sensorControl.getBallOffsetPx();
+
+        if (!Double.isNaN(offsetPx)) {
+            audienceAutonState = AudienceAutonState.centerOnBall;
+            return;
+        }
+
+        Pose2d pose = drive.getPoseEstimate();
+        Pose2d target = new Pose2d(
+                pose.getX() - STRAFE_STEP,
+                pose.getY(),
+                pose.getHeading()
+        );
+
+        drive.followTrajectorySequenceAsync(
+                drive.trajectorySequenceBuilder(pose, 50)
+                        .lineToLinearHeading(target)
+                        .build()
+        );
+    }
+
+    private void centerOnBall() {
 //        if (drive.isBusy()) return;
-//        wasIfCalled = false;
-//
-//        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-//        audienceAutonState = AudienceAutonState.shoot;
-//        addWaitTime(AutonomousConstants.shootTime);
-//    }
-//
-//    private void shoot() {
-//        if (getSeconds() < currentWait) return;
-//
-//        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
-//        drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
-//        audienceAutonState = AudienceAutonState.goToTake;
-//    }
+
+        double offsetPx = sensorControl.getBallOffsetPx();
+        if (Double.isNaN(offsetPx)) {
+            audienceAutonState = AudienceAutonState.searchForBall;
+            return;
+        }
+
+        if (Math.abs(offsetPx) <= CENTERING_THRESHOLD_PX) {
+            audienceAutonState = AudienceAutonState.driveToBall;
+            return;
+        }
+
+        Pose2d pose = drive.getPoseEstimate();
+        double correctionInches = offsetPx * 0.02; // tuning factor
+
+        Pose2d target = new Pose2d(
+                pose.getX() - correctionInches,
+                pose.getY(),
+                pose.getHeading()
+        );
+
+        drive.followTrajectorySequenceAsync(
+                drive.trajectorySequenceBuilder(pose, 50)
+                        .lineToLinearHeading(target)
+                        .build()
+        );
+    }
+
+    private void driveToBall() {
+//        if (drive.isBusy()) return;
+
+        Pose2d pose = drive.getPoseEstimate();
+
+        Pose2d target = new Pose2d(
+                pose.getX(),
+                TARGET_Y,
+                pose.getHeading()
+        );
+
+        drive.followTrajectorySequenceAsync(
+                drive.trajectorySequenceBuilder(pose, 20)
+                        .lineToLinearHeading(target)
+                        .build()
+        );
+
+        audienceAutonState = AudienceAutonState.moveToShoot;
+    }
+
+    private void moveToShoot() {
+        if (!wasIfCalled) {
+            IntakeStates.setMotorState(IntakeMotorStates.idle);
+            OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
+            OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
+            drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
+            wasIfCalled = true;
+        }
+        if (drive.isBusy()) return;
+        wasIfCalled = false;
+
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+        audienceAutonState = AudienceAutonState.shoot;
+        addWaitTime(AutonomousConstants.shootTime);
+    }
+
+    private void shoot() {
+        if (getSeconds() < currentWait) return;
+
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
+        drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
+        audienceAutonState = AudienceAutonState.goToTake;
+    }
 
     private void addWaitTime(double waitTime) {
         currentWait = getSeconds() + waitTime;

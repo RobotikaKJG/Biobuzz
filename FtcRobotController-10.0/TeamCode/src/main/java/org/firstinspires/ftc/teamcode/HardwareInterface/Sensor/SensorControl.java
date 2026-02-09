@@ -42,8 +42,8 @@ public class SensorControl {
     private double currentDistance;
     double y = 0;
 
-//    private OpenCvCamera webcam;
-//    private BallDetectionPipeline ballPipeline;
+    private OpenCvCamera webcam;
+    private BallDetectionPipeline ballPipeline;
     private double cameraHFOVDegrees = 78.0; // Logitech C720 approx HFOV
     private int cameraWidthPx = 640;
 
@@ -88,28 +88,28 @@ public class SensorControl {
         pinpointImu.resetPosAndIMU();
     }
 
-//    public void initBallCamera(HardwareMap hardwareMap) {
-//        int camMonitorViewId = hardwareMap.appContext.getResources()
-//                .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-//
-////        webcam = OpenCvCameraFactory.getInstance().createWebcam(
-////                hardwareMap.get(WebcamName.class, "Webcam 1"), camMonitorViewId);
-//
-//        ballPipeline = new BallDetectionPipeline();
-////        webcam.setPipeline(ballPipeline);
-//
-//        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-//            @Override
-//            public void onOpened() {
-//                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
-//            }
-//
-//            @Override
-//            public void onError(int errorCode) {
-//                // Handle camera error
-//            }
-//        });
-//    }
+    public void initBallCamera(HardwareMap hardwareMap) {
+        int camMonitorViewId = hardwareMap.appContext.getResources()
+                .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class, "Webcam 1"), camMonitorViewId);
+
+        ballPipeline = new BallDetectionPipeline();
+        webcam.setPipeline(ballPipeline);
+
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                // Handle camera error
+            }
+        });
+    }
 
     public void initLimelight(int pipelineNr) {
         limelight.start();
@@ -180,16 +180,16 @@ public class SensorControl {
         return Double.NaN;
     }
 
-//    public double getBallOffsetPx() {
-//        if (ballPipeline == null) return Double.NaN;
-//        return ballPipeline.getCenterOffsetPx();
-//    }
+    public double getBallOffsetPx() {
+        if (ballPipeline == null) return Double.NaN;
+        return ballPipeline.getCenterOffsetPx();
+    }
 
-//    public double getBallOffsetDegrees() {
-//        double px = getBallOffsetPx();
-//        if (Double.isNaN(px)) return Double.NaN;
-//        return (px / cameraWidthPx) * cameraHFOVDegrees;
-//    }
+    public double getBallOffsetDegrees() {
+        double px = getBallOffsetPx();
+        if (Double.isNaN(px)) return Double.NaN;
+        return (px / cameraWidthPx) * cameraHFOVDegrees;
+    }
 
     public static double degreesToPixels(double offsetDegrees, double imageWidthPx, double cameraHFOVDegrees) {
         if (Double.isNaN(offsetDegrees) || imageWidthPx <= 0 || cameraHFOVDegrees <= 0) return Double.NaN;
@@ -245,10 +245,6 @@ public class SensorControl {
         currentGreen = 0;
         currentBlue = 0;
     }
-
-//    public void updateDistance(){
-//        currentDistance = rangeSensor.getDistance(DistanceUnit.MM);
-//    }
 
     public void resetDistance(){
         currentDistance = 100;

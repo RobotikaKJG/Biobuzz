@@ -7,6 +7,7 @@ import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Main.GoBildaPinpointDriver;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
+import org.firstinspires.ftc.teamcode.Pose2D;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -41,6 +43,10 @@ public class SensorControl {
     public int currentBlue;
     private double currentDistance;
     double y = 0;
+    private static final double redGoalX = 72.0;   // example
+    private static final double redGoalY = -72;  // example
+    private static final double blueGoalX = 72.0;  // example
+    private static final double blueGoalY = 72;  // example
 
     private OpenCvCamera webcam;
     private BallDetectionPipeline ballPipeline;
@@ -86,6 +92,7 @@ public class SensorControl {
     public void initPinpoint() {
         pinpointImu.initialize();
         pinpointImu.resetPosAndIMU();
+        pinpointImu.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
     }
 
     public void initBallCamera(HardwareMap hardwareMap) {
@@ -118,6 +125,70 @@ public class SensorControl {
 
     public LLResult limelightResult() {
         return limelight.getLatestResult();
+    }
+
+    public boolean resetPinpointPoseWithLimelight() {
+        LLResult result = limelightResult();
+        if (result == null || !result.isValid()) return false;
+
+        Pose3D botpose = result.getBotpose();
+        if (botpose == null) return false;
+
+        // Limelight pose is in meters → convert to millimeters
+        double xMM = -botpose.getPosition().x * 1000.0;
+        double yMM = -botpose.getPosition().y * 1000.0;
+
+        // Keep current heading (Pinpoint uses radians)
+        double currentHeadingRad = pinpointImu.getHeading();
+
+        // Set pinpoint pose (X, Y updated, heading unchanged)
+        pinpointImu.setPosition(new Pose2D(DistanceUnit.MM, xMM, yMM,
+                AngleUnit.RADIANS, currentHeadingRad));
+
+        return true;
+    }
+
+    public double getTurretTargetAngleDegrees() {
+        // Get robot pose from pinpoint (mm and radians)
+        double robotXmm = pinpointImu.getPosX();
+        double robotYmm = pinpointImu.getPosY();
+        double robotHeadingRad = pinpointImu.getHeading();
+
+        // Convert robot position to inches to match goal constants
+        double robotX = robotXmm / 25.4;
+        double robotY = robotYmm / 25.4;
+
+        // Select target corner based on alliance
+        double targetX;
+        double targetY;
+
+        if (GlobalVariables.alliance == Alliance.Red) {
+            targetX = redGoalX;
+            targetY = redGoalY;
+        } else {
+            targetX = blueGoalX;
+            targetY = blueGoalY;
+        }
+
+        // Vector from robot to target
+        double dx = targetX - robotX;
+        double dy = targetY - robotY;
+
+        // Absolute angle to target (field frame)
+        double angleToTargetRad = Math.atan2(dy, dx);
+
+        // Turret angle relative to robot heading
+        double turretAngleRad = angleToTargetRad - robotHeadingRad;
+
+        // Convert to degrees and normalize
+        double turretAngleDeg = Math.toDegrees(turretAngleRad);
+        return normalizeDegrees(turretAngleDeg);
+    }
+
+    private double normalizeDegrees(double angle) {
+        while (angle > 180) angle -= 360;
+        while (angle < -180) angle += 360;
+        return angle;
     }
 
     public double getTagDistance() {
@@ -207,64 +278,6 @@ public class SensorControl {
 
     public void resetPinpointAngle() {
         if (edgeDetection.rising(GamepadIndexValues.options))
-            pinpointImu.resetPosAndIMU();
-    }
-
-    public double getLocalizerAngle() {
-        resetLocalizerAngle(); //Checks every time, resets only when button pressed
-        Pose2d currentPose = localizer.getPoseEstimate();
-        return currentPose.getHeading();
-    }
-
-    public void resetLocalizerAngle() {
-        if (edgeDetection.rising(GamepadIndexValues.options))
-            localizer.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(0)));
-    }
-
-//    public boolean isLimitSwitchPressed(LimitSwitches state) {
-//        switch (state) {
-//            case slides:
-//                return limitSwitches[0].getIsPressed();
-//            case pivot:
-//                return limitSwitches[1].getIsPressed();
-//            default:
-//                return false; // Or throw an exception
-//        }
-//    }
-
-    public void updateColor(){
-//        currentColor = colorSensor.getNormalizedColors().toColor();
-        currentRed = Color.red(currentColor);
-        currentGreen = Color.green(currentColor);
-        currentBlue = Color.blue(currentColor);
-    }
-
-    public void resetColor(){
-        currentColor = 0;
-        currentRed = 0;
-        currentGreen = 0;
-        currentBlue = 0;
-    }
-
-    public void resetDistance(){
-        currentDistance = 100;
-    }
-
-    public boolean isRed(){
-        //return currentGreen < 5 && currentRed > 7 || (currentBlue == 2 && currentGreen == 2 && currentRed == 5);
-        return currentRed < 28 && currentRed > 22;
-    }
-
-    public boolean isYellow(){
-        return currentGreen > 27;
-    }
-
-    public boolean isBlue(){
-//        return (currentRed < 5 && currentBlue > 3 && currentGreen < 8) || ( currentRed == 1 && currentBlue == 3 && currentGreen < 4);
-        return  currentRed < 25 && currentBlue > 20;
-    }
-
-    public double getDistance(){
-        return currentDistance;
+            pinpointImu.setPosition(new Pose2D(pinpointImu.getPosX(), pinpointImu.getPosY(), 90));
     }
 }

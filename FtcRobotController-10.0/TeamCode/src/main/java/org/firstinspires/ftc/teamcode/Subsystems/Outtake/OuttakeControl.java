@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycl
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetPosControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
@@ -17,13 +18,15 @@ public class OuttakeControl {
     private final FeederMotorControl feederMotorControl;
     private final TurretServoControl turretServoControl;
     private final AutoOuttakeFarCloseControl autoOuttakeFarCloseControl;
+    private final AutoResetPosControl autoResetPosControl;
 
-    public OuttakeControl(OuttakeMotorControl outtakeMotorControl, AutoCycleShootLogic autoCycleShootLogic, FeederMotorControl feederMotorControl, TurretServoControl turretServoControl, AutoOuttakeFarCloseControl autoOuttakeFarCloseControl) {
+    public OuttakeControl(OuttakeMotorControl outtakeMotorControl, AutoCycleShootLogic autoCycleShootLogic, FeederMotorControl feederMotorControl, TurretServoControl turretServoControl, AutoOuttakeFarCloseControl autoOuttakeFarCloseControl, AutoResetPosControl autoResetPosControl) {
         this.outtakeMotorControl = outtakeMotorControl;
         this.autoCycleShootLogic = autoCycleShootLogic;
         this.feederMotorControl = feederMotorControl;
         this.turretServoControl = turretServoControl;
         this.autoOuttakeFarCloseControl = autoOuttakeFarCloseControl;
+        this.autoResetPosControl = autoResetPosControl;
     }
 
     public void update() {
@@ -33,6 +36,7 @@ public class OuttakeControl {
         feederMotorControl.update();
         turretServoControl.update();
         autoOuttakeFarCloseControl.update();
+        autoResetPosControl.update();
 
         updateOuttakeState();
     }

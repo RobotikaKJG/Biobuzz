@@ -30,11 +30,11 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
                 .build();
 
         goToTakeFirst = drive.trajectorySequenceBuilder(shootPose, 100)
-                .lineToLinearHeading(new Pose2d(-25, -40, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-25, -40, Math.toRadians(270)))
                 .build();
 
         takeFirst = drive.trajectorySequenceBuilder(goToTakeFirst.end(), 40)
-                .lineToLinearHeading(new Pose2d(-25, -70, Math.toRadians(90)))
+                .lineToLinearHeading(new Pose2d(-25, -70, Math.toRadians(270)))
                 .build();
 
         moveToShoot = drive.trajectorySequenceBuilder(takeFirst.end(), 50)

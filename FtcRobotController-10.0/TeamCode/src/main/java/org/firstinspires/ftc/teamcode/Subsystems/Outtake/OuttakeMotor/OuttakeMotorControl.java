@@ -12,6 +12,11 @@ public class OuttakeMotorControl {
     private final SensorControl sensorControl;
     private OuttakeMotorStates prevMotorStates = OuttakeMotorStates.idle;
     private double currentWait = 0;
+    private double minD = OuttakeConstants.minDistance;
+    private double maxD = OuttakeConstants.maxDistance;
+
+    private double speed;
+    private double prevspeed = OuttakeConstants.outtakeSpeedCloseClose;
 
     public OuttakeMotorControl(MotorControl motorControl, SensorControl sensorControl) {
         this.motorControl = motorControl;
@@ -37,14 +42,9 @@ public class OuttakeMotorControl {
             case forwardClose:
                 double distance = sensorControl.getTagDistance();
 
-                double minD = OuttakeConstants.minDistance;
-                double maxD = OuttakeConstants.maxDistance;
-
-                double speed;
-
                 // If no valid tag detected, default to closeClose speed
                 if (distance < 0) {
-                    speed = OuttakeConstants.outtakeSpeedCloseClose;
+                    speed = prevspeed;
                 }
                 // Closer than minimum → use closeClose speed
                 else if (distance <= minD) {
@@ -61,6 +61,8 @@ public class OuttakeMotorControl {
                             t * (OuttakeConstants.outtakeSpeedCloseFar -
                                     OuttakeConstants.outtakeSpeedCloseClose);
                 }
+
+                prevspeed = speed;
 
                 motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
                 motorControl.setMotorSpeed(MotorConstants.outtake2, speed);

@@ -83,12 +83,6 @@ public class IterativeController {
 
         updateHardwareValues();
 
-        if(!colorSensorActive)
-            sensorControl.resetDistance();
-
-        if(sensorControl.getDistance() < 90)
-            sensorControl.updateColor();
-
         intakeControl.update();
         outtakeControl.update();
     }

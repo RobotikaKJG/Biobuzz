@@ -1,50 +1,39 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo;
 
-import android.provider.Settings;
-
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
-import org.firstinspires.ftc.teamcode.Main.Alliance;
-import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 
 public class TurretServoControl {
 
-    private final ServoControl servo;
-    private final SensorControl sensor;
+    private final ServoControl servoControl;
+    private final SensorControl sensorControl;
 
-    private double currentWait = 0;
-    private boolean wasIfCalled = false;
-
-    private static final double MAX_TURRET_ANGLE_DEG = 85.0;
-    private static final double KP = 0.01;
-    private static final double MAX_SERVO_SPEED = 0.5;
-    private static final double TARGET_TOLERANCE_DEG = 1.0;
-    private static final double GEAR_RATIO = 40.0 / 120.0;
+    private static final double maxTurretAngle = 85.0;
+    private static final double kP = 0.01;
+    private static final double maxSpeed = 1.0;
+    private static final double minSpeed = 0.05;
+    private static final double tolerance = 0.2;
+    private static final double gearRatio = 40.0 / 120.0;
 
     private double lastAnalog = 0.0;
     private int rotationCount = 0;
     private double turretAngleDeg = 0.0;
     private double analogZero = 0.0;
     private double servoAngleZeroDeg = 0.0;
-    private static double AIM_OFFSET_DEG = 1;
 
     /* ================= CONSTRUCTOR ================= */
 
-    public TurretServoControl(ServoControl servo, SensorControl sensor) {
-        this.servo = servo;
-        this.sensor = sensor;
+    public TurretServoControl(ServoControl servoControl, SensorControl sensorControl) {
+        this.servoControl = servoControl;
+        this.sensorControl = sensorControl;
 
-        // Zero turret at startup
-        analogZero = servo.getCRSPos(ServoConstants.turretAnalog);
+        analogZero = servoControl.getCRSPos(ServoConstants.turretAnalog);
         lastAnalog = analogZero;
         rotationCount = 0;
 
         servoAngleZeroDeg = analogZero * 360.0;
-
         turretAngleDeg = 0.0;
-
-
     }
 
     /* ================= PUBLIC UPDATE ================= */
@@ -52,13 +41,12 @@ public class TurretServoControl {
     public void update() {
         updateTurretAngle();
         updateTurretControl();
-        wasIfCalled = false;
     }
 
     /* ================= ANGLE TRACKING ================= */
 
     private void updateTurretAngle() {
-        double analog = servo.getCRSPos(ServoConstants.turretAnalog); // 0–1
+        double analog = servoControl.getCRSPos(ServoConstants.turretAnalog);
         double delta = analog - lastAnalog;
 
         if (delta > 0.5) {
@@ -69,85 +57,61 @@ public class TurretServoControl {
 
         lastAnalog = analog;
 
-        // Continuous SERVO angle
         double servoAngleDeg =
                 rotationCount * 360.0 + analog * 360.0;
 
-        // Subtract startup angle, THEN apply gear ratio
         turretAngleDeg =
-                (servoAngleDeg - servoAngleZeroDeg) * GEAR_RATIO;
+                (servoAngleDeg - servoAngleZeroDeg) * gearRatio;
     }
 
-
     /* ================= CONTROL ================= */
-
     private void updateTurretControl() {
-        double tx = 0;
+        // Get the desired turret angle from the sensor control (using the pinoint odometers)
+        double desiredTurretAngleDeg = sensorControl.getTurretTargetAngleDegrees();
 
-        if (GlobalVariables.far) {
-            AIM_OFFSET_DEG = 2;
-        }
-        else {
-            AIM_OFFSET_DEG = 1;
-        }
-
-        if (GlobalVariables.alliance == Alliance.Red) {
-            tx = sensor.getDisToCenter() + AIM_OFFSET_DEG;
-        }
-        else {
-            tx = sensor.getDisToCenter() - AIM_OFFSET_DEG;
+        // Clamp the desired angle to turret's physical range
+        if (desiredTurretAngleDeg > maxTurretAngle) {
+            desiredTurretAngleDeg = maxTurretAngle;
+        } else if (desiredTurretAngleDeg < -maxTurretAngle) {
+            desiredTurretAngleDeg = -maxTurretAngle;
         }
 
-        // No target
-        if (Double.isNaN(tx)) {
-            servo.setServoSpeed(ServoConstants.turretServo, 0);
+        // Calculate error (in degrees) between current and desired angle
+        double angleError = desiredTurretAngleDeg - turretAngleDeg;
+
+        // Reverse the direction of the servo by negating angleError
+        angleError = -angleError;
+
+        // If the angle error is within the tolerance, stop the servo
+        if (Math.abs(angleError) <= tolerance) {
+            servoControl.setServoSpeed(ServoConstants.turretServo, 0.0);
             return;
         }
 
-        // Deadband
-        if (Math.abs(tx) < TARGET_TOLERANCE_DEG) {
-            servo.setServoSpeed(ServoConstants.turretServo, 0);
-            return;
+        // Simple proportional control for servo power
+        double servoPower = kP * angleError;
+
+        // Clamp servo power to maximum speed
+        if (servoPower > maxSpeed) {
+            servoPower = maxSpeed;
+        } else if (servoPower < -maxSpeed) {
+            servoPower = -maxSpeed;
         }
 
-        // Proportional control
-        double power = tx * KP;
-
-        // Clamp speed
-        power = Math.max(-MAX_SERVO_SPEED, Math.min(MAX_SERVO_SPEED, power));
-
-        // Enforce limits
-        if (GlobalVariables.isAutonomous) {
-            if ((turretAngleDeg <= -MAX_TURRET_ANGLE_DEG && power > 0) ||
-                    (turretAngleDeg >= MAX_TURRET_ANGLE_DEG && power < 0)) {
-                power = 0;
-            }
-        }
-        else {
-            if ((turretAngleDeg <= -MAX_TURRET_ANGLE_DEG - GlobalVariables.lastTurretAngle && power > 0) ||
-                    (turretAngleDeg >= MAX_TURRET_ANGLE_DEG - GlobalVariables.lastTurretAngle && power < 0)) {
-                power = 0;
-            }
+        // Add minimum servo speed so the servo doesn't stop when power is nonzero but small
+        if (servoPower > 0 && servoPower < minSpeed) {
+            servoPower = minSpeed;
+        } else if (servoPower < 0 && servoPower > -minSpeed) {
+            servoPower = -minSpeed;
         }
 
-        if (GlobalVariables.isAutonomous) {
-            GlobalVariables.lastTurretAngle = turretAngleDeg;
-        }
-
-        servo.setServoSpeed(ServoConstants.turretServo, power);
+        // Send command to the turret servo (continuous rotation servo assumed)
+        servoControl.setServoSpeed(ServoConstants.turretServo, servoPower);
     }
 
     /* ================= GETTERS ================= */
 
     public double getTurretAngleDeg() {
         return turretAngleDeg;
-    }
-
-    private void addWaitTime(double waitTime) {
-        currentWait = getSeconds() + waitTime;
-    }
-
-    private double getSeconds() {
-        return System.currentTimeMillis() / 1000.0;
     }
 }

@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorC
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetPosControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorControl;
@@ -65,7 +66,7 @@ public class Dependencies {
     }
 
     public OuttakeControl createOuttakeControl() {
-        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createFeederMotorControl(), createTurretServoControl(), createAutoOuttakeFarCloseControl());
+        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createFeederMotorControl(), createTurretServoControl(), createAutoOuttakeFarCloseControl(), createAutoResetPosControl());
     }
 
     private OuttakeMotorControl createOuttakeMotorControl() {
@@ -98,5 +99,9 @@ public class Dependencies {
 
     private LockServoControl createLockServoControl() {
         return new LockServoControl(servoControl);
+    }
+
+    private AutoResetPosControl createAutoResetPosControl() {
+        return new AutoResetPosControl(sensorControl);
     }
 }

@@ -58,11 +58,11 @@ public class Dependencies {
     }
 
     ButtonControl createSubsystemControl() {
-        return new ButtonControl(edgeDetection, sensorControl);
+        return new ButtonControl(edgeDetection, sensorControl, motorControl);
     }
 
     ButtonControl createSubsystemControl2() {
-        return new ButtonControl(gamepad2EdgeDetection, sensorControl);
+        return new ButtonControl(gamepad2EdgeDetection, sensorControl, motorControl);
     }
 
     public OuttakeControl createOuttakeControl() {

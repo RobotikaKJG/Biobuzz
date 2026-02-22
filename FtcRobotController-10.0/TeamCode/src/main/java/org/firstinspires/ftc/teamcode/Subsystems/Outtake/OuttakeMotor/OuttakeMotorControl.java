@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
+import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
@@ -40,29 +41,7 @@ public class OuttakeMotorControl {
                 motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedFar);
                 break;
             case forwardClose:
-                double distance = sensorControl.getTagDistance();
-
-                // If no valid tag detected, default to closeClose speed
-                if (distance < 0) {
-                    speed = prevspeed;
-                }
-                // Closer than minimum → use closeClose speed
-                else if (distance <= minD) {
-                    speed = OuttakeConstants.outtakeSpeedCloseClose;
-                }
-                // Farther than maximum → use closeFar speed
-                else if (distance >= maxD) {
-                    speed = OuttakeConstants.outtakeSpeedCloseFar;
-                }
-                // Between min and max → interpolate
-                else {
-                    double t = (distance - minD) / (maxD - minD); // 0 → 1
-                    speed = OuttakeConstants.outtakeSpeedCloseClose +
-                            t * (OuttakeConstants.outtakeSpeedCloseFar -
-                                    OuttakeConstants.outtakeSpeedCloseClose);
-                }
-
-                prevspeed = speed;
+                calculateSpeed();
 
                 motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
                 motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
@@ -78,5 +57,32 @@ public class OuttakeMotorControl {
                 motorControl.setMotors(MotorConstants.outtake2);
                 break;
         }
+    }
+
+    private void calculateSpeed() {
+//        double distance = sensorControl.getTagDistance();
+        double distance = GlobalVariables.distanceToTarget/1000;
+
+        // If no valid tag detected, default to closeClose speed
+        if (distance < 0) {
+            speed = prevspeed;
+        }
+        // Closer than minimum → use closeClose speed
+        else if (distance <= minD) {
+            speed = OuttakeConstants.outtakeSpeedCloseClose;
+        }
+        // Farther than maximum → use closeFar speed
+        else if (distance >= maxD) {
+            speed = OuttakeConstants.outtakeSpeedCloseFar;
+        }
+        // Between min and max → interpolate
+        else {
+            double t = (distance - minD) / (maxD - minD); // 0 → 1
+            speed = OuttakeConstants.outtakeSpeedCloseClose +
+                    t * (OuttakeConstants.outtakeSpeedCloseFar -
+                            OuttakeConstants.outtakeSpeedCloseClose);
+        }
+        GlobalVariables.outtakeTargetSpeed = speed;
+        prevspeed = speed;
     }
 }

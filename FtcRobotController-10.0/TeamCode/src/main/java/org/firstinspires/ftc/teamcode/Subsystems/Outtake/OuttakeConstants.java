@@ -28,4 +28,12 @@ public class OuttakeConstants {
     public static double outtakeSpeedCloseClose = 0.58;
     public static double outtakeSpeedFar = 0.83;
     public static double outtakeSpeedCloseFar = 0.7291;
+
+    // units in MM
+    public static double redTargetX = 1830;
+    public static double targetY = 1830;
+    public static double blueTargetX = -redTargetX;
+
+    public static double farShootingThreshold = 2300;
+    public static double targetSpeedThreshold = 0.02;
 }

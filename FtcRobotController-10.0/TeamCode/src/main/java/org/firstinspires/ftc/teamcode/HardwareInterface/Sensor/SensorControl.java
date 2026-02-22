@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Pose2D;
+import org.firstinspires.ftc.teamcode.Main.Pose2D;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -279,5 +279,9 @@ public class SensorControl {
     public void resetPinpointAngle() {
         if (edgeDetection.rising(GamepadIndexValues.options))
             pinpointImu.setPosition(new Pose2D(pinpointImu.getPosX(), pinpointImu.getPosY(), 90));
+    }
+
+    public Pose2D getPinpointPos() {
+        return pinpointImu.getPosition();
     }
 }

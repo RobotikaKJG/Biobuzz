@@ -5,12 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 //import org.firstinspires.ftc.teamcode.Autonomous.AutonomousControl;
 import org.firstinspires.ftc.teamcode.Autonomous.AutonomousControl;
-import org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton;
 import org.firstinspires.ftc.teamcode.Autonomous.SelectStartVariables;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.Main.Dependencies;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 
 
 @Autonomous

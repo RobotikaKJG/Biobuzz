@@ -3,11 +3,9 @@ package org.firstinspires.ftc.teamcode.Main;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Slide.SlideControl;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
@@ -16,8 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
-import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretMotor.TurretMotorControl;
 
 public class IterativeController {
     private final MotorControl motorControl;
@@ -36,7 +33,7 @@ public class IterativeController {
     private final OuttakeControl outtakeControl;
     private final IntakeControl intakeControl;
     private final SensorControl sensorControl;
-    private final TurretServoControl turretServoControl;
+    private final TurretMotorControl turretServoControl;
     private boolean colorSensorActive = true;
 
     public IterativeController(Dependencies dependencies) {
@@ -54,7 +51,7 @@ public class IterativeController {
         outtakeControl = dependencies.createOuttakeControl();
         intakeControl = dependencies.createIntakeControl();
         sensorControl = dependencies.sensorControl;
-        turretServoControl = dependencies.turretServoControl;
+        turretServoControl = dependencies.turretMotorControl;
 
         sensorControl.initPinpoint();
         sensorControl.initLimelight(0);

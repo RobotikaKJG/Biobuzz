@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetP
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretMotor.TurretMotorControl;
 
 public class Dependencies {
     public final HardwareMap hardwareMap;
@@ -32,7 +32,7 @@ public class Dependencies {
     public MotorControl motorControl;
     public SensorControl sensorControl;
     public ServoControl servoControl;
-    public TurretServoControl turretServoControl;
+    public TurretMotorControl turretMotorControl;
     public EdgeDetection edgeDetection = new EdgeDetection();
     public EdgeDetection gamepad2EdgeDetection = new EdgeDetection();
 
@@ -46,7 +46,7 @@ public class Dependencies {
         motorControl = new MotorControl(hardwareMap);
         sensorControl = new SensorControl(hardwareMap, edgeDetection, localizer);
         servoControl = new ServoControl(hardwareMap);
-        turretServoControl = new TurretServoControl(servoControl, sensorControl);
+        turretMotorControl = new TurretMotorControl(motorControl, sensorControl);
     }
 
     public Drivebase createDrivebase() {
@@ -66,7 +66,7 @@ public class Dependencies {
     }
 
     public OuttakeControl createOuttakeControl() {
-        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createFeederMotorControl(), createTurretServoControl(), createAutoOuttakeFarCloseControl(), createAutoResetPosControl());
+        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createFeederMotorControl(), createTurretMotorControl(), createAutoOuttakeFarCloseControl(), createAutoResetPosControl());
     }
 
     private OuttakeMotorControl createOuttakeMotorControl() {
@@ -85,8 +85,8 @@ public class Dependencies {
         return new FeederMotorControl(motorControl);
     }
 
-    private TurretServoControl createTurretServoControl() {
-        return turretServoControl;
+    private TurretMotorControl createTurretMotorControl() {
+        return turretMotorControl;
     }
 
     private AutoCycleShootLogic createAutoCycleShootLogic() {

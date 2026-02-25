@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class AutoCycleShootControl {
@@ -24,18 +23,13 @@ public class AutoCycleShootControl {
             case turnTransfer:
                 IntakeStates.setMotorState(IntakeMotorStates.forward);
                 break;
-            case turnFeeder:
-                OuttakeStates.setFeederMotorState(FeederMotorStates.forward);
-                break;
             case stopTransfer:
                 break;
             case turnFeederBack:
-                OuttakeStates.setFeederMotorState(FeederMotorStates.forward);
-                IntakeStates.setMotorState(IntakeMotorStates.idle);
-                IntakeStates.setLockServoState(LockServoStates.push);
+                IntakeStates.setMotorState(IntakeMotorStates.backward);
                 break;
             case deactivate:
-                OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
+                IntakeStates.setMotorState(IntakeMotorStates.idle);
                 IntakeStates.setLockServoState(LockServoStates.lock);
                 break;
             case idle:

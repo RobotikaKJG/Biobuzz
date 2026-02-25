@@ -11,13 +11,16 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
     TrajectorySequence moveToShootFirst;
     TrajectorySequence goToTakeFirst;
     TrajectorySequence takeFirst;
-    TrajectorySequence moveToShoot;
+    TrajectorySequence moveToShootSecond;
     TrajectorySequence goToTakeBalls;
+    TrajectorySequence takeBalls;
+    TrajectorySequence moveToShoot;
     TrajectorySequence park;
 
     private final Pose2d startPose = new Pose2d(-60, -15,Math.toRadians(360));
     private final Pose2d shootPose = new Pose2d(-50, -20, Math.toRadians(360));
-    private final Pose2d takePose = new Pose2d(-10, -40, Math.toRadians(271));
+    private final Pose2d takePose = new Pose2d(-10, -40, Math.toRadians(155));
+    private final Pose2d takenPose = new Pose2d(-10, -60, Math.toRadians(155));
 
     public RedAudienceTrajectories(SampleMecanumDrive drive) {
         this.drive = drive;
@@ -37,7 +40,7 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
                 .lineToLinearHeading(new Pose2d(-25, -70, Math.toRadians(270)))
                 .build();
 
-        moveToShoot = drive.trajectorySequenceBuilder(takeFirst.end(), 50)
+        moveToShootSecond = drive.trajectorySequenceBuilder(takeFirst.end(), 50)
                 .lineToLinearHeading(shootPose)
                 .build();
 
@@ -45,7 +48,15 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
                 .lineToLinearHeading(takePose)
                 .build();
 
-        park = drive.trajectorySequenceBuilder(moveToShoot.end(), 100)
+        takeBalls = drive.trajectorySequenceBuilder(takePose, 100)
+                .lineToLinearHeading(takenPose)
+                .build();
+
+        moveToShoot = drive.trajectorySequenceBuilder(takenPose, 100)
+                .lineToLinearHeading(shootPose)
+                .build();
+
+        park = drive.trajectorySequenceBuilder(shootPose, 100)
                 .lineTo(new Vector2d(-55, -40))
                 .build();
     }
@@ -62,13 +73,23 @@ public class RedAudienceTrajectories implements AudienceTrajectories {
     public TrajectorySequence takeFirst() { return takeFirst; }
 
     @Override
-    public TrajectorySequence moveToShoot() {
-        return moveToShoot;
+    public TrajectorySequence moveToShootSecond() {
+        return moveToShootSecond;
     }
 
     @Override
     public TrajectorySequence goToTakeBalls() {
         return goToTakeBalls;
+    }
+
+    @Override
+    public TrajectorySequence takeBalls() {
+        return takeBalls;
+    }
+
+    @Override
+    public TrajectorySequence moveToShoot() {
+        return moveToShoot;
     }
 
     public TrajectorySequence park() {

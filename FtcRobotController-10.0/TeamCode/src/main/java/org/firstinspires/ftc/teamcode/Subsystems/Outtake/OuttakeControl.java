@@ -3,7 +3,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycl
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetPosControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretMotor.TurretMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
@@ -12,15 +11,13 @@ public class OuttakeControl {
     private final OuttakeMotorControl outtakeMotorControl;
     private final AutoCycleShootControl autoCycleShootControl = new AutoCycleShootControl();
     private final AutoCycleShootLogic autoCycleShootLogic;
-    private final FeederMotorControl feederMotorControl;
     private final TurretMotorControl turretServoControl;
     private final AutoOuttakeFarCloseControl autoOuttakeFarCloseControl;
     private final AutoResetPosControl autoResetPosControl;
 
-    public OuttakeControl(OuttakeMotorControl outtakeMotorControl, AutoCycleShootLogic autoCycleShootLogic, FeederMotorControl feederMotorControl, TurretMotorControl turretServoControl, AutoOuttakeFarCloseControl autoOuttakeFarCloseControl, AutoResetPosControl autoResetPosControl) {
+    public OuttakeControl(OuttakeMotorControl outtakeMotorControl, AutoCycleShootLogic autoCycleShootLogic, TurretMotorControl turretServoControl, AutoOuttakeFarCloseControl autoOuttakeFarCloseControl, AutoResetPosControl autoResetPosControl) {
         this.outtakeMotorControl = outtakeMotorControl;
         this.autoCycleShootLogic = autoCycleShootLogic;
-        this.feederMotorControl = feederMotorControl;
         this.turretServoControl = turretServoControl;
         this.autoOuttakeFarCloseControl = autoOuttakeFarCloseControl;
         this.autoResetPosControl = autoResetPosControl;
@@ -30,7 +27,6 @@ public class OuttakeControl {
         outtakeMotorControl.update();
         autoCycleShootControl.update();
         autoCycleShootLogic.update();
-        feederMotorControl.update();
         turretServoControl.update();
         autoOuttakeFarCloseControl.update();
         autoResetPosControl.update();

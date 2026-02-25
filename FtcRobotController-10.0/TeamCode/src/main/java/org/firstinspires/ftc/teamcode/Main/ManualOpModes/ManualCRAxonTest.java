@@ -44,8 +44,6 @@ public class ManualCRAxonTest extends LinearOpMode {
                 power = -0.5;
             }
 
-            dependencies.servoControl.setServoSpeed(0, power);
-
             double voltage = axonFeedback.getVoltage();
             double position = voltage / axonFeedback.getMaxVoltage();
 

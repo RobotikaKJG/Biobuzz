@@ -7,7 +7,7 @@ public class MotorConstants {
     public static final int backRight = 3;
     public static final int outtake1 = 4;
     public static final int intake = 5;
-    public static final int feeder = 6;
+    public static final int turret = 6;
     public static final int outtake2 = 7;
     public static final int[][] motorConfig = {
             //separate motors
@@ -17,7 +17,7 @@ public class MotorConstants {
             {backRight},
             {outtake1},
             {intake},
-            {feeder},
+            {turret},
             {outtake2},
             //various combinations
             {frontLeft, backLeft, frontRight, backRight},
@@ -25,9 +25,9 @@ public class MotorConstants {
             {frontRight, backRight},
             {frontLeft, backRight},
             {backLeft, frontRight},
-            {frontLeft, backLeft, frontRight, backRight, outtake1, intake, feeder, outtake2},
-            {outtake1, intake, feeder, outtake2},
-            {frontLeft, backLeft, frontRight, backRight, intake, feeder, outtake2}
+            {frontLeft, backLeft, frontRight, backRight, outtake1, intake, turret, outtake2},
+            {outtake1, intake, turret, outtake2},
+            {frontLeft, backLeft, frontRight, backRight, intake, turret, outtake2}
     };
     // motorConfig combined value names
     public static final int allDrive = 8;

@@ -11,8 +11,10 @@ public class BlueAudienceTrajectories implements AudienceTrajectories {
     TrajectorySequence moveToShootFirst;
     TrajectorySequence goToTakeFirst;
     TrajectorySequence takeFirst;
-    TrajectorySequence moveToShoot;
+    TrajectorySequence moveToShootSecond;
     TrajectorySequence goToTakeBalls;
+    TrajectorySequence takeBalls;
+    TrajectorySequence moveToShoot;
     TrajectorySequence park;
 
     private final Pose2d startPose = new Pose2d(-60, 15,Math.toRadians(0));
@@ -37,7 +39,7 @@ public class BlueAudienceTrajectories implements AudienceTrajectories {
                 .lineToLinearHeading(new Pose2d(-25, 70, Math.toRadians(90)))
                 .build();
 
-        moveToShoot = drive.trajectorySequenceBuilder(takeFirst.end(), 50)
+        moveToShootSecond = drive.trajectorySequenceBuilder(takeFirst.end(), 50)
                 .lineToLinearHeading(shootPose)
                 .build();
 
@@ -45,7 +47,7 @@ public class BlueAudienceTrajectories implements AudienceTrajectories {
                 .lineToLinearHeading(takePose)
                 .build();
 
-        park = drive.trajectorySequenceBuilder(moveToShoot.end(), 100)
+        park = drive.trajectorySequenceBuilder(moveToShootSecond.end(), 100)
                 .lineTo(new Vector2d(-55, 40))
                 .build();
     }
@@ -62,13 +64,23 @@ public class BlueAudienceTrajectories implements AudienceTrajectories {
     public TrajectorySequence takeFirst() { return takeFirst; }
 
     @Override
-    public TrajectorySequence moveToShoot() {
-        return moveToShoot;
+    public TrajectorySequence moveToShootSecond() {
+        return moveToShootSecond;
     }
 
     @Override
     public TrajectorySequence goToTakeBalls() {
         return goToTakeBalls;
+    }
+
+    @Override
+    public TrajectorySequence takeBalls() {
+        return takeBalls;
+    }
+
+    @Override
+    public TrajectorySequence moveToShoot() {
+        return moveToShoot;
     }
 
     public TrajectorySequence park() {

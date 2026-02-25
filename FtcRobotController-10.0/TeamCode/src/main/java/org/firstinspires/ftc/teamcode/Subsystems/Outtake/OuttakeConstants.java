@@ -20,14 +20,14 @@ public class OuttakeConstants {
 
     public static double stopTransferAfter = 1;
     public static double reverseFeederAfter = 0.1;
-    public static double stopFeederAfter = 0.3;
+    public static double deactivateAfter = 0.3;
     public static double stopFeederWait = 0;
 
     public static double resetWait = 100.0;
 
     public static double outtakeSpeedCloseClose = 0.58;
     public static double outtakeSpeedFar = 0.83;
-    public static double outtakeSpeedCloseFar = 0.7291;
+    public static double outtakeSpeedCloseFar = 0.67; //0.7291;
 
     // units in MM
     public static double redTargetX = 1830;

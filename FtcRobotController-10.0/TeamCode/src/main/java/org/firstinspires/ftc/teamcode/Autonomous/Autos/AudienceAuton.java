@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Autos;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Autonomous.Auton;
 import org.firstinspires.ftc.teamcode.Autonomous.AutonomousConstants;
 import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.AudienceTrajectories;
@@ -11,18 +8,14 @@ import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.RedAudienceTraject
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.BallDetectionPipeline;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
-import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 
 public class AudienceAuton implements Auton {
     private final SampleMecanumDrive drive;
@@ -102,14 +95,8 @@ public class AudienceAuton implements Auton {
             case goToTake:
                 goToTake();
                 break;
-            case searchForBall:
-                searchForBall();
-                break;
-            case centerOnBall:
-                centerOnBall();
-                break;
-            case driveToBall:
-                driveToBall();
+            case takeBalls:
+                takeBalls();
                 break;
             case moveToShoot:
                 moveToShoot();
@@ -146,8 +133,8 @@ public class AudienceAuton implements Auton {
 
     private void takeFirst() {
         if(drive.isBusy()) return;
-        drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
-        OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
+        drive.followTrajectorySequenceAsync(trajectories.moveToShootSecond());
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
         audienceAutonState = AudienceAutonState.moveToShootSecond;
     }
@@ -170,82 +157,16 @@ public class AudienceAuton implements Auton {
 
     private void goToTake() {
         if (drive.isBusy()) return;
-
+        drive.followTrajectorySequenceAsync(trajectories.takeBalls());
         IntakeStates.setMotorState(IntakeMotorStates.forward);
-        audienceAutonState = AudienceAutonState.searchForBall;
+        audienceAutonState = AudienceAutonState.takeBalls;
     }
 
-    private void searchForBall() {
-        double offsetPx = sensorControl.getBallOffsetPx();
+    private void takeBalls() {
+        if (drive.isBusy()) return;
 
-        if (!Double.isNaN(offsetPx)) {
-            audienceAutonState = AudienceAutonState.centerOnBall;
-            return;
-        }
-
-        Pose2d pose = drive.getPoseEstimate();
-
-        Pose2d target = new Pose2d(
-                pose.getX() - STRAFE_STEP,
-                y,
-                heading
-        );
-
-        drive.followTrajectorySequenceAsync(
-                drive.trajectorySequenceBuilder(pose, 50)
-                        .lineToLinearHeading(target)
-                        .build()
-        );
-    }
-
-    private void centerOnBall() {
-//        if (drive.isBusy()) return;
-
-        double offsetPx = sensorControl.getBallOffsetPx();
-
-//        if (Double.isNaN(offsetPx)) {
-//            audienceAutonState = AudienceAutonState.searchForBall;
-//            return;
-//        }
-
-        if (Math.abs(offsetPx) <= CENTERING_THRESHOLD_PX) {
-            audienceAutonState = AudienceAutonState.driveToBall;
-            return;
-        }
-
-        Pose2d pose = drive.getPoseEstimate();
-        double correctionInches = offsetPx * 0.02; // tuning factor
-
-        Pose2d target = new Pose2d(
-                pose.getX() - correctionInches,
-                y,
-                heading
-        );
-
-        drive.followTrajectorySequenceAsync(
-                drive.trajectorySequenceBuilder(pose, 50)
-                        .lineToLinearHeading(target)
-                        .build()
-        );
-    }
-
-    private void driveToBall() {
-//        if (drive.isBusy()) return;
-
-        Pose2d pose = drive.getPoseEstimate();
-
-        Pose2d target = new Pose2d(
-                pose.getX(),
-                TARGET_Y,
-                heading
-        );
-
-        drive.followTrajectorySequenceAsync(
-                drive.trajectorySequenceBuilder(pose, 20)
-                        .lineToLinearHeading(target)
-                        .build()
-        );
-
+        drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
         audienceAutonState = AudienceAutonState.moveToShoot;
     }
 
@@ -253,10 +174,8 @@ public class AudienceAuton implements Auton {
         if (drive.isBusy()) return;
 
         if (!wasIfCalled) {
-            IntakeStates.setMotorState(IntakeMotorStates.idle);
-            OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
             OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
-            drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
+            drive.followTrajectorySequenceAsync(trajectories.moveToShootSecond());
             wasIfCalled = true;
         }
 

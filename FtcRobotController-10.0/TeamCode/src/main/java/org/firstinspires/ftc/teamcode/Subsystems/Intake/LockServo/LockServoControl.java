@@ -24,13 +24,11 @@ public class LockServoControl {
     public void updateStates() {
         switch (IntakeStates.getLockServoState()) {
             case lock:
-                servoControl.setServoPos(ServoConstants.lockServo, IntakeConstants.lockServoLockPos);
-                break;
-            case unlock:
                 servoControl.setServoPos(ServoConstants.lockServo, IntakeConstants.lockServoMaxPos);
                 break;
-            case push:
+            case unlock:
                 servoControl.setServoPos(ServoConstants.lockServo, IntakeConstants.lockServoMinPos);
+                break;
             case idle:
                 break;
         }

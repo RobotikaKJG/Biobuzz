@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
@@ -128,15 +127,14 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.takeSecondBalls());
         IntakeStates.setMotorState(IntakeMotorStates.forward);
-        OuttakeStates.setFeederMotorState(FeederMotorStates.intake);
         goalAutonState = GoalAutonState.takeSecondBalls;
     }
 
     private void takeSecondBalls() {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.goToRelease());
-        OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
         goalAutonState = GoalAutonState.goToRelease;
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
         addWaitTime(3);
     }
 
@@ -170,7 +168,6 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.takeThirdBalls());
         IntakeStates.setMotorState(IntakeMotorStates.forward);
-        OuttakeStates.setFeederMotorState(FeederMotorStates.intake);
         goalAutonState = GoalAutonState.takeThirdBalls;
     }
 
@@ -178,7 +175,7 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootThird());
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
-        OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
         goalAutonState = GoalAutonState.moveToShootThird;
         addWaitTime(1);
     }
@@ -201,7 +198,6 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.takeFourthBalls());
         IntakeStates.setMotorState(IntakeMotorStates.forward);
-        OuttakeStates.setFeederMotorState(FeederMotorStates.intake);
         goalAutonState = GoalAutonState.takeFourthBalls;
     }
 
@@ -209,7 +205,7 @@ public class GoalAuton implements Auton {
         if(drive.isBusy()) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootFourth());
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
-        OuttakeStates.setFeederMotorState(FeederMotorStates.idle);
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
         goalAutonState = GoalAutonState.moveToShootFourth;
         addWaitTime(1);
     }

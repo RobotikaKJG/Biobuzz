@@ -8,8 +8,10 @@ public interface AudienceTrajectories {
     TrajectorySequence moveToShootFirst();
     TrajectorySequence goToTakeFirst();
     TrajectorySequence takeFirst();
-    TrajectorySequence moveToShoot();
+    TrajectorySequence moveToShootSecond();
     TrajectorySequence goToTakeBalls();
+    TrajectorySequence takeBalls();
+    TrajectorySequence moveToShoot();
 
     TrajectorySequence park();
 

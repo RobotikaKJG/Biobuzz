@@ -6,14 +6,15 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 
 public class ServoControl {
 
     private final HardwareMap hardwareMap;
     private Servo[] servos;
-    private CRServo[] crservos;
-    private AnalogInput[] analog;
+//    private CRServo[] crservos;
+//    private AnalogInput[] analog;
 
     public ServoControl(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
@@ -21,22 +22,20 @@ public class ServoControl {
     }
 
     private void getServos() {
-        crservos = new CRServo[]{
-                hardwareMap.get(CRServo.class, "turretServo")
-        };
+//        crservos = new CRServo[]{
+//                hardwareMap.get(CRServo.class, "turretServo")
+//        };
         servos = new Servo[]{
                 hardwareMap.get(Servo.class, "lockServo")
         };
-        analog = new AnalogInput[]{
-                hardwareMap.get(AnalogInput.class, "turretAnalog")
-
-        };
+//        analog = new AnalogInput[]{
+//                hardwareMap.get(AnalogInput.class, "turretAnalog")
+//
+//        };
     }
 
     public void setServoStartPos() {
-        for (int i = 0; i< crservos.length; i++) {
-            crservos[i].setDirection(DcMotorSimple.Direction.FORWARD);
-        }
+        servos[ServoConstants.lockServo].setPosition(IntakeConstants.lockServoMinPos);
 
     }
 
@@ -45,19 +44,19 @@ public class ServoControl {
             servos[index].setPosition(position);
     }
 
-    public void setServoSpeed(int index, double speed) {
-        crservos[index].setPower(speed);
-    }
+//    public void setServoSpeed(int index, double speed) {
+//        crservos[index].setPower(speed);
+//    }
 
     private boolean isInBounds(int index, double position) {
         return position >= ServoConstants.servoMinPos[index] && position <= ServoConstants.servoMaxPos[index];
     }
 
-    public double getCRSPos(int index) {
-        return analog[index].getVoltage() / analog[index].getMaxVoltage();
-    }
+//    public double getCRSPos(int index) {
+//        return analog[index].getVoltage() / analog[index].getMaxVoltage();
+//    }
 
-    public double getCRSDegrees(int index) {
-        return getCRSPos(index) * 360.0;
-    }
+//    public double getCRSDegrees(int index) {
+//        return getCRSPos(index) * 360.0;
+//    }
 }

@@ -1,11 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.FeederMotor.FeederMotorStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class AutoResetPosControl {

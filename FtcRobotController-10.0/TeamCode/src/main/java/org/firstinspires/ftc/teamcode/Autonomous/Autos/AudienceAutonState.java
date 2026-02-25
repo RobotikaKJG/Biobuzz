@@ -5,14 +5,11 @@ public enum AudienceAutonState {
     shootFirst,
     goToTakeFirst,
     takeFirst,
-
     moveToShootSecond,
     shootSecond,
 
     goToTake,
-    searchForBall,
-    centerOnBall,
-    driveToBall,
+    takeBalls,
     moveToShoot,
     shoot,
 

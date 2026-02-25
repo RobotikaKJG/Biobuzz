@@ -41,7 +41,9 @@ public class OuttakeMotorControl {
                 motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedFar);
                 break;
             case forwardClose:
-                calculateSpeed();
+//                calculateSpeed();
+                motorControl.setMotorSpeed(MotorConstants.outtake1, OuttakeConstants.outtakeSpeedCloseFar);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedCloseFar);
 
                 motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
                 motorControl.setMotorSpeed(MotorConstants.outtake2, speed);

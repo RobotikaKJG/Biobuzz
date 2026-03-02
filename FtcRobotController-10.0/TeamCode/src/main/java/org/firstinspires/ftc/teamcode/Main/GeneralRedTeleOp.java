@@ -4,6 +4,7 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
@@ -42,10 +43,11 @@ public class GeneralRedTeleOp extends LinearOpMode {
             telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
             telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
             telemetry.addData("TurretAngle", dependencies.turretMotorControl.getTurretAngleDeg());
-            telemetry.addData("Turret should state", dependencies.sensorControl.getTurretTargetAngleDegrees());
+            telemetry.addData("Turret should", dependencies.sensorControl.getTurretTargetAngleDegrees());
             telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());
-            telemetry.addData("Robot X", dependencies.sensorControl.pinpointImu.getPosX());
-            telemetry.addData("Robot Y", dependencies.sensorControl.pinpointImu.getPosY());
+            telemetry.addData("Turret encoder", dependencies.motorControl.getMotorPosition(MotorConstants.turret));
+            telemetry.addData("PosX", dependencies.sensorControl.getPinpointPos().getX(DistanceUnit.INCH));
+            telemetry.addData("PosY", dependencies.sensorControl.getPinpointPos().getY(DistanceUnit.INCH));
             
             calculateLoopTime();
             telemetry.update();

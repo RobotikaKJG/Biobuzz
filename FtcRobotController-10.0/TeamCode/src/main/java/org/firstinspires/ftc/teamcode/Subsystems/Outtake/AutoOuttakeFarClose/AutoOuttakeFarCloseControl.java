@@ -22,9 +22,7 @@ public class AutoOuttakeFarCloseControl {
     public void updateStates() {
         switch (OuttakeStates.getAutoOuttakeFarCloseState()) {
             case cycle:
-//                if (sensorControl.getTagDistance() < 2.3) {
-                calculateDistanceToTarget();
-                if (GlobalVariables.distanceToTarget < OuttakeConstants.farShootingThreshold) {
+                if (sensorControl.getTagDistance() < OuttakeConstants.maxDistance + 0.5) {
                         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
                         GlobalVariables.far = false;
                     }
@@ -36,20 +34,5 @@ public class AutoOuttakeFarCloseControl {
             case idle:
                 break;
         }
-    }
-
-    private void calculateDistanceToTarget() {
-        Pose2D currentPos = sensorControl.getPinpointPos();
-        double xDist = 0;
-        switch (GlobalVariables.alliance){
-            case Red:
-                xDist = OuttakeConstants.redTargetX - currentPos.getX(DistanceUnit.MM);
-                break;
-            case Blue:
-                xDist = OuttakeConstants.blueTargetX - currentPos.getX(DistanceUnit.MM);
-                break;
-        }
-        double yDist = OuttakeConstants.targetY - currentPos.getY(DistanceUnit.MM);
-        GlobalVariables.distanceToTarget =  Math.sqrt(Math.pow(xDist,2) + Math.pow(yDist,2));
     }
 }

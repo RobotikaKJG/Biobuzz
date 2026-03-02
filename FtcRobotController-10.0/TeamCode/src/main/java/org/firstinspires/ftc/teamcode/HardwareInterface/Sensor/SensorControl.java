@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.HardwareInterface.Sensor;
 import android.graphics.Color;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -20,7 +21,10 @@ import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -31,7 +35,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.BallDetectionPipe
 
 public class SensorControl {
 
-//    private final LimitSwitch[] limitSwitches;
+    private final LimitSwitch[] limitSwitches;
     private Limelight3A limelight;
     private final EdgeDetection edgeDetection;
     private final StandardTrackingWheelLocalizer localizer;
@@ -43,16 +47,27 @@ public class SensorControl {
     public int currentBlue;
     private double currentDistance;
     double y = 0;
-    private static final double redGoalX = 72.0;   // example
-    private static final double redGoalY = -72;  // example
-    private static final double blueGoalX = 72.0;  // example
-    private static final double blueGoalY = 72;  // example
+    private static final double redGoalX = 66.0;
+    private static final double redGoalY = 59.0;
+    private static final double blueGoalX = 66.0;
+    private static final double blueGoalY = -59.0;
 
     private double cameraHFOVDegrees = 78.0; // Logitech C720 approx HFOV
     private int cameraWidthPx = 640;
 
+    /** When set, called with the new pose (inches, radians) when position is reset from Limelight so drive/localizer can stay in sync. */
+    private Consumer<Pose2d> roadRunnerPoseUpdater = null;
+
+    /** Last drive pose from Road Runner (position + heading in one consistent frame). Used for turret calc. */
+    private Pose2d lastDrivePose = new Pose2d(0, 0, 0);
+
+    /** Average filter for Limelight position to remove ±2–3 inch jitter. Keeps last N readings. */
+    private static final int LIMELIGHT_AVERAGE_FILTER_SIZE = 5;
+    private final List<Double> limelightXReadingsM = new ArrayList<>();
+    private final List<Double> limelightYReadingsM = new ArrayList<>();
+
     public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection,  StandardTrackingWheelLocalizer localizer) {
-//        limitSwitches = getLimitSwitches(hardwareMap);
+        limitSwitches = getLimitSwitches(hardwareMap);
 
 //        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "ColorSensor");
 //        rangeSensor = hardwareMap.get(LynxI2cColorRangeSensor.class, "ColorSensor");
@@ -66,17 +81,15 @@ public class SensorControl {
         this.edgeDetection = edgeDetection;
     }
 
-//    private LimitSwitch[] getLimitSwitches(HardwareMap hardwareMap) {
-//        final LimitSwitch[] limitSwitches;
-//        limitSwitches = new LimitSwitch[]{
-//                hardwareMap.get(LimitSwitch.class, "slidesLimitSwitch"),
-//                hardwareMap.get(LimitSwitch.class, "pivotLimitSwitch")
-//        };
-//
-//        limitSwitches[0].setMode(LimitSwitch.SwitchConfig.NC);
-//        limitSwitches[1].setMode(LimitSwitch.SwitchConfig.NC);
-//        return limitSwitches;
-//    }
+    private LimitSwitch[] getLimitSwitches(HardwareMap hardwareMap) {
+        final LimitSwitch[] limitSwitches;
+        limitSwitches = new LimitSwitch[]{
+                hardwareMap.get(LimitSwitch.class, "turretRightLimitSwitch")
+        };
+
+        limitSwitches[0].setMode(LimitSwitch.SwitchConfig.NC);
+        return limitSwitches;
+    }
 
     private void setInitialLocalisationAngle() {
         if (!GlobalVariables.wasAutonomous)
@@ -98,20 +111,54 @@ public class SensorControl {
         limelight.pipelineSwitch(pipelineNr);
     }
 
+    public boolean isLimitSwitchPressed() {
+        return limitSwitches[0].getIsPressed();
+    }
+
     public LLResult limelightResult() {
         return limelight.getLatestResult();
     }
 
-    public boolean resetPinpointPoseWithLimelight() {
-        LLResult result = limelightResult();
-        if (result == null || !result.isValid()) return false;
-
+    /**
+     * Call every loop so the average filter has a sliding window of the last N Limelight positions.
+     * Reduces jitter when resetPinpointPoseWithLimelight() uses the filtered position.
+     */
+    public void updateLimelightFilter() {
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) return;
         Pose3D botpose = result.getBotpose();
-        if (botpose == null) return false;
+        if (botpose == null) return;
 
-        // Limelight pose is in meters → convert to millimeters
-        double xMM = -botpose.getPosition().x * 1000.0;
-        double yMM = -botpose.getPosition().y * 1000.0;
+        double xM = -botpose.getPosition().x;
+        double yM = -botpose.getPosition().y;
+        limelightXReadingsM.add(xM);
+        limelightYReadingsM.add(yM);
+        if (limelightXReadingsM.size() > LIMELIGHT_AVERAGE_FILTER_SIZE) {
+            limelightXReadingsM.remove(0);
+            limelightYReadingsM.remove(0);
+        }
+    }
+
+    /** Returns average of last N Limelight positions in meters [x, y], or null if no readings. */
+    private double[] getFilteredLimelightPositionMeters() {
+        if (limelightXReadingsM.isEmpty()) return null;
+        double sumX = 0, sumY = 0;
+        int n = limelightXReadingsM.size();
+        for (int i = 0; i < n; i++) {
+            sumX += limelightXReadingsM.get(i);
+            sumY += limelightYReadingsM.get(i);
+        }
+        return new double[]{sumX / n, sumY / n};
+    }
+
+    public boolean resetPinpointPoseWithLimelight() {
+        updateLimelightFilter();
+        double[] filtered = getFilteredLimelightPositionMeters();
+        if (filtered == null) return false;
+
+        // Use average-filtered position (meters → mm)
+        double xMM = filtered[0] * 1000.0;
+        double yMM = filtered[1] * -1000.0;
 
         // Keep current heading (Pinpoint uses radians)
         double currentHeadingRad = pinpointImu.getHeading();
@@ -120,19 +167,27 @@ public class SensorControl {
         pinpointImu.setPosition(new Pose2D(DistanceUnit.MM, xMM, yMM,
                 AngleUnit.RADIANS, currentHeadingRad));
 
+        // Update Road Runner drive: convert telemetry (X=left, Y=up) back to RR (X=forward, Y=left)
+        if (roadRunnerPoseUpdater != null) {
+            double leftInches = xMM / 25.4;
+            double forwardInches = yMM / 25.4;
+            roadRunnerPoseUpdater.accept(new Pose2d(forwardInches, leftInches, currentHeadingRad));
+        }
+
         return true;
     }
 
+    /** Call from teleop (e.g. Dependencies) so Limelight position reset also updates the drive pose. */
+    public void setRoadRunnerPoseUpdater(Consumer<Pose2d> updater) {
+        this.roadRunnerPoseUpdater = updater;
+    }
+
     public double getTurretTargetAngleDegrees() {
-        double robotXmm = pinpointImu.getPosX();
-        double robotYmm = pinpointImu.getPosY();
+        // Pinpoint position is in telemetry convention: X=left, Y=forward/up
+        double robotX = pinpointImu.getPosX() / 25.4;
+        double robotY = pinpointImu.getPosY() / 25.4;
         double robotHeadingRad = pinpointImu.getHeading();
 
-        // Convert robot position to inches to match goal constants
-        double robotX = robotXmm / 25.4;
-        double robotY = robotYmm / 25.4;
-
-        // Select target corner based on alliance
         double targetX;
         double targetY;
 
@@ -144,28 +199,15 @@ public class SensorControl {
             targetY = blueGoalY;
         }
 
-        // Vector from robot to target
         double dx = targetX - robotX;
         double dy = targetY - robotY;
 
-        // Absolute angle to target (field frame)
-        double angleToTargetRad = Math.atan2(dy, dx);
+        // atan2(dx, dy) measures angle from +Y axis (forward), matching heading convention
+        double angleToTargetRad = Math.atan2(dx, dy);
 
-        // Turret angle relative to robot heading
         double turretAngleRad = angleToTargetRad - robotHeadingRad;
-        double turretAngleDeg = 0;
 
-        // Convert to degrees and normalize
-        switch (GlobalVariables.alliance) {
-            case Red:
-                turretAngleDeg = Math.toDegrees(turretAngleRad) + 90;
-                break;
-            case Blue:
-                turretAngleDeg = Math.toDegrees(turretAngleRad) - 90;
-                break;
-        }
-
-        return normalizeDegrees(turretAngleDeg);
+        return normalizeDegrees(Math.toDegrees(turretAngleRad));
     }
 
     private double normalizeDegrees(double angle) {
@@ -242,10 +284,15 @@ public class SensorControl {
         return fraction * imageWidthPx;
     }
 
+    /** Robot forward = non-intake side. Same convention as localizer for teleop + autonomous. */
+    private double getRobotHeadingRad() {
+        return Angle.norm(pinpointImu.getHeading() + Math.PI);
+    }
+
     public double getPinpointAngle() {
         resetPinpointAngle();
         pinpointImu.update();
-        return pinpointImu.getHeading();
+        return getRobotHeadingRad();
     }
 
     public void resetPinpointAngle() {
@@ -255,5 +302,17 @@ public class SensorControl {
 
     public Pose2D getPinpointPos() {
         return pinpointImu.getPosition();
+    }
+
+    /**
+     * Updates Pinpoint X and Y from Road Runner pose; heading is not written so the device gyro integrates normally
+     * and matches the robot's rotation (avoids heading lag). Gyro reset (options) still works since we never overwrite heading.
+     */
+    public void setPositionFromRoadRunner(Pose2d poseInches) {
+        lastDrivePose = poseInches;
+        // Map Road Runner (X=forward, Y=left) to telemetry convention (X=left, Y=forward/up)
+        double xMM = poseInches.getY() * 25.4;
+        double yMM = poseInches.getX() * 25.4;
+        pinpointImu.setPositionXY(xMM, yMM);
     }
 }

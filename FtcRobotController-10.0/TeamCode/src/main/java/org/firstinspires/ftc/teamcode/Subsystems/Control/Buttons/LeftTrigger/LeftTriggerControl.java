@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftTrigger;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
@@ -26,13 +27,22 @@ public class LeftTriggerControl {
                 OuttakeStates.setAutoOuttakeFarCloseState(AutoOuttakeFarCloseStates.cycle);
                 break;
             case forwardFar:
-                OuttakeStates.setMotorState(OuttakeMotorStates.idle);
-                OuttakeStates.setAutoOuttakeFarCloseState(AutoOuttakeFarCloseStates.idle);
+                stopShooter();
                 break;
             case forwardClose:
-                OuttakeStates.setMotorState(OuttakeMotorStates.idle);
-                OuttakeStates.setAutoOuttakeFarCloseState(AutoOuttakeFarCloseStates.idle);
+                stopShooter();
                 break;
         }
+    }
+
+    private void stopShooter() {
+        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
+        OuttakeStates.setAutoOuttakeFarCloseState(AutoOuttakeFarCloseStates.idle);
+        if (!needToTurnOff()) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
+    }
+
+    private boolean needToTurnOff() {
+        return OuttakeStates.getAutoCycleShootState() == AutoCycleShootStates.activate || OuttakeStates.getAutoCycleShootState() == AutoCycleShootStates.turnTransfer;
     }
 }

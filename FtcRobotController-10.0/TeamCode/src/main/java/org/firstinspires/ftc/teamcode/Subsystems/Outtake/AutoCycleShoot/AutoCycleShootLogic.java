@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
+import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
@@ -24,7 +25,7 @@ public class AutoCycleShootLogic {
             case turnTransfer:
                 turnTransfer();
                 break;
-            case stopTransfer:
+            case stop:
                 stopTransfer();
                 break;
             case turnFeederBack:
@@ -53,7 +54,9 @@ public class AutoCycleShootLogic {
 
     private void stopTransfer() {
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnFeederBack);
-        addWaitTime(OuttakeConstants.deactivateAfter);
+        if (!GlobalVariables.isAutonomous) {
+            addWaitTime(OuttakeConstants.deactivateAfter);
+        }
     }
 
     private void turnFeederBack() {

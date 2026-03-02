@@ -24,19 +24,7 @@ public class AudienceAuton implements Auton {
     private SensorControl sensorControl;
     private AudienceAutonState audienceAutonState = AudienceAutonState.moveToShootFirst;
     private double currentWait = 0;
-    private BallDetectionPipeline pipeline;
-    private OpenCvCamera webcam;
     private boolean wasIfCalled = false;
-
-    private static final double CENTERING_THRESHOLD_PX = 10;
-    private static final double STRAFE_KP = 0.002;
-    private static final double SEARCH_STRAFE_POWER = 0.2;
-    private static final double FORWARD_POWER = 0.4;
-    private static final double TARGET_Y = -60;
-    private static final double STRAFE_STEP = 3; // inches
-    private static final double FORWARD_STEP = 5; // inches
-    private double y = 0;
-    private double heading = 0;
 
     public AudienceAuton(SampleMecanumDrive drive, SensorControl sensorControl) {
         this.drive = drive;
@@ -59,13 +47,9 @@ public class AudienceAuton implements Auton {
         switch (GlobalVariables.alliance) {
             case Red:
                 trajectories = new RedAudienceTrajectories(drive);
-                y = -40;
-                heading = 270;
                 break;
             case Blue:
                 trajectories = new BlueAudienceTrajectories(drive);
-                y = 40;
-                heading = 90;
                 break;
         }
     }
@@ -119,7 +103,7 @@ public class AudienceAuton implements Auton {
 
     private void shootFirst() {
         if(getSeconds() < currentWait) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
         drive.followTrajectorySequenceAsync(trajectories.goToTakeFirst());
         audienceAutonState = AudienceAutonState.goToTakeFirst;
     }
@@ -150,7 +134,7 @@ public class AudienceAuton implements Auton {
 
     private void shootSecond() {
         if(getSeconds() < currentWait) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
         drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
         audienceAutonState = AudienceAutonState.goToTake;
     }
@@ -190,7 +174,7 @@ public class AudienceAuton implements Auton {
     private void shoot() {
         if (getSeconds() < currentWait) return;
 
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
         drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
         audienceAutonState = AudienceAutonState.goToTake;
     }

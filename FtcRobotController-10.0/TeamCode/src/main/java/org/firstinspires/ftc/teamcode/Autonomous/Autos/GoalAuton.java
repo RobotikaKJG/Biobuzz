@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
@@ -33,7 +34,7 @@ public class GoalAuton implements Auton {
         drive.followTrajectorySequenceAsync(trajectories.moveToShootFirst());
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
         goalAutonState = GoalAutonState.moveToShootFirst;
-        addWaitTime(1);
+        addWaitTime(3);
     }
 
     @Override
@@ -56,46 +57,49 @@ public class GoalAuton implements Auton {
                 moveToShootFirst();
                 break;
             case shootBallsFirst:
-                shootFirstFirst();
+                shootBallsFirst();
                 break;
             case goToTakeSecondBalls:
                 goToTakeSecondBalls();
-                break;
-            case takeSecondBalls:
-                takeSecondBalls();
-                break;
-            case goToRelease:
-                goToRelease();
                 break;
             case moveToShootSecond:
                 moveToShootSecond();
                 break;
             case shootBallsSecond:
-                shootSecondFirst();
+                shootBallsSecond();
                 break;
             case goToTakeThirdBalls:
                 goToTakeThirdBalls();
                 break;
-            case takeThirdBalls:
-                takeThirdBalls();
+            case goToReleaseSecond:
+                goToReleaseSecond();
                 break;
             case moveToShootThird:
                 moveToShootThird();
                 break;
             case shootBallsThird:
-                shootThirdFirst();
+                shootBallsThird();
                 break;
             case goToTakeFourthBalls:
                 goToTakeFourthBalls();
                 break;
-            case takeFourthBalls:
-                takeFourthBalls();
+            case goToReleaseThird:
+                goToReleaseThird();
                 break;
             case moveToShootFourth:
                 moveToShootFourth();
                 break;
             case shootBallsFourth:
-                shootFourthFirst();
+                shootBallsFourth();
+                break;
+            case goToTakeFifthBalls:
+                goToTakeFifthBalls();
+                break;
+            case moveToShootFifth:
+                moveToShootFifth();
+                break;
+            case shootBallsFifth:
+                shootBallsFifth();
                 break;
             case stop:
                 stop();
@@ -109,42 +113,26 @@ public class GoalAuton implements Auton {
 
     private void moveToShootFirst() {
         if(drive.isBusy() || getSeconds() < currentWait) return;
-        //activate shooting+
+        //activate shooting
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shootBallsFirst;
         addWaitTime(AutonomousConstants.shootTime);
     }
 
-    private void shootFirstFirst() {
+    private void shootBallsFirst() {
         if(getSeconds() < currentWait) return;
-        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
+        IntakeStates.setLockServoState(LockServoStates.lock);
+        IntakeStates.setMotorState(IntakeMotorStates.forward);
         drive.followTrajectorySequenceAsync(trajectories.goToTakeSecondBalls());
         goalAutonState = GoalAutonState.goToTakeSecondBalls;
     }
 
     private void goToTakeSecondBalls() {
         if(drive.isBusy()) return;
-        drive.followTrajectorySequenceAsync(trajectories.takeSecondBalls());
-        IntakeStates.setMotorState(IntakeMotorStates.forward);
-        goalAutonState = GoalAutonState.takeSecondBalls;
-    }
-
-    private void takeSecondBalls() {
-        if(drive.isBusy()) return;
-        drive.followTrajectorySequenceAsync(trajectories.goToRelease());
-        goalAutonState = GoalAutonState.goToRelease;
-        IntakeStates.setMotorState(IntakeMotorStates.idle);
-        addWaitTime(3);
-    }
-
-    private void goToRelease() {
-        if(drive.isBusy() || getSeconds() < currentWait) return;
         drive.followTrajectorySequenceAsync(trajectories.moveToShootSecond());
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
         goalAutonState = GoalAutonState.moveToShootSecond;
-        addWaitTime(1);
-
+        addWaitTime(1.5);
     }
 
     private void moveToShootSecond() {
@@ -156,25 +144,24 @@ public class GoalAuton implements Auton {
 
     }
 
-    private void shootSecondFirst() {
+    private void shootBallsSecond() {
         if(getSeconds() < currentWait) return;
-        drive.followTrajectorySequenceAsync(trajectories.goToTakeThirdBalls());
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stopTransfer);
-        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
+        drive.followTrajectorySequenceAsync(trajectories.goToReleaseBalls());
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
+        goalAutonState = GoalAutonState.goToReleaseSecond;
+    }
+
+    private void goToReleaseSecond() {
+        if (drive.isBusy()) return;
+        drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
+        IntakeStates.setMotorState(IntakeMotorStates.forward);
         goalAutonState = GoalAutonState.goToTakeThirdBalls;
+        addWaitTime(3);
     }
 
     private void goToTakeThirdBalls() {
-        if(drive.isBusy()) return;
-        drive.followTrajectorySequenceAsync(trajectories.takeThirdBalls());
-        IntakeStates.setMotorState(IntakeMotorStates.forward);
-        goalAutonState = GoalAutonState.takeThirdBalls;
-    }
-
-    private void takeThirdBalls() {
-        if(drive.isBusy()) return;
-        drive.followTrajectorySequenceAsync(trajectories.moveToShootThird());
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
+        if(drive.isBusy() || getSeconds() < currentWait) return;
+        drive.followTrajectorySequenceAsync(trajectories.moveToShootBalls());
         IntakeStates.setMotorState(IntakeMotorStates.idle);
         goalAutonState = GoalAutonState.moveToShootThird;
         addWaitTime(1);
@@ -187,24 +174,24 @@ public class GoalAuton implements Auton {
         addWaitTime(AutonomousConstants.shootTime);
     }
 
-    private void shootThirdFirst() {
+    private void shootBallsThird() {
         if(getSeconds() < currentWait) return;
-        drive.followTrajectorySequenceAsync(trajectories.goToTakeFourthBalls());
-        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
+        drive.followTrajectorySequenceAsync(trajectories.goToReleaseBalls());
+        goalAutonState = GoalAutonState.goToReleaseThird;
+    }
+
+    private void goToReleaseThird() {
+        if(drive.isBusy()) return;
+        drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
+        IntakeStates.setMotorState(IntakeMotorStates.forward);
         goalAutonState = GoalAutonState.goToTakeFourthBalls;
+        addWaitTime(3);
     }
 
     private void goToTakeFourthBalls() {
-        if(drive.isBusy()) return;
-        drive.followTrajectorySequenceAsync(trajectories.takeFourthBalls());
-        IntakeStates.setMotorState(IntakeMotorStates.forward);
-        goalAutonState = GoalAutonState.takeFourthBalls;
-    }
-
-    private void takeFourthBalls() {
-        if(drive.isBusy()) return;
-        drive.followTrajectorySequenceAsync(trajectories.moveToShootFourth());
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
+        if(drive.isBusy() || getSeconds() < currentWait) return;
+        drive.followTrajectorySequenceAsync(trajectories.moveToShootBalls());
         IntakeStates.setMotorState(IntakeMotorStates.idle);
         goalAutonState = GoalAutonState.moveToShootFourth;
         addWaitTime(1);
@@ -217,11 +204,37 @@ public class GoalAuton implements Auton {
         addWaitTime(AutonomousConstants.shootTime);
     }
 
-    private void shootFourthFirst() {
+    private void shootBallsFourth() {
         if(getSeconds() < currentWait) return;
+        IntakeStates.setLockServoState(LockServoStates.lock);
+        IntakeStates.setMotorState(IntakeMotorStates.forward);
+        drive.followTrajectorySequenceAsync(trajectories.goToTakeFifthBalls());
+        goalAutonState = GoalAutonState.goToTakeFifthBalls;
+        addWaitTime(1);
+    }
+
+    private void goToTakeFifthBalls() {
+        if(drive.isBusy() || getSeconds() < currentWait) return;
+        IntakeStates.setMotorState(IntakeMotorStates.idle);
+        drive.followTrajectorySequenceAsync(trajectories.moveToShootFifth());
+        goalAutonState = GoalAutonState.moveToShootFifth;
+        addWaitTime(1);
+    }
+
+    private void moveToShootFifth() {
+        if (drive.isBusy() || getSeconds() < currentWait) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+        goalAutonState = GoalAutonState.shootBallsFifth;
+        addWaitTime(AutonomousConstants.shootTime);
+    }
+
+    private void shootBallsFifth() {
+        if(getSeconds() < currentWait) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
         OuttakeStates.setMotorState(OuttakeMotorStates.idle);
         drive.followTrajectorySequenceAsync(trajectories.park());
         goalAutonState = GoalAutonState.stop;
+
     }
 
     private void stop() {

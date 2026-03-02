@@ -392,6 +392,15 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     }
 
     /**
+     * Updates only X and Y position on the device; heading is left unchanged so the gyro can integrate normally.
+     * Use this when syncing position from another source (e.g. Road Runner) without overwriting heading every loop.
+     */
+    public void setPositionXY(double xMM, double yMM) {
+        writeByteArray(Register.X_POSITION, floatToByteArray((float) xMM, ByteOrder.LITTLE_ENDIAN));
+        writeByteArray(Register.Y_POSITION, floatToByteArray((float) yMM, ByteOrder.LITTLE_ENDIAN));
+    }
+
+    /**
      * Checks the deviceID of the Odometry Computer. Should return 1.
      * @return 1 if device is functional.
      */

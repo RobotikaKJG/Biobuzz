@@ -205,10 +205,17 @@ public class SampleMecanumDrive extends MecanumDrive {
     }
 
     public void update() {
-        imu.update();
         updatePoseEstimate();
         DriveSignal signal = trajectorySequenceRunner.update(getPoseEstimate(), getPoseVelocity());
         if (signal != null) setDriveSignal(signal);
+    }
+
+    /**
+     * Updates only the pose estimate (IMU + localizer), without applying any drive signal.
+     * Use this during teleop so position uses the same TwoWheelTrackingLocalizer as autonomous.
+     */
+    public void updatePoseOnly() {
+        updatePoseEstimate();
     }
 
     public void waitForIdle() {
@@ -261,6 +268,23 @@ public class SampleMecanumDrive extends MecanumDrive {
         }
 
         setDrivePower(vel);
+    }
+
+    /** Robot is flipped 180° (intake in back). Negate X and Y so trajectory "forward" and "strafe" move correctly. */
+    @Override
+    public void setDriveSignal(@NonNull DriveSignal driveSignal) {
+        Pose2d vel = driveSignal.getVel();
+        Pose2d accel = driveSignal.getAccel();
+        super.setDriveSignal(new DriveSignal(
+                new Pose2d(-vel.getX(), -vel.getY(), vel.getHeading()),
+                new Pose2d(-accel.getX(), -accel.getY(), accel.getHeading())
+        ));
+    }
+
+    /** Manual driving: only negate Y (strafe), since gamepad stick-Y is already inverted for X. */
+    @Override
+    public void setDrivePower(Pose2d power) {
+        super.setDrivePower(new Pose2d(power.getX(), -power.getY(), power.getHeading()));
     }
 
     @NonNull

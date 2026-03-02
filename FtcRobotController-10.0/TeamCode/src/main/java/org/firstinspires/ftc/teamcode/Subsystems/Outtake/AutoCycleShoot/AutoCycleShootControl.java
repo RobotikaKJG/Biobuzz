@@ -23,7 +23,7 @@ public class AutoCycleShootControl {
             case turnTransfer:
                 IntakeStates.setMotorState(IntakeMotorStates.forward);
                 break;
-            case stopTransfer:
+            case stop:
                 break;
             case turnFeederBack:
                 IntakeStates.setMotorState(IntakeMotorStates.backward);

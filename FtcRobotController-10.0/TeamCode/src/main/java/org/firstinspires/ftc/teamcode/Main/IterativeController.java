@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
+import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
@@ -28,6 +29,7 @@ public class IterativeController {
     private final EdgeDetection gamepad2EdgeDetection;
     private final DrivebaseController drivebaseController;
     private final StandardTrackingWheelLocalizer localizer;
+    private final SampleMecanumDrive drive;
     private final ButtonControl buttonControl;
     private final ButtonControl subsystemControl2;
     private final OuttakeControl outtakeControl;
@@ -46,6 +48,7 @@ public class IterativeController {
         currentGamepad1.copy(this.gamepad1);
         prevGamepad1.copy(currentGamepad1);
         localizer = dependencies.localizer;
+        drive = dependencies.drive;
         buttonControl = dependencies.createSubsystemControl();
         subsystemControl2 = dependencies.createSubsystemControl2();
         outtakeControl = dependencies.createOuttakeControl();
@@ -55,6 +58,8 @@ public class IterativeController {
 
         sensorControl.initPinpoint();
         sensorControl.initLimelight(0);
+        // Sync Pinpoint to Road Runner pose so turret angle uses same localization as autonomous
+        sensorControl.setPositionFromRoadRunner(drive.getPoseEstimate());
 
         IntakeStates.setInitialStates();
         OuttakeStates.setInitialStates();
@@ -101,6 +106,11 @@ public class IterativeController {
 
         motorControl.setMotors(MotorConstants.all);
         localizer.update();
+        // Use same TwoWheelTrackingLocalizer as autonomous so turret angle has tuned position
+        drive.updatePoseOnly();
+        sensorControl.setPositionFromRoadRunner(drive.getPoseEstimate());
+        // Keep Limelight median filter updated so square-reset uses smoothed position
+        sensorControl.updateLimelightFilter();
     }
 
     private boolean gamepad1Active(){

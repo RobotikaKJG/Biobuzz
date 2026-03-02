@@ -13,6 +13,5 @@ public class GlobalVariables {
     public static boolean subCycles;
     public static boolean hang = false;
     public static double lastTurretAngle = 0;
-    public static double distanceToTarget = 0;
     public static double outtakeTargetSpeed = 0;
 }

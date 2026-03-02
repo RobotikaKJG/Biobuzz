@@ -5,20 +5,22 @@ public enum GoalAutonState {
     shootBallsFirst,
 
     goToTakeSecondBalls,
-    takeSecondBalls,
-    goToRelease,
     moveToShootSecond,
     shootBallsSecond,
 
+    goToReleaseSecond,
     goToTakeThirdBalls,
-    takeThirdBalls,
     moveToShootThird,
     shootBallsThird,
 
+    goToReleaseThird,
     goToTakeFourthBalls,
-    takeFourthBalls,
     moveToShootFourth,
     shootBallsFourth,
+
+    goToTakeFifthBalls,
+    moveToShootFifth,
+    shootBallsFifth,
 
     stop,
     idle

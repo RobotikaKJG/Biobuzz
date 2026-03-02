@@ -4,19 +4,23 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
+import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 
 public class TurretMotorControl {
 
     private final MotorControl motorControl;
     private final SensorControl sensorControl;
 
-    private static final double turretLimit = 40.0;
+    private static final double turretLimit = 90.0;
+    private boolean rightLimitWasPressed = false;
+    private static final double limitSwitchRightAngle = -90.0;
     private static final double kP = 0.01;
-    private static final double maxSpeed = 0.3;
-    private static final double minSpeed = 0.1;
-    private static final double tolerance = 0.5;    // degrees
-    private static final double gearRatio = 287.0 / 30.0;
-    private static final double ticksPerDegree = (145.6 * gearRatio) / 360;
+    private static final double maxSpeed = 0.9;
+    private static final double minSpeed = 0.07;
+    private static final double tolerance = 0.2;    // degrees
+    private static final double gearRatio = 120.0 / 74.0;
+    private static final double ticksPerDegree = (1425.5 * gearRatio) / 360;
+    private double desiredAngle = 0;
 
     private double turretAngleDeg = 0.0;
     private double targetAngleDeg = 0.0;
@@ -29,13 +33,30 @@ public class TurretMotorControl {
     }
 
     public void update() {
-        double desiredAngle = sensorControl.getTurretTargetAngleDegrees();
+        if (GlobalVariables.isAutonomous) {
+            desiredAngle = -45.0;
+        }
+        else {
+            desiredAngle = sensorControl.getTurretTargetAngleDegrees();
+        }
 
         targetAngleDeg = clamp(desiredAngle, -turretLimit, turretLimit);
 
         turretAngleDeg = getCurrentTurretAngleDeg();
+        boolean rightLimitPressed = sensorControl.isLimitSwitchPressed();
 
-        double error = angleErrorDeg(targetAngleDeg, turretAngleDeg);
+        if (rightLimitPressed && !rightLimitWasPressed) {
+            motorControl.resetMotorEncoders(MotorConstants.turret);
+            rightLimitWasPressed = true;
+        }
+
+        if (rightLimitWasPressed && !rightLimitPressed) {
+            rightLimitWasPressed = false;
+        }
+
+        turretAngleDeg = getCurrentTurretAngleDeg() + limitSwitchRightAngle;
+
+        double error = targetAngleDeg - turretAngleDeg;
 
         if (Math.abs(error) < tolerance) {
             motorControl.setMotorSpeed(MotorConstants.turret, 0);
@@ -56,6 +77,14 @@ public class TurretMotorControl {
             power = 0;
         }
 
+        if (turretAngleDeg <= -90 && !rightLimitPressed) {
+            power = -0.2;
+        }
+
+        if (rightLimitPressed && power < 0) {
+            power = 0;
+        }
+
         motorControl.setMotorSpeed(MotorConstants.turret, power);
         motorControl.setMotors(MotorConstants.turret);
     }
@@ -63,13 +92,6 @@ public class TurretMotorControl {
     private double getCurrentTurretAngleDeg() {
         int ticks = motorControl.getMotorPosition(MotorConstants.turret);
         return ticks / ticksPerDegree;
-    }
-
-    private double angleErrorDeg(double target, double current) {
-        double error = target - current;
-        while (error > 180) error -= 360;
-        while (error < -180) error += 360;
-        return error;
     }
 
     private double clamp(double val, double min, double max) {

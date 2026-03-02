@@ -18,7 +18,7 @@ public class LimitSwitchTest extends LinearOpMode {
         // Get the color sensor from hardwareMap
 
         SensorControl sensorControl = new SensorControl(hardwareMap,edgeDetection, new StandardTrackingWheelLocalizer(hardwareMap));
-        LimitSwitch limitSwitch = hardwareMap.get(LimitSwitch.class, "pivotLimitSwitch");
+        LimitSwitch limitSwitch = hardwareMap.get(LimitSwitch.class, "turretRightLimitSwitch");
 
         // Wait for the Play button to be pressed
         waitForStart();

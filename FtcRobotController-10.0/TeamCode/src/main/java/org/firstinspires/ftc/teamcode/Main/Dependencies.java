@@ -8,7 +8,10 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
+import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
+
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
@@ -28,6 +31,7 @@ public class Dependencies {
     public final Gamepad gamepad2;
     public final Telemetry telemetry;
     public final StandardTrackingWheelLocalizer localizer;
+    public final SampleMecanumDrive drive;
     public MotorControl motorControl;
     public SensorControl sensorControl;
     public ServoControl servoControl;
@@ -42,8 +46,15 @@ public class Dependencies {
         this.gamepad2 = gamepad2;
         this.telemetry = telemetry;
         localizer = new StandardTrackingWheelLocalizer(hardwareMap);
+        drive = new SampleMecanumDrive(hardwareMap);
+        if (GlobalVariables.wasAutonomous) {
+            drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(-45)));
+        } else {
+            drive.setPoseEstimate(new Pose2d(0, 0, 0));
+        }
         motorControl = new MotorControl(hardwareMap);
         sensorControl = new SensorControl(hardwareMap, edgeDetection, localizer);
+        sensorControl.setRoadRunnerPoseUpdater(pose -> drive.setPoseEstimate(pose));
         servoControl = new ServoControl(hardwareMap);
         turretMotorControl = new TurretMotorControl(motorControl, sensorControl);
     }

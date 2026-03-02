@@ -41,10 +41,7 @@ public class OuttakeMotorControl {
                 motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedFar);
                 break;
             case forwardClose:
-//                calculateSpeed();
-                motorControl.setMotorSpeed(MotorConstants.outtake1, OuttakeConstants.outtakeSpeedCloseFar);
-                motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedCloseFar);
-
+                calculateSpeed();
                 motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
                 motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
                 break;
@@ -62,8 +59,7 @@ public class OuttakeMotorControl {
     }
 
     private void calculateSpeed() {
-//        double distance = sensorControl.getTagDistance();
-        double distance = GlobalVariables.distanceToTarget/1000;
+        double distance = sensorControl.getTagDistance();
 
         // If no valid tag detected, default to closeClose speed
         if (distance < 0) {

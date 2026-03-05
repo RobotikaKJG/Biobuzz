@@ -291,8 +291,11 @@ public class SensorControl {
 
     public double getPinpointAngle() {
         resetPinpointAngle();
-        pinpointImu.update();
         return getRobotHeadingRad();
+    }
+
+    public void updatePinpoint() {
+        pinpointImu.update();
     }
 
     public void resetPinpointAngle() {

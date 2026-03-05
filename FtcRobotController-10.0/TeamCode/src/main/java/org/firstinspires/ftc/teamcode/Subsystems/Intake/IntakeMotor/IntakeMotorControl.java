@@ -4,6 +4,7 @@ import com.qualcomm.hardware.dfrobot.HuskyLens;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
+import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
@@ -30,8 +31,10 @@ public class IntakeMotorControl {
         switch (IntakeStates.getMotorState()) {
             case forward:
                 motorControl.setMotorSpeed(MotorConstants.intake, 1.0);
-                IntakeStates.setLockServoState(LockServoStates.lock);
-                OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
+                if (!GlobalVariables.isAutonomous) {
+                    IntakeStates.setLockServoState(LockServoStates.lock);
+                    OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
+                }
                 break;
             case backward:
                 motorControl.setMotorSpeed(MotorConstants.intake, -1.0);

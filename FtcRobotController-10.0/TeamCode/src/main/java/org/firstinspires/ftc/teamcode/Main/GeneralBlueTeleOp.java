@@ -41,7 +41,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
 
 //            dependencies.sensorControl.updateDistance();
 
-            telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
+            telemetry.addData("yaw", dependencies.sensorControl.getPinpointPos());
 //            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
 //            telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
 //            telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());

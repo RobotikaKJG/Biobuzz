@@ -63,6 +63,7 @@ public class Drivebase {
     }
 
     private void driverOrientedGamepadDrive(double y, double x, double rotation, double maxSpeed) {
+        sensorControl.updatePinpoint();
         double botHeading = sensorControl.getPinpointAngle();
         double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
         double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);

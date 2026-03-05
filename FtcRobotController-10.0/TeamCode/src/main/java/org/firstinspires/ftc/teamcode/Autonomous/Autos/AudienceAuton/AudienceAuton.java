@@ -1,11 +1,10 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Autos;
+package org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Auton;
 import org.firstinspires.ftc.teamcode.Autonomous.AutonomousConstants;
-import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.AudienceTrajectories;
-import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.BlueAudienceTrajectories;
-import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.RedAudienceTrajectories;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.BallDetectionPipeline;
+import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.AudienceTrajectories.AudienceTrajectories;
+import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.AudienceTrajectories.BlueAudienceTrajectories;
+import org.firstinspires.ftc.teamcode.Autonomous.Trajectories.AudienceTrajectories.RedAudienceTrajectories;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
@@ -15,7 +14,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
-import org.openftc.easyopencv.OpenCvCamera;
 
 public class AudienceAuton implements Auton {
     private final SampleMecanumDrive drive;

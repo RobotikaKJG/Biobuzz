@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Trajectories;
+package org.firstinspires.ftc.teamcode.Autonomous.Trajectories.GoalTrajectories;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -14,7 +14,6 @@ public class BlueGoalTrajectories implements GoalTrajectories {
     TrajectorySequence goToReleaseFirst;
     TrajectorySequence moveToShootSecond;
     TrajectorySequence goToReleaseBalls;
-    TrajectorySequence goToTakeBalls;
     TrajectorySequence moveToShootBalls;
 
     TrajectorySequence goToTakeFifthBalls;
@@ -39,8 +38,9 @@ public class BlueGoalTrajectories implements GoalTrajectories {
 
         goToTakeSecondBalls = drive.trajectorySequenceBuilder(shootPose, 100)
                 .setReversed(true)
-                .lineTo(new Vector2d(-5, -15))
-                .splineTo(new Vector2d(12, -55), Math.toRadians(-90))
+                .lineTo(new Vector2d(-7, -20))
+                .splineTo(new Vector2d(12, -25), Math.toRadians(90))
+                .splineTo(new Vector2d(12, -60), Math.toRadians(90))
                 .build();
 
         goToReleaseFirst = drive.trajectorySequenceBuilder(goToTakeSecondBalls.end(), 100)
@@ -55,11 +55,6 @@ public class BlueGoalTrajectories implements GoalTrajectories {
         goToReleaseBalls = drive.trajectorySequenceBuilder(shootPose, 100)
                 .setReversed(true)
                 .splineTo(new Vector2d(6, -55), Math.toRadians(-90))
-                .build();
-
-        goToTakeBalls = drive.trajectorySequenceBuilder(goToReleaseBalls.end(), 100)
-                .setReversed(false)
-                .splineToLinearHeading(new Pose2d(20, -60, Math.toRadians(45)), Math.toRadians(180))
                 .build();
 
         moveToShootBalls =  drive.trajectorySequenceBuilder(goToReleaseBalls.end(), 100)
@@ -101,9 +96,6 @@ public class BlueGoalTrajectories implements GoalTrajectories {
         return goToReleaseBalls;
     }
 
-    public TrajectorySequence goToTakeBalls() {
-        return goToTakeBalls;
-    }
 
     public TrajectorySequence moveToShootBalls() {
         return moveToShootBalls;

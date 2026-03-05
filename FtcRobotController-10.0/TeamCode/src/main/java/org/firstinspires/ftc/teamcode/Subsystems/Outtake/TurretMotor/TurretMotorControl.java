@@ -14,7 +14,7 @@ public class TurretMotorControl {
     private static final double turretLimit = 90.0;
     private boolean rightLimitWasPressed = false;
     private static final double limitSwitchRightAngle = -90.0;
-    private static final double kP = 0.01;
+    private static final double kP = 0.02;
     private static final double maxSpeed = 0.9;
     private static final double minSpeed = 0.07;
     private static final double tolerance = 0.2;    // degrees
@@ -33,60 +33,62 @@ public class TurretMotorControl {
     }
 
     public void update() {
-        if (GlobalVariables.isAutonomous) {
-            desiredAngle = -45.0;
-        }
-        else {
-            desiredAngle = sensorControl.getTurretTargetAngleDegrees();
-        }
+//        if (GlobalVariables.isAutonomous) {
+//            desiredAngle = -45.0;
+//        }
+//        else {
+//            desiredAngle = sensorControl.getTurretTargetAngleDegrees();
+//        }
 
-        targetAngleDeg = clamp(desiredAngle, -turretLimit, turretLimit);
-
-        turretAngleDeg = getCurrentTurretAngleDeg();
-        boolean rightLimitPressed = sensorControl.isLimitSwitchPressed();
-
-        if (rightLimitPressed && !rightLimitWasPressed) {
-            motorControl.resetMotorEncoders(MotorConstants.turret);
-            rightLimitWasPressed = true;
-        }
-
-        if (rightLimitWasPressed && !rightLimitPressed) {
-            rightLimitWasPressed = false;
-        }
-
-        turretAngleDeg = getCurrentTurretAngleDeg() + limitSwitchRightAngle;
-
-        double error = targetAngleDeg - turretAngleDeg;
-
-        if (Math.abs(error) < tolerance) {
-            motorControl.setMotorSpeed(MotorConstants.turret, 0);
-            motorControl.setMotors(MotorConstants.turret);
-            return;
-        }
-
-        double power = error * kP;
-
-        if (Math.abs(power) < minSpeed) {
-            power = Math.signum(power) * minSpeed;
-        }
-
-        power = clamp(power, -maxSpeed, maxSpeed);
-
-        if ((turretAngleDeg >= turretLimit && power > 0) ||
-                (turretAngleDeg <= -turretLimit && power < 0)) {
-            power = 0;
-        }
-
-        if (turretAngleDeg <= -90 && !rightLimitPressed) {
-            power = -0.2;
-        }
-
-        if (rightLimitPressed && power < 0) {
-            power = 0;
-        }
-
-        motorControl.setMotorSpeed(MotorConstants.turret, power);
-        motorControl.setMotors(MotorConstants.turret);
+//        desiredAngle = sensorControl.getTurretTargetAngleDegrees();
+//
+//        targetAngleDeg = clamp(desiredAngle, -turretLimit, turretLimit);
+//
+//        turretAngleDeg = getCurrentTurretAngleDeg();
+//        boolean rightLimitPressed = sensorControl.isLimitSwitchPressed();
+//
+//        if (rightLimitPressed && !rightLimitWasPressed) {
+//            motorControl.resetMotorEncoders(MotorConstants.turret);
+//            rightLimitWasPressed = true;
+//        }
+//
+//        if (rightLimitWasPressed && !rightLimitPressed) {
+//            rightLimitWasPressed = false;
+//        }
+//
+//        turretAngleDeg = getCurrentTurretAngleDeg() + limitSwitchRightAngle;
+//
+//        double error = targetAngleDeg - turretAngleDeg;
+//
+//        if (Math.abs(error) < tolerance) {
+//            motorControl.setMotorSpeed(MotorConstants.turret, 0);
+//            motorControl.setMotors(MotorConstants.turret);
+//            return;
+//        }
+//
+//        double power = error * kP;
+//
+//        if (Math.abs(power) < minSpeed) {
+//            power = Math.signum(power) * minSpeed;
+//        }
+//
+//        power = clamp(power, -maxSpeed, maxSpeed);
+//
+//        if ((turretAngleDeg >= turretLimit && power > 0) ||
+//                (turretAngleDeg <= -turretLimit && power < 0)) {
+//            power = 0;
+//        }
+//
+//        if (turretAngleDeg <= -90 && !rightLimitPressed) {
+//            power = -0.2;
+//        }
+//
+//        if (rightLimitPressed && power < 0) {
+//            power = 0;
+//        }
+//
+//        motorControl.setMotorSpeed(MotorConstants.turret, power);
+//        motorControl.setMotors(MotorConstants.turret);
     }
 
     private double getCurrentTurretAngleDeg() {

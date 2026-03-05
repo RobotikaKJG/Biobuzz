@@ -18,6 +18,7 @@ public class SelectStartVariables {
     private boolean risingSquareEdge;
     private boolean risingDpadUpEdge;
     private boolean risingDpadLeftEdge;
+    private boolean risingDpadRightEdge;
 
     public SelectStartVariables(Gamepad gamepad1, Telemetry telemetry) {
         this.gamepad1 = gamepad1;
@@ -29,15 +30,17 @@ public class SelectStartVariables {
     }
 
     private void selectAuton() {
-        while (!risingDpadUpEdge && !risingDpadLeftEdge) {
+        while (!risingDpadUpEdge && !risingDpadLeftEdge && !risingDpadRightEdge) {
             calculateGamepadValues();
 
-            telemetry.addLine("Press dpad up for audience side, dpad left for goal side");
+            telemetry.addLine("Press dpad up for audience side, dpad left for goal side, dpad right for goal side solo");
             telemetry.update();
             if (risingDpadUpEdge)
                 GlobalVariables.autonomousMode = AutonomousMode.audienceSide;
             if (risingDpadLeftEdge)
                 GlobalVariables.autonomousMode = AutonomousMode.goalSide;
+            if (risingDpadRightEdge)
+                GlobalVariables.autonomousMode = AutonomousMode.goalSideSolo;
 
         }
     }
@@ -66,5 +69,6 @@ public class SelectStartVariables {
         risingSquareEdge = edgeDetection.rising(GamepadIndexValues.square);
         risingDpadUpEdge = edgeDetection.rising(GamepadIndexValues.dpadUp);
         risingDpadLeftEdge = edgeDetection.rising(GamepadIndexValues.dpadLeft);
+        risingDpadRightEdge = edgeDetection.rising(GamepadIndexValues.dpadRight);
     }
 }

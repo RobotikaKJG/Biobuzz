@@ -36,6 +36,10 @@ public class OuttakeMotorControl {
 
     public void updateStates() {
         switch (OuttakeStates.getMotorState()) {
+            case autonomous:
+                motorControl.setMotorSpeed(MotorConstants.outtake1, 0.62);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, 0.62);
+                break;
             case forwardFar:
                 motorControl.setMotorSpeed(MotorConstants.outtake1, OuttakeConstants.outtakeSpeedFar);
                 motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedFar);

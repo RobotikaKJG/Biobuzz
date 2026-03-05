@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.HardwareInterface.Sensor;
 
 import android.graphics.Color;
+import android.provider.Settings;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.Angle;
@@ -120,57 +121,42 @@ public class SensorControl {
     }
 
     /**
-     * Call every loop so the average filter has a sliding window of the last N Limelight positions.
-     * Reduces jitter when resetPinpointPoseWithLimelight() uses the filtered position.
+     * Called repeatedly by AutoResetPosControl when square is pressed.
+     * Collects one Limelight reading per call. Returns false until N readings
+     * are gathered, then averages them, resets position, and returns true.
      */
-    public void updateLimelightFilter() {
+    public boolean resetPinpointPoseWithLimelight() {
         LLResult result = limelight.getLatestResult();
-        if (result == null || !result.isValid()) return;
-        Pose3D botpose = result.getBotpose();
-        if (botpose == null) return;
-
-        double xM = -botpose.getPosition().x;
-        double yM = -botpose.getPosition().y;
-        limelightXReadingsM.add(xM);
-        limelightYReadingsM.add(yM);
-        if (limelightXReadingsM.size() > LIMELIGHT_AVERAGE_FILTER_SIZE) {
-            limelightXReadingsM.remove(0);
-            limelightYReadingsM.remove(0);
+        if (result != null && result.isValid()) {
+            Pose3D botpose = result.getBotpose();
+            if (botpose != null) {
+                limelightXReadingsM.add(-botpose.getPosition().x);
+                limelightYReadingsM.add(-botpose.getPosition().y);
+            }
         }
-    }
 
-    /** Returns average of last N Limelight positions in meters [x, y], or null if no readings. */
-    private double[] getFilteredLimelightPositionMeters() {
-        if (limelightXReadingsM.isEmpty()) return null;
+        if (limelightXReadingsM.size() < LIMELIGHT_AVERAGE_FILTER_SIZE) return false;
+
         double sumX = 0, sumY = 0;
         int n = limelightXReadingsM.size();
         for (int i = 0; i < n; i++) {
             sumX += limelightXReadingsM.get(i);
             sumY += limelightYReadingsM.get(i);
         }
-        return new double[]{sumX / n, sumY / n};
-    }
+        double avgXmm = (sumX / n) * 1000.0;
+        double avgYmm = (sumY / n) * -1000.0;
 
-    public boolean resetPinpointPoseWithLimelight() {
-        updateLimelightFilter();
-        double[] filtered = getFilteredLimelightPositionMeters();
-        if (filtered == null) return false;
+        limelightXReadingsM.clear();
+        limelightYReadingsM.clear();
 
-        // Use average-filtered position (meters → mm)
-        double xMM = filtered[0] * 1000.0;
-        double yMM = filtered[1] * -1000.0;
-
-        // Keep current heading (Pinpoint uses radians)
         double currentHeadingRad = pinpointImu.getHeading();
 
-        // Set pinpoint pose (X, Y updated, heading unchanged)
-        pinpointImu.setPosition(new Pose2D(DistanceUnit.MM, xMM, yMM,
+        pinpointImu.setPosition(new Pose2D(DistanceUnit.MM, avgXmm, avgYmm,
                 AngleUnit.RADIANS, currentHeadingRad));
 
-        // Update Road Runner drive: convert telemetry (X=left, Y=up) back to RR (X=forward, Y=left)
         if (roadRunnerPoseUpdater != null) {
-            double leftInches = xMM / 25.4;
-            double forwardInches = yMM / 25.4;
+            double leftInches = avgXmm / 25.4;
+            double forwardInches = avgYmm / 25.4;
             roadRunnerPoseUpdater.accept(new Pose2d(forwardInches, leftInches, currentHeadingRad));
         }
 
@@ -183,6 +169,7 @@ public class SensorControl {
     }
 
     public double getTurretTargetAngleDegrees() {
+        double angleToTargetRad = 0;
         // Pinpoint position is in telemetry convention: X=left, Y=forward/up
         double robotX = pinpointImu.getPosX() / 25.4;
         double robotY = pinpointImu.getPosY() / 25.4;
@@ -203,7 +190,20 @@ public class SensorControl {
         double dy = targetY - robotY;
 
         // atan2(dx, dy) measures angle from +Y axis (forward), matching heading convention
-        double angleToTargetRad = Math.atan2(dx, dy);
+        if (!GlobalVariables.isAutonomous) {
+            angleToTargetRad = Math.atan2(dx, dy);
+        }
+        else {
+            switch(GlobalVariables.alliance) {
+                case Red:
+                    angleToTargetRad = Math.toRadians(45.0);
+                    break;
+                case Blue:
+                    angleToTargetRad = Math.toRadians(135.0);
+                    break;
+            }
+
+        }
 
         double turretAngleRad = angleToTargetRad - robotHeadingRad;
 

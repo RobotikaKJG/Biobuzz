@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Autos;
+package org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton;
 
 public enum AudienceAutonState {
     moveToShootFirst,

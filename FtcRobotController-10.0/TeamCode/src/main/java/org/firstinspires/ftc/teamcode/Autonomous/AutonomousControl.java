@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton;
-import org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAuton;
+import org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton.AudienceAuton;
+import org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAuton.GoalAuton;
+import org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAutonSolo.GoalAutonSolo;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
@@ -21,15 +22,17 @@ public class AutonomousControl {
 
     private final MotorControl motorControl;
     private final GoalAuton goalAuton;
+    private final GoalAutonSolo goalAutonSolo;
     private final AudienceAuton audienceAuton;
     private final IntakeControl intakeControl;
     private final OuttakeControl outtakeControl;
     private final SensorControl sensorControl;
 
 
-    public AutonomousControl(MotorControl motorControl, GoalAuton goalAuton, AudienceAuton audienceAuton, IntakeControl intakeControl, OuttakeControl outtakeControl, SensorControl sensorControl) {
+    public AutonomousControl(MotorControl motorControl, GoalAuton goalAuton, GoalAutonSolo goalAutonSolo, AudienceAuton audienceAuton, IntakeControl intakeControl, OuttakeControl outtakeControl, SensorControl sensorControl) {
         this.motorControl = motorControl;
         this.goalAuton = goalAuton;
+        this.goalAutonSolo = goalAutonSolo;
         this.audienceAuton = audienceAuton;
         this.intakeControl = intakeControl;
         this.outtakeControl = outtakeControl;
@@ -48,6 +51,10 @@ public class AutonomousControl {
                 break;
             case goalSide:
                 goalAuton.start();
+                break;
+            case goalSideSolo:
+                goalAutonSolo.start();
+                break;
         }
     }
 
@@ -58,6 +65,9 @@ public class AutonomousControl {
                 break;
             case goalSide:
                 goalAuton.run();
+                break;
+            case goalSideSolo:
+                goalAutonSolo.run();
                 break;
         }
         updateSubsystems();

@@ -25,8 +25,8 @@ public class OuttakeConstants {
 
     public static double resetWait = 100.0;
 
-    public static double outtakeSpeedCloseClose = 0.59;
-    public static double outtakeSpeedFar = 0.83;
+    public static double outtakeSpeedCloseClose = 0.62;
+    public static double outtakeSpeedFar = 0.9;
     public static double outtakeSpeedCloseFar = 0.73;
 
     // units in MM

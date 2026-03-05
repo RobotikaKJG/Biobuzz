@@ -109,8 +109,6 @@ public class IterativeController {
         // Use same TwoWheelTrackingLocalizer as autonomous so turret angle has tuned position
         drive.updatePoseOnly();
         sensorControl.setPositionFromRoadRunner(drive.getPoseEstimate());
-        // Keep Limelight median filter updated so square-reset uses smoothed position
-        sensorControl.updateLimelightFilter();
     }
 
     private boolean gamepad1Active(){

@@ -40,14 +40,14 @@ public class GeneralRedTeleOp extends LinearOpMode {
             if (gamepad1.triangle) break;
 
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
-            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
-            telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
-            telemetry.addData("TurretAngle", dependencies.turretMotorControl.getTurretAngleDeg());
-            telemetry.addData("Turret should", dependencies.sensorControl.getTurretTargetAngleDegrees());
-            telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());
-            telemetry.addData("Turret encoder", dependencies.motorControl.getMotorPosition(MotorConstants.turret));
-            telemetry.addData("PosX", dependencies.sensorControl.getPinpointPos().getX(DistanceUnit.INCH));
-            telemetry.addData("PosY", dependencies.sensorControl.getPinpointPos().getY(DistanceUnit.INCH));
+//            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+//            telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
+//            telemetry.addData("TurretAngle", dependencies.turretMotorControl.getTurretAngleDeg());
+//            telemetry.addData("Turret should", dependencies.sensorControl.getTurretTargetAngleDegrees());
+//            telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());
+//            telemetry.addData("Turret encoder", dependencies.motorControl.getMotorPosition(MotorConstants.turret));
+//            telemetry.addData("PosX", dependencies.sensorControl.getPinpointPos().getX(DistanceUnit.INCH));
+//            telemetry.addData("PosY", dependencies.sensorControl.getPinpointPos().getY(DistanceUnit.INCH));
             
             calculateLoopTime();
             telemetry.update();

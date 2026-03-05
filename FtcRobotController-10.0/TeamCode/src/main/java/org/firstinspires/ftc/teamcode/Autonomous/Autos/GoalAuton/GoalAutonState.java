@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Autos;
+package org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAuton;
 
 public enum GoalAutonState {
     moveToShootFirst,
@@ -9,7 +9,6 @@ public enum GoalAutonState {
     shootBallsSecond,
 
     goToReleaseSecond,
-    goToTakeThirdBalls,
     moveToShootThird,
     shootBallsThird,
 

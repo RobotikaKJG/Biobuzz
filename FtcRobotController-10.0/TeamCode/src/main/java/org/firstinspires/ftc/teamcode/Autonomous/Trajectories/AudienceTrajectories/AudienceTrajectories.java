@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Trajectories;
+package org.firstinspires.ftc.teamcode.Autonomous.Trajectories.AudienceTrajectories;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 

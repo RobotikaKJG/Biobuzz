@@ -42,13 +42,11 @@ public class GeneralBlueTeleOp extends LinearOpMode {
 //            dependencies.sensorControl.updateDistance();
 
             telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
-            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
-            telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
-            telemetry.addData("TurretAngle", dependencies.turretMotorControl.getTurretAngleDeg());
-            telemetry.addData("Turret should state", dependencies.sensorControl.getTurretTargetAngleDegrees());
-            telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());
-            telemetry.addData("Robot X", dependencies.sensorControl.pinpointImu.getPosX());
-            telemetry.addData("Robot Y", dependencies.sensorControl.pinpointImu.getPosY());
+//            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+//            telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
+//            telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());
+//            telemetry.addData("Robot X", dependencies.sensorControl.pinpointImu.getPosX());
+//            telemetry.addData("Robot Y", dependencies.sensorControl.pinpointImu.getPosY());
             
             if (gamepad1.triangle) break;
             calculateLoopTime();

@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Circle;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretMotor.TurretMotorStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoStates;
 
 public class CircleLogic {
     private final CircleControl circleControl = new CircleControl();
@@ -18,7 +18,7 @@ public class CircleLogic {
     }
 
     private boolean turretAdjust() {
-        if(OuttakeStates.getTurretServoState() != TurretMotorStates.idle) return false;
+        if(OuttakeStates.getTurretServoState() != TurretServoStates.idle) return false;
         ButtonStates.setCircleState(CircleStates.turretAdjust);
         completeAction();
         return true;

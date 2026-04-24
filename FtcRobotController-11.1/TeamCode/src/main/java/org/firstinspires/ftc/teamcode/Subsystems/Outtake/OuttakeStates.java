@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetPosStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretMotor.TurretMotorStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
@@ -11,7 +11,7 @@ public class OuttakeStates {
     private static SubsystemState outtakeState = SubsystemState.Idle;
     private static OuttakeMotorStates outtakeMotorState = OuttakeMotorStates.idle;
     private static AutoCycleShootStates autoCycleShootStates = AutoCycleShootStates.idle;
-    private static TurretMotorStates turretServoState = TurretMotorStates.idle;
+    private static TurretServoStates turretServoState = TurretServoStates.idle;
     private static AutoOuttakeFarCloseStates autoOuttakeFarCloseState = AutoOuttakeFarCloseStates.idle;
     private static AutoResetPosStates autoResetPosState = AutoResetPosStates.idle;
     private static boolean turretTrackingEnabled = true;
@@ -20,7 +20,7 @@ public class OuttakeStates {
         outtakeState = SubsystemState.Idle;
         outtakeMotorState = OuttakeMotorStates.idle;
         autoCycleShootStates = AutoCycleShootStates.idle;
-        turretServoState = TurretMotorStates.idle;
+        turretServoState = TurretServoStates.idle;
         autoOuttakeFarCloseState = AutoOuttakeFarCloseStates.idle;
         autoResetPosState = AutoResetPosStates.idle;
         turretTrackingEnabled = true;
@@ -46,11 +46,11 @@ public class OuttakeStates {
 
     public static void setAutoCycleShootState(AutoCycleShootStates state) {autoCycleShootStates = state;}
 
-    public static TurretMotorStates getTurretServoState() {
+    public static TurretServoStates getTurretServoState() {
         return turretServoState;
     }
 
-    public static void setTurretServoState(TurretMotorStates state) {
+    public static void setTurretServoState(TurretServoStates state) {
         turretServoState = state;
     }
 

@@ -5,18 +5,18 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycl
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetPosControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretMotor.TurretMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class OuttakeControl {
     private final OuttakeMotorControl outtakeMotorControl;
     private final AutoCycleShootControl autoCycleShootControl;
     private final AutoCycleShootLogic autoCycleShootLogic;
-    private final TurretMotorControl turretServoControl;
+    private final TurretServoControl turretServoControl;
     private final AutoOuttakeFarCloseControl autoOuttakeFarCloseControl;
     private final AutoResetPosControl autoResetPosControl;
 
-    public OuttakeControl(OuttakeMotorControl outtakeMotorControl, AutoCycleShootLogic autoCycleShootLogic, TurretMotorControl turretServoControl, AutoOuttakeFarCloseControl autoOuttakeFarCloseControl, AutoResetPosControl autoResetPosControl, MotorControl motorControl) {
+    public OuttakeControl(OuttakeMotorControl outtakeMotorControl, AutoCycleShootLogic autoCycleShootLogic, TurretServoControl turretServoControl, AutoOuttakeFarCloseControl autoOuttakeFarCloseControl, AutoResetPosControl autoResetPosControl, MotorControl motorControl) {
         this.outtakeMotorControl = outtakeMotorControl;
         this.autoCycleShootLogic = autoCycleShootLogic;
         this.turretServoControl = turretServoControl;

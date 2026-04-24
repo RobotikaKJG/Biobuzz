@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretMotor.TurretMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 
 public class IterativeController {
     private final MotorControl motorControl;
@@ -37,7 +37,7 @@ public class IterativeController {
     private final OuttakeControl outtakeControl;
     private final IntakeControl intakeControl;
     private final SensorControl sensorControl;
-    private final TurretMotorControl turretServoControl;
+    private final TurretServoControl turretServoControl;
     private final RevBlinkinLedDriver led;
 
     public IterativeController(Dependencies dependencies) {

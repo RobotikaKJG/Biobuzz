@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Main.Dependencies;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 
 @TeleOp
-public class ManualServoControl extends LinearOpMode {
+public class TrippleServoControl extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -21,7 +21,7 @@ public class ManualServoControl extends LinearOpMode {
         Gamepad prevGamepad1 = new Gamepad();
         prevGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
-        int currentServo = 1;
+        int currentServo = 0;
         waitForStart();
 
         if (isStopRequested()) return;
@@ -36,11 +36,15 @@ public class ManualServoControl extends LinearOpMode {
             telemetry.addLine("Press square to cycle through servos");
             if(dependencies.edgeDetection.rising(GamepadIndexValues.leftBumper))
             {
-                dependencies.servoControl.setServoPos(currentServo, ServoConstants.servoMinPos[currentServo]);
+                dependencies.servoControl.setServoPos(1, ServoConstants.servoMinPos[1]);
+                dependencies.servoControl.setServoPos(2, ServoConstants.servoMinPos[2]);
+                dependencies.servoControl.setServoPos(3, ServoConstants.servoMinPos[3]);
             }
             if(dependencies.edgeDetection.rising(GamepadIndexValues.rightBumper))
             {
-                dependencies.servoControl.setServoPos(currentServo, ServoConstants.servoMaxPos[currentServo]);
+                dependencies.servoControl.setServoPos(1, ServoConstants.servoMaxPos[1]);
+                dependencies.servoControl.setServoPos(2, ServoConstants.servoMaxPos[2]);
+                dependencies.servoControl.setServoPos(3, ServoConstants.servoMaxPos[3]);
             }
             if(dependencies.edgeDetection.rising(GamepadIndexValues.square))
             {
@@ -52,16 +56,10 @@ public class ManualServoControl extends LinearOpMode {
             telemetry.addLine("Currently selected servo:");
             switch (currentServo) {
                 case 0:
-                    telemetry.addLine("lock servo");
+                    telemetry.addLine("outtake 1");
                     break;
                 case 1:
-                    telemetry.addLine("turret 1");
-                    break;
-                case 2:
-                    telemetry.addLine("turret 2");
-                    break;
-                case 3:
-                    telemetry.addLine("turret 3");
+                    telemetry.addLine("outtake 2");
                     break;
             }
             telemetry.update();

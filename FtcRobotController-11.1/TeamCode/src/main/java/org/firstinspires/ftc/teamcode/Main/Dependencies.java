@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.Aut
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetPosControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretMotor.TurretMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 
 public class Dependencies {
     public final HardwareMap hardwareMap;
@@ -35,7 +35,7 @@ public class Dependencies {
     public MotorControl motorControl;
     public SensorControl sensorControl;
     public ServoControl servoControl;
-    public TurretMotorControl turretMotorControl;
+    public TurretServoControl turretMotorControl;
     public EdgeDetection edgeDetection = new EdgeDetection();
     public EdgeDetection gamepad2EdgeDetection = new EdgeDetection();
 
@@ -56,7 +56,7 @@ public class Dependencies {
         sensorControl = new SensorControl(hardwareMap, edgeDetection, localizer);
         sensorControl.setRoadRunnerPoseUpdater(pose -> drive.setPoseEstimate(pose));
         servoControl = new ServoControl(hardwareMap);
-        turretMotorControl = new TurretMotorControl(motorControl, sensorControl);
+        turretMotorControl = new TurretServoControl(servoControl, sensorControl);
     }
 
     public Drivebase createDrivebase() {
@@ -91,7 +91,7 @@ public class Dependencies {
         return new IntakeMotorControl(motorControl);
     }
 
-    private TurretMotorControl createTurretMotorControl() {
+    private TurretServoControl createTurretMotorControl() {
         return turretMotorControl;
     }
 

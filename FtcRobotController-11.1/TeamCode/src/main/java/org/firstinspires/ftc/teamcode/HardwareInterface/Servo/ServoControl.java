@@ -47,6 +47,16 @@ public class ServoControl {
             servos[index].setPosition(position);
     }
 
+    public double getServoPos(int index) {
+        return servos[index].getPosition();
+    }
+
+    public void setTurretServosPos(double position) {
+        servos[ServoConstants.turretServo1].setPosition(position * OuttakeConstants.turretServo1Max);
+        servos[ServoConstants.turretServo2].setPosition(position * OuttakeConstants.turretServo2Max);
+        servos[ServoConstants.turretServo3].setPosition(position * OuttakeConstants.turretServo3Max);
+    }
+
 //    public void setServoSpeed(int index, double speed) {
 //        crservos[index].setPower(speed);
 //    }

@@ -18,7 +18,7 @@ public class MotorControl {
         public static final String backRight = "backRightMotor";
         public static final String outtake1 = "outtake1Motor";
         public static final String intake = "intakeMotor";
-        public static final String turret = "turretMotor";
+        public static final String transfer = "transferMotor";
         public static final String outtake2 = "outtake2Motor";
     }
 
@@ -45,7 +45,7 @@ public class MotorControl {
                 hardwareMap.get(DcMotorEx.class, MotorNames.backRight),
                 hardwareMap.get(DcMotorEx.class, MotorNames.outtake1),
                 hardwareMap.get(DcMotorEx.class, MotorNames.intake),
-                hardwareMap.get(DcMotorEx.class, MotorNames.turret),
+                hardwareMap.get(DcMotorEx.class, MotorNames.transfer),
                 hardwareMap.get(DcMotorEx.class, MotorNames.outtake2),
         };
 
@@ -55,18 +55,15 @@ public class MotorControl {
     private void setMotorProperties() {
         motors[MotorConstants.frontLeft].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[MotorConstants.backLeft].setDirection(DcMotorSimple.Direction.REVERSE);
-        motors[MotorConstants.turret].setDirection(DcMotorSimple.Direction.FORWARD);
         motors[MotorConstants.outtake1].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[MotorConstants.outtake2].setDirection(DcMotorSimple.Direction.FORWARD);
         setZeroPowerBehavior(MotorConstants.all, DcMotor.ZeroPowerBehavior.BRAKE);
-        setZeroPowerBehavior(MotorConstants.turret, DcMotor.ZeroPowerBehavior.BRAKE);
         setZeroPowerBehavior(MotorConstants.outtake2, DcMotor.ZeroPowerBehavior.FLOAT);
         setZeroPowerBehavior(MotorConstants.outtake1, DcMotor.ZeroPowerBehavior.FLOAT);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         setMotorMode(MotorConstants.outtake1, DcMotor.RunMode.RUN_USING_ENCODER);
         setMotorMode(MotorConstants.outtake2, DcMotor.RunMode.RUN_USING_ENCODER);
-        setMotorMode(MotorConstants.turret, DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void setZeroPowerBehavior(int index, DcMotor.ZeroPowerBehavior zeroPowerBehavior) {

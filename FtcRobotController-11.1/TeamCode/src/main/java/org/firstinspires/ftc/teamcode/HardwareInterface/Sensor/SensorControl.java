@@ -7,6 +7,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Main.Alliance;
@@ -22,30 +23,34 @@ import java.util.function.Consumer;
 
 public class SensorControl {
 
-    private final LimitSwitch turretLimitSwitch;
     private final Limelight3A limelight;
     private final EdgeDetection edgeDetection;
     private final StandardTrackingWheelLocalizer localizer;
 
-    public final LynxI2cColorRangeSensor rangeSensor;
-    private double currentDistanceInches;
+    public final LynxI2cColorRangeSensor rangeSensorMid;
+    public final LynxI2cColorRangeSensor rangeSensorFront;
+    private double currentDistanceInchesMid;
+    private double currentDistanceInchesFront;
+
+    private double ballDistanceIn = 5.12;
 
     // Goal coordinates in INCHES (Standardized)
-    public static final double RED_GOAL_X_IN = 66.0;
-    public static final double RED_GOAL_Y_IN = 62.0;
-    public static final double BLUE_GOAL_X_IN = -66.0;
-    public static final double BLUE_GOAL_Y_IN = 62.0;
+    public static final double RedXInches = 66.0;
+    public static final double RedYInches = 62.0;
+    public static final double BlueXInches = 66.0;
+    public static final double BlueYInches = -62.0;
 
     // Field geometry: half-size offset in inches (~1.7m)
-    private static final double FIELD_HALF_SIZE_IN = 66.93;
+    private static final double FieldHalfInches = 66.93;
 
     /** When set, allows external classes to react to a position jump (e.g., updating a drive train class) */
     private Consumer<Pose2d> roadRunnerPoseUpdater = null;
 
     /** Average filter for Limelight position jitter */
-    private static final int LIMELIGHT_COLLECT_SIZE = 7;
+    private static final int LimelightFrames = 7;
     private final List<Double> limelightXReadingsIn = new ArrayList<>();
     private final List<Double> limelightYReadingsIn = new ArrayList<>();
+    private final List<Double> limelightYawReadingsRad = new ArrayList<>();
 
     private static final long LIMELIGHT_RESET_TIMEOUT_MS = 3000;
     private long resetStartTimeMs = -1;
@@ -60,12 +65,9 @@ public class SensorControl {
         this.localizer = localizer;
         this.edgeDetection = edgeDetection;
 
-        // Limit Switch Initialization
-        turretLimitSwitch = hardwareMap.get(LimitSwitch.class, "turretRightLimitSwitch");
-        turretLimitSwitch.setMode(LimitSwitch.SwitchConfig.NC);
-
-        // Distance Sensor (using the Color/Range combo)
-        rangeSensor = hardwareMap.get(LynxI2cColorRangeSensor.class, "ColorSensor");
+        // Distance Sensor (Color Sensor)
+        rangeSensorMid = hardwareMap.get(LynxI2cColorRangeSensor.class, "MidColorSensor");
+        rangeSensorFront = hardwareMap.get(LynxI2cColorRangeSensor.class, "FrontColorSensor");
 
         // Limelight Initialization
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -82,7 +84,10 @@ public class SensorControl {
         }
     }
 
-    // --- LOCALIZER WRAPPERS ---
+
+    //
+    //  Localizer
+    //
 
     public void updateLocalizer() {
         localizer.update();
@@ -90,6 +95,16 @@ public class SensorControl {
 
     public void initLocalizerPose() {
         localizer.setPoseEstimate(new Pose2d(0, 0, 0));
+    }
+
+    public void setPositionFromRoadRunner(Pose2d poseInches) {
+        // We directly update the localizer's estimate so all internal
+        // calculations (turret, distance, etc.) use this new coordinate.
+        localizer.setPoseEstimate(poseInches);
+    }
+
+    public void setRoadRunnerPoseUpdater(Consumer<Pose2d> updater) {
+        this.roadRunnerPoseUpdater = updater;
     }
 
     public double getLocalizerAngle() {
@@ -105,8 +120,8 @@ public class SensorControl {
         double robotX = currentPose.getY();
         double robotY = currentPose.getX();
 
-        double targetX = (GlobalVariables.alliance == Alliance.Red) ? RED_GOAL_X_IN : BLUE_GOAL_X_IN;
-        double targetY = (GlobalVariables.alliance == Alliance.Red) ? RED_GOAL_Y_IN : BLUE_GOAL_Y_IN;
+        double targetX = (GlobalVariables.alliance == Alliance.Red) ? RedXInches : BlueXInches;
+        double targetY = (GlobalVariables.alliance == Alliance.Red) ? RedYInches : BlueYInches;
 
         double dx = targetX - robotX;
         double dy = targetY - robotY;
@@ -121,25 +136,44 @@ public class SensorControl {
         }
     }
 
-    // --- HARDWARE STATE ---
-
-    public boolean isLimitPressed() {
-        return turretLimitSwitch.getIsPressed();
-    }
-
     public Pose2d getLocalizerPose() {
         return localizer.getPoseEstimate();
     }
 
+
+    //
+    //  Color / Range Sensor
+    //
+
     public void updateDistance() {
-        currentDistanceInches = rangeSensor.getDistance(DistanceUnit.INCH);
+        currentDistanceInchesMid = rangeSensorMid.getDistance(DistanceUnit.INCH);
+        currentDistanceInchesFront = rangeSensorFront.getDistance(DistanceUnit.INCH);
     }
 
-    public double getDistance() {
-        return currentDistanceInches;
+    public double getDistanceMid() {
+        return currentDistanceInchesMid;
     }
 
-    // --- LIMELIGHT & TARGETING ---
+    public double getDistanceFront() {
+        return currentDistanceInchesFront;
+    }
+
+    public boolean isMidBall() {
+        return rangeSensorMid.getDistance(DistanceUnit.INCH) < ballDistanceIn;
+    }
+
+    public boolean isFrontBall() {
+        return rangeSensorFront.getDistance(DistanceUnit.INCH) < ballDistanceIn;
+    }
+
+    public boolean isNoBallSeen() {
+        return !isMidBall() && !isFrontBall();
+    }
+
+
+    //
+    //  Limelight
+    //
 
     public void initLimelight(int pipelineNr) {
         limelight.start();
@@ -169,30 +203,30 @@ public class SensorControl {
                 // Converting Limelight meters to inches
                 double xIn = botpose.getPosition().x * 39.37;
                 double yIn = botpose.getPosition().y * 39.37;
+                double headingRad = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
 
                 if (GlobalVariables.alliance == Alliance.Red) {
                     limelightXReadingsIn.add(xIn);
                     limelightYReadingsIn.add(-yIn);
+                    limelightYawReadingsRad.add(headingRad);
                 } else {
                     limelightXReadingsIn.add(xIn);
                     limelightYReadingsIn.add(yIn);
+                    limelightYawReadingsRad.add(headingRad);
                 }
             }
         }
 
-        if (limelightXReadingsIn.size() < LIMELIGHT_COLLECT_SIZE) return false;
+        if (limelightXReadingsIn.size() < LimelightFrames) return false;
 
         // Trimmed Mean filter (removes outliers)
         double avgX = getTrimmedAverage(limelightXReadingsIn);
         double avgY = getTrimmedAverage(limelightYReadingsIn);
+        double avgHeading = getTrimmedAverage(limelightYawReadingsRad);
 
         clearLimelightBuffers();
 
-        double currentHeading = localizer.getPoseEstimate().getHeading();
-        // Standard RR Localizer uses (x, y, heading)
-        // Here we swap/invert coordinates to match your original pinpoint logic:
-        // Pinpoint X was RR Y, Pinpoint Y was RR X.
-        Pose2d newPose = new Pose2d(avgY, avgX, currentHeading);
+        Pose2d newPose = new Pose2d(avgY, avgX, avgHeading);
         localizer.setPoseEstimate(newPose);
 
         if (roadRunnerPoseUpdater != null) {
@@ -202,24 +236,45 @@ public class SensorControl {
         return true;
     }
 
-    private double getTrimmedAverage(List<Double> data) {
-        Collections.sort(data);
-        double sum = 0;
-        for (int i = 1; i < data.size() - 1; i++) {
-            sum += data.get(i);
-        }
-        return sum / (data.size() - 2);
-    }
-
     private void clearLimelightBuffers() {
         limelightXReadingsIn.clear();
         limelightYReadingsIn.clear();
+        limelightYawReadingsRad.clear();
         resetStartTimeMs = -1;
     }
 
-    /**
-     * Calculates required turret angle to face the goal based on Localizer position.
-     */
+    public double getTagDistance() {
+        double y = 0;
+
+        LLResult result = limelightResult();
+
+        int targetID = (GlobalVariables.alliance == Alliance.Red) ? 24 : 20;
+
+        if (result != null && result.isValid()) {
+            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+            if (fiducials != null) {
+                for (LLResultTypes.FiducialResult f : fiducials) {
+                    if (f.getFiducialId() == targetID) {
+                        Pose3D botpose = result.getBotpose();
+
+                        if (GlobalVariables.alliance == Alliance.Red)
+                            y = botpose.getPosition().y - FieldHalfInches * 25.4;
+                        else
+                            y = botpose.getPosition().y + FieldHalfInches * 25.4;
+
+                        double x = botpose.getPosition().x + FieldHalfInches * 25.4;
+                        return Math.sqrt(x * x + y * y);
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    //
+    //  Other
+    //
+
     public double getTurretTargetAngleDegrees() {
         Pose2d currentPose = localizer.getPoseEstimate();
 
@@ -229,8 +284,8 @@ public class SensorControl {
         double robotY = currentPose.getX();
         double robotHeading = currentPose.getHeading();
 
-        double targetX = (GlobalVariables.alliance == Alliance.Red) ? RED_GOAL_X_IN : BLUE_GOAL_X_IN;
-        double targetY = (GlobalVariables.alliance == Alliance.Red) ? RED_GOAL_Y_IN : BLUE_GOAL_Y_IN;
+        double targetX = (GlobalVariables.alliance == Alliance.Red) ? RedXInches : BlueXInches;
+        double targetY = (GlobalVariables.alliance == Alliance.Red) ? RedYInches : BlueYInches;
 
         double dx = targetX - robotX;
         double dy = targetY - robotY;
@@ -253,91 +308,18 @@ public class SensorControl {
         return normalizeDegrees(Math.toDegrees(turretAngleRad));
     }
 
-    /**
-     * Continuous background vision fusion.
-     * Corrects Standard Localizer position using Limelight when the robot is steady.
-     */
-    public void continuousVisionUpdate(double turretAngleDeg) {
-        if (Math.abs(turretAngleDeg) > FUSION_MAX_TURRET_ANGLE_DEG) return;
-
-        // Get velocity from localizer to ensure we aren't sliding/moving fast
-        Pose2d velocityPose = localizer.getPoseVelocity();
-        if (velocityPose == null) return;
-
-        double velocity = Math.sqrt(Math.pow(velocityPose.getX(), 2) + Math.pow(velocityPose.getY(), 2));
-        if (velocity > FUSION_MAX_VELOCITY_IN_S) return;
-
-        LLResult result = limelight.getLatestResult();
-        if (result == null || !result.isValid()) return;
-
-        Pose3D botpose = result.getBotpose();
-        if (botpose == null) return;
-
-        int tagCount = (result.getFiducialResults() != null) ? result.getFiducialResults().size() : 0;
-        if (tagCount == 0) return;
-
-        double alpha = (tagCount >= 2) ? FUSION_ALPHA_MULTI_TAG : FUSION_ALPHA_SINGLE_TAG_CLOSE;
-
-        // Convert Vision meters to inches
-        double visionX = -botpose.getPosition().x * 39.37;
-        double visionY = botpose.getPosition().y * 39.37;
-
-        Pose2d currentPose = localizer.getPoseEstimate();
-
-        // Blending logic
-        // Note: Swapping back to RR coordinate convention (X = forward, Y = left)
-        double correctedX = currentPose.getX() + alpha * (visionY - currentPose.getX());
-        double correctedY = currentPose.getY() + alpha * (visionX - currentPose.getY());
-
-        Pose2d correctedPose = new Pose2d(correctedX, correctedY, currentPose.getHeading());
-        localizer.setPoseEstimate(correctedPose);
-
-        if (roadRunnerPoseUpdater != null) {
-            roadRunnerPoseUpdater.accept(correctedPose);
+    private double getTrimmedAverage(List<Double> data) {
+        Collections.sort(data);
+        double sum = 0;
+        for (int i = 1; i < data.size() - 1; i++) {
+            sum += data.get(i);
         }
-    }
-
-    public double getTagDistance() {
-        double y = 0;
-
-        LLResult result = limelightResult();
-
-        int targetID = (GlobalVariables.alliance == Alliance.Red) ? 24 : 20;
-
-        if (result != null && result.isValid()) {
-            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
-            if (fiducials != null) {
-                for (LLResultTypes.FiducialResult f : fiducials) {
-                    if (f.getFiducialId() == targetID) {
-                        Pose3D botpose = result.getBotpose();
-
-                        if (GlobalVariables.alliance == Alliance.Red)
-                            y = botpose.getPosition().y - FIELD_HALF_SIZE_IN * 25.4;
-                        else
-                            y = botpose.getPosition().y + FIELD_HALF_SIZE_IN * 25.4;
-
-                        double x = botpose.getPosition().x + FIELD_HALF_SIZE_IN * 25.4;
-                        return Math.sqrt(x * x + y * y);
-                    }
-                }
-            }
-        }
-        return -1;
+        return sum / (data.size() - 2);
     }
 
     private double normalizeDegrees(double angle) {
         while (angle > 180) angle -= 360;
         while (angle < -180) angle += 360;
         return angle;
-    }
-
-    public void setPositionFromRoadRunner(Pose2d poseInches) {
-        // We directly update the localizer's estimate so all internal
-        // calculations (turret, distance, etc.) use this new coordinate.
-        localizer.setPoseEstimate(poseInches);
-    }
-
-    public void setRoadRunnerPoseUpdater(Consumer<Pose2d> updater) {
-        this.roadRunnerPoseUpdater = updater;
     }
 }

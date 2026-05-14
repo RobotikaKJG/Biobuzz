@@ -5,4 +5,6 @@ public class IntakeConstants {
 
     public static double lockServoMinPos = 0.06;
     public static double lockServoMaxPos = 0.65;
+
+    public static double checkAgainAfter = 0.2;
 }

@@ -56,11 +56,10 @@ public class IterativeController {
         outtakeControl = dependencies.createOuttakeControl();
         intakeControl = dependencies.createIntakeControl();
         sensorControl = dependencies.sensorControl;
-        turretServoControl = dependencies.turretMotorControl;
+        turretServoControl = dependencies.turretServoControl;
 
         led = dependencies.hardwareMap.get(RevBlinkinLedDriver.class, "led");
 
-        sensorControl.initLocalizerPose();
         sensorControl.initLimelight(0);
         // Sync Pinpoint to Road Runner pose so turret angle uses same localization as autonomous
         sensorControl.setPositionFromRoadRunner(drive.getPoseEstimate());

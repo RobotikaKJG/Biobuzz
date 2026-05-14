@@ -67,14 +67,9 @@ public class OuttakeMotorControl {
     }
 
     private void calculateSpeed() {
-        double distance = sensorControl.getTagDistance();
+        double distance = sensorControl.getDistanceFromLocalizer();
 
-        // If no tag visible, fall back to Pinpoint-based distance
-        if (distance < 0) {
-            distance = sensorControl.getDistance();
-        }
-
-        // If distance is still invalid (shouldn't happen with Pinpoint fallback), keep previous
+        // If distance is still invalid (shouldn't happen with Localizer fallback), keep previous
         if (distance < 0) {
             speed = prevspeed;
         }

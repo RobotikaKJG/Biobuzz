@@ -22,14 +22,17 @@ public class AutoCycleShootLogic {
             case activate:
                 activate();
                 break;
+            case turnBack:
+                turnBack();
+                break;
             case turnTransfer:
                 turnTransfer();
                 break;
             case stop:
                 stopTransfer();
                 break;
-            case turnFeederBack:
-                turnFeederBack();
+            case turnTransferBack:
+                turnTransferBack();
                 break;
             case deactivate:
                 deactivate();
@@ -41,11 +44,22 @@ public class AutoCycleShootLogic {
 
     private void activate() {
         if(!wasIfCalled) {
-            wasIfCalled = true;
-            addWaitTime(0.2);
+            if (sensorControl.isNoBallSeen()) {
+                OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnBack);
+                addWaitTime(OuttakeConstants.oneBallWait);
+            }
+            else {
+                wasIfCalled = true;
+                addWaitTime(OuttakeConstants.servoOpenWait);
+            }
         }
         if(currentWait > getSeconds()) return;
         wasIfCalled = false;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
+    }
+
+    private void turnBack() {
+        if(currentWait > getSeconds()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
     }
 
@@ -53,13 +67,13 @@ public class AutoCycleShootLogic {
     }
 
     private void stopTransfer() {
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnFeederBack);
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransferBack);
         if (!GlobalVariables.isAutonomous) {
             addWaitTime(OuttakeConstants.deactivateAfter);
         }
     }
 
-    private void turnFeederBack() {
+    private void turnTransferBack() {
         if(currentWait > getSeconds()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.deactivate);
     }

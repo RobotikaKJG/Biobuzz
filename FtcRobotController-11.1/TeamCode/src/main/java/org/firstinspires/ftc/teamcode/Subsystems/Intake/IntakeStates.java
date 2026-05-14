@@ -1,17 +1,24 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Intake;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class IntakeStates {
     private static SubsystemState intakeState = SubsystemState.Idle;
+    private static AutoIntakeTransferStates autoIntakeTransferState = AutoIntakeTransferStates.idle;
     private static IntakeMotorStates intakeMotorState = IntakeMotorStates.idle;
+    private static TransferMotorStates transferMotorState = TransferMotorStates.idle;
     private static LockServoStates lockServoState = LockServoStates.idle;
 
     public static void setInitialStates() {
+        autoIntakeTransferState = AutoIntakeTransferStates.idle;
         intakeState = SubsystemState.Idle;
         intakeMotorState = IntakeMotorStates.idle;
+        transferMotorState = TransferMotorStates.idle;
         lockServoState = LockServoStates.lock;
     }
 
@@ -23,12 +30,28 @@ public class IntakeStates {
         intakeState = state;
     }
 
-    public static IntakeMotorStates getMotorState() {
+    public static AutoIntakeTransferStates getAutoIntakeTransferState() {
+        return autoIntakeTransferState;
+    }
+
+    public static void setAutoIntakeTransferState(AutoIntakeTransferStates state) {
+        autoIntakeTransferState = state;
+    }
+
+    public static IntakeMotorStates getIntakeMotorState() {
         return intakeMotorState;
     }
 
-    public static void setMotorState(IntakeMotorStates state) {
+    public static void setIntakeMotorState(IntakeMotorStates state) {
         intakeMotorState = state;
+    }
+
+    public static TransferMotorStates getTransferMotorState() {
+        return transferMotorState;
+    }
+
+    public static void setTransferMotorState(TransferMotorStates state) {
+        transferMotorState = state;
     }
 
     public static LockServoStates getLockServoState() {

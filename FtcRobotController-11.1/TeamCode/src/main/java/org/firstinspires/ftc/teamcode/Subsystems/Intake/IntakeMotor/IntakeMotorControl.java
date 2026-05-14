@@ -13,26 +13,23 @@ public class IntakeMotorControl {
     }
 
     public void update() {
-        if(IntakeStates.getMotorState() != prevMotorStates) {
+        if(IntakeStates.getIntakeMotorState() != prevMotorStates) {
             updateStates();
-            prevMotorStates = IntakeStates.getMotorState();
+            prevMotorStates = IntakeStates.getIntakeMotorState();
         }
 
     }
 
     public void updateStates() {
-        switch (IntakeStates.getMotorState()) {
+        switch (IntakeStates.getIntakeMotorState()) {
             case forward:
                 motorControl.setMotorSpeed(MotorConstants.intake, 1.0);
-                motorControl.setMotorSpeed(MotorConstants.transfer, 1.0);
                 break;
             case backward:
                 motorControl.setMotorSpeed(MotorConstants.intake, -1.0);
-                motorControl.setMotorSpeed(MotorConstants.transfer, -1.0);
                 break;
             case idle:
                 motorControl.setMotorSpeed(MotorConstants.intake, 0);
-                motorControl.setMotorSpeed(MotorConstants.transfer, 0);
                 break;
         }
 

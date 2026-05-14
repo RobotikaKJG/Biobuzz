@@ -4,9 +4,6 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
-
 import java.util.List;
 
 
@@ -51,7 +48,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
             telemetry.addData("PosY mm", dependencies.sensorControl.getLocalizerPose().getY());
             telemetry.addData("TagDist", dependencies.sensorControl.getTagDistance());
             telemetry.addData("PinpointDist", dependencies.sensorControl.getDistanceFromLocalizer());
-            telemetry.addData("TurretAngle", dependencies.turretMotorControl.getTurretAngleDeg());
+            telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
             telemetry.addData("TurretTarget", dependencies.sensorControl.getTurretTargetAngleDegrees());
 
             if (gamepad1.triangle) break;

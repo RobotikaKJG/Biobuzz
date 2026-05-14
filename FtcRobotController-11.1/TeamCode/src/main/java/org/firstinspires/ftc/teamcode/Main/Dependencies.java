@@ -15,9 +15,11 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetPosControl;
@@ -35,7 +37,7 @@ public class Dependencies {
     public MotorControl motorControl;
     public SensorControl sensorControl;
     public ServoControl servoControl;
-    public TurretServoControl turretMotorControl;
+    public TurretServoControl turretServoControl;
     public EdgeDetection edgeDetection = new EdgeDetection();
     public EdgeDetection gamepad2EdgeDetection = new EdgeDetection();
 
@@ -56,7 +58,7 @@ public class Dependencies {
         sensorControl = new SensorControl(hardwareMap, edgeDetection, localizer);
         sensorControl.setRoadRunnerPoseUpdater(pose -> drive.setPoseEstimate(pose));
         servoControl = new ServoControl(hardwareMap);
-        turretMotorControl = new TurretServoControl(servoControl, sensorControl);
+        turretServoControl = new TurretServoControl(servoControl, sensorControl);
     }
 
     public Drivebase createDrivebase() {
@@ -76,7 +78,7 @@ public class Dependencies {
     }
 
     public OuttakeControl createOuttakeControl() {
-        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createTurretMotorControl(), createAutoOuttakeFarCloseControl(), createAutoResetPosControl(), motorControl);
+        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createTurretServoControl(), createAutoOuttakeFarCloseControl(), createAutoResetPosControl(), motorControl);
     }
 
     private OuttakeMotorControl createOuttakeMotorControl() {
@@ -84,15 +86,23 @@ public class Dependencies {
     }
 
     public IntakeControl createIntakeControl() {
-        return new IntakeControl(createIntakeMotorControl(), createLockServoControl());
+        return new IntakeControl(createAutoIntakeTransferControl(), createIntakeMotorControl(), createTransferMotorControl(), createLockServoControl());
+    }
+
+    private AutoIntakeTransferControl createAutoIntakeTransferControl() {
+        return new AutoIntakeTransferControl();
     }
 
     private IntakeMotorControl createIntakeMotorControl() {
         return new IntakeMotorControl(motorControl);
     }
 
-    private TurretServoControl createTurretMotorControl() {
-        return turretMotorControl;
+    private TransferMotorControl createTransferMotorControl() {
+        return new TransferMotorControl(motorControl);
+    }
+
+    private TurretServoControl createTurretServoControl() {
+        return turretServoControl;
     }
 
     private AutoCycleShootLogic createAutoCycleShootLogic() {

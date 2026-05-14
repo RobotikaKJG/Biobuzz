@@ -1,20 +1,31 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Intake;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class IntakeControl {
+    private final AutoIntakeTransferControl autoIntakeTransferControl;
     private final IntakeMotorControl intakeMotorControl;
+    private final TransferMotorControl transferMotorControl;
     private final LockServoControl lockServoControl;
 
-    public IntakeControl(IntakeMotorControl intakeMotorControl, LockServoControl lockServoControl) {
+    public IntakeControl(AutoIntakeTransferControl autoIntakeTransferControl, IntakeMotorControl intakeMotorControl, TransferMotorControl transferMotorControl, LockServoControl lockServoControl) {
+        this.autoIntakeTransferControl = autoIntakeTransferControl;
         this.intakeMotorControl = intakeMotorControl;
+        this.transferMotorControl = transferMotorControl;
         this.lockServoControl = lockServoControl;
     }
 
     public void update() {
+        autoIntakeTransferControl.update();
         intakeMotorControl.update();
+        transferMotorControl.update();
         lockServoControl.update();
 
         updateIntakeState();
@@ -28,6 +39,6 @@ public class IntakeControl {
     }
 
     private boolean intakeActive() {
-        return false;
+        return IntakeStates.getIntakeMotorState() != IntakeMotorStates.idle;
     }
 }

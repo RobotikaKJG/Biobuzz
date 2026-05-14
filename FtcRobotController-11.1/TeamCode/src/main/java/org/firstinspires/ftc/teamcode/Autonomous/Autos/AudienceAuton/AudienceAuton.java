@@ -9,11 +9,12 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
@@ -103,7 +104,7 @@ public class AudienceAuton implements Auton {
         if(getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
-        IntakeStates.setMotorState(IntakeMotorStates.forward);
+        IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
         if (GlobalVariables.secondRelease) {
             drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
             addWaitTime(4);
@@ -118,7 +119,7 @@ public class AudienceAuton implements Auton {
         if(drive.isBusy() || getSeconds() < currentWait) return;
         OuttakeStates.setMotorState(OuttakeMotorStates.autonomous);
         drive.followTrajectorySequenceAsync(trajectories.moveToShootSecond());
-        IntakeStates.setMotorState(IntakeMotorStates.forward);
+        IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
         audienceAutonState = AudienceAutonState.moveToShootSecond;
     }
 
@@ -136,7 +137,7 @@ public class AudienceAuton implements Auton {
         if(getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
-        IntakeStates.setMotorState(IntakeMotorStates.forward);
+        IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
         drive.followTrajectorySequenceAsync(trajectories.goToTakeBalls());
         audienceAutonState = AudienceAutonState.goToTake;
 
@@ -147,7 +148,7 @@ public class AudienceAuton implements Auton {
         if (drive.isBusy() || getSeconds() < currentWait) return;
         OuttakeStates.setMotorState(OuttakeMotorStates.autonomous);
         drive.followTrajectorySequenceAsync(trajectories.moveToShoot());
-        IntakeStates.setMotorState(IntakeMotorStates.forward);
+        IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
         audienceAutonState = AudienceAutonState.moveToShoot;
         addWaitTime(4);
     }

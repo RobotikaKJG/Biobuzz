@@ -20,7 +20,7 @@ public class RightTriggerLogic {
     }
 
     private boolean runIntake() {
-        if(IntakeStates.getMotorState() != IntakeMotorStates.idle) return false;
+        if(IntakeStates.getIntakeMotorState() != IntakeMotorStates.idle) return false;
         ButtonStates.setRightTriggerState(RightTriggerStates.forward);
         completeAction();
         return true;

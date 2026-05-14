@@ -206,12 +206,12 @@ public class SensorControl {
                 double headingRad = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
 
                 if (GlobalVariables.alliance == Alliance.Red) {
-                    limelightXReadingsIn.add(xIn);
-                    limelightYReadingsIn.add(-yIn);
+                    limelightXReadingsIn.add(-xIn);
+                    limelightYReadingsIn.add(yIn);
                     limelightYawReadingsRad.add(headingRad);
                 } else {
                     limelightXReadingsIn.add(xIn);
-                    limelightYReadingsIn.add(yIn);
+                    limelightYReadingsIn.add(-yIn);
                     limelightYawReadingsRad.add(headingRad);
                 }
             }

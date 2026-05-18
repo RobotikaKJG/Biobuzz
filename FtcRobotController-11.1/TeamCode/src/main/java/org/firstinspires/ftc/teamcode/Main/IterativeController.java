@@ -96,6 +96,7 @@ public class IterativeController {
 
         // Single Pinpoint I2C read for the entire loop
         sensorControl.updateLocalizer();
+        sensorControl.updateDistance();
 
         // Continuous vision correction: blend Pinpoint position toward Limelight when tags visible
         // Only when turret is near center (Limelight is mounted on turret)

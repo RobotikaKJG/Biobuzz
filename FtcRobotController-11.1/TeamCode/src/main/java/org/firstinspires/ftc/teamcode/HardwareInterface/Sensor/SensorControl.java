@@ -32,7 +32,7 @@ public class SensorControl {
     private double currentDistanceInchesMid;
     private double currentDistanceInchesFront;
 
-    private double ballDistanceIn = 5.12;
+    private double ballDistanceIn = 4.0;
 
     // Goal coordinates in INCHES (Standardized)
     public static final double RedXInches = 66.0;
@@ -159,11 +159,11 @@ public class SensorControl {
     }
 
     public boolean isMidBall() {
-        return rangeSensorMid.getDistance(DistanceUnit.INCH) < ballDistanceIn;
+        return currentDistanceInchesMid < ballDistanceIn;
     }
 
     public boolean isFrontBall() {
-        return rangeSensorFront.getDistance(DistanceUnit.INCH) < ballDistanceIn;
+        return currentDistanceInchesFront < ballDistanceIn;
     }
 
     public boolean isNoBallSeen() {

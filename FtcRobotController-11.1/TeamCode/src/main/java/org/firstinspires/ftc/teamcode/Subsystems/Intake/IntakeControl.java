@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Intake;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
@@ -11,12 +12,14 @@ import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class IntakeControl {
     private final AutoIntakeTransferControl autoIntakeTransferControl;
+    private final AutoIntakeTransferLogic autoIntakeTransferLogic;
     private final IntakeMotorControl intakeMotorControl;
     private final TransferMotorControl transferMotorControl;
     private final LockServoControl lockServoControl;
 
-    public IntakeControl(AutoIntakeTransferControl autoIntakeTransferControl, IntakeMotorControl intakeMotorControl, TransferMotorControl transferMotorControl, LockServoControl lockServoControl) {
+    public IntakeControl(AutoIntakeTransferControl autoIntakeTransferControl, AutoIntakeTransferLogic autoIntakeTransferLogic, IntakeMotorControl intakeMotorControl, TransferMotorControl transferMotorControl, LockServoControl lockServoControl) {
         this.autoIntakeTransferControl = autoIntakeTransferControl;
+        this.autoIntakeTransferLogic = autoIntakeTransferLogic;
         this.intakeMotorControl = intakeMotorControl;
         this.transferMotorControl = transferMotorControl;
         this.lockServoControl = lockServoControl;
@@ -24,6 +27,7 @@ public class IntakeControl {
 
     public void update() {
         autoIntakeTransferControl.update();
+        autoIntakeTransferLogic.update();
         intakeMotorControl.update();
         transferMotorControl.update();
         lockServoControl.update();

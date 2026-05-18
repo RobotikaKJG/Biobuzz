@@ -4,6 +4,8 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
+
 import java.util.List;
 
 @TeleOp
@@ -46,6 +48,9 @@ public class GeneralRedTeleOp extends LinearOpMode {
             telemetry.addData("PinpointDist", dependencies.sensorControl.getDistanceFromLocalizer());
             telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
             telemetry.addData("TurretTarget", dependencies.sensorControl.getTurretTargetAngleDegrees());
+            telemetry.addData("Front distance", dependencies.sensorControl.getDistanceFront());
+            telemetry.addData("Mid distance", dependencies.sensorControl.getDistanceMid());
+            telemetry.addData("Auto Intake Transfer state, ", IntakeStates.getAutoIntakeTransferState());
 
             calculateLoopTime();
             telemetry.update();

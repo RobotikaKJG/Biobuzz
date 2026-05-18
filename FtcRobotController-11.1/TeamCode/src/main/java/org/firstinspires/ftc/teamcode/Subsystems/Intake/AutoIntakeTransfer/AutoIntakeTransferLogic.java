@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer;
 
+import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
@@ -10,9 +12,11 @@ public class AutoIntakeTransferLogic {
     private double currentWait = 0;
     private boolean wasIfCalled = false;
     private SensorControl sensorControl;
+    private Gamepad gamepad1;
 
-    public AutoIntakeTransferLogic(SensorControl sensorControl) {
+    public AutoIntakeTransferLogic(SensorControl sensorControl, Gamepad gamepad1) {
         this.sensorControl = sensorControl;
+        this.gamepad1 = gamepad1;
     }
 
     public void update() {
@@ -56,11 +60,8 @@ public class AutoIntakeTransferLogic {
 
     private void stopTransfer() {
         if (sensorControl.isFrontBall()) {
-            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
+            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainFront);
             addWaitTime(IntakeConstants.checkAgainAfter);
-        }
-        else {
-            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
         }
     }
 
@@ -75,6 +76,7 @@ public class AutoIntakeTransferLogic {
     }
 
     private void stop() {
+        gamepad1.rumble(300);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
     }
 

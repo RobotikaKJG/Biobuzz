@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoControl;
@@ -86,11 +87,15 @@ public class Dependencies {
     }
 
     public IntakeControl createIntakeControl() {
-        return new IntakeControl(createAutoIntakeTransferControl(), createIntakeMotorControl(), createTransferMotorControl(), createLockServoControl());
+        return new IntakeControl(createAutoIntakeTransferControl(), createAutoIntakeTransferLogic(), createIntakeMotorControl(), createTransferMotorControl(), createLockServoControl());
     }
 
     private AutoIntakeTransferControl createAutoIntakeTransferControl() {
         return new AutoIntakeTransferControl();
+    }
+
+    public AutoIntakeTransferLogic createAutoIntakeTransferLogic() {
+        return new AutoIntakeTransferLogic(sensorControl, gamepad1);
     }
 
     private IntakeMotorControl createIntakeMotorControl() {

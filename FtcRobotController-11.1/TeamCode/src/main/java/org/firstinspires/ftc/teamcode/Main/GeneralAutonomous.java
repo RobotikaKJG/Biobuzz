@@ -72,6 +72,7 @@ public class GeneralAutonomous extends LinearOpMode {
 
         telemetry.addLine(" ");
         dependencies.sensorControl.updateLocalizer();
+        dependencies.sensorControl.updateDistance();
         telemetry.addData("yaw", dependencies.sensorControl.getLocalizerAngle());
         telemetry.addData("outtake vel", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
 

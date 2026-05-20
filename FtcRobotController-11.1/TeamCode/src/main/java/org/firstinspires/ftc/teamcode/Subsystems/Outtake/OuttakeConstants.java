@@ -13,7 +13,7 @@ public class OuttakeConstants {
     public static double maxDistance = 2.5;
     public static double minDistance = 1.37;
 
-    public static double oneBallWait = 0.2;
+    public static double oneBallWait = 0.1;
     public static double servoOpenWait = 0.1;
     public static double deactivateAfter = 0.3;
 

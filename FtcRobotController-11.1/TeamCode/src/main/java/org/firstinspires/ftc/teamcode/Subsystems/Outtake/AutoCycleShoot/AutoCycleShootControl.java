@@ -36,7 +36,7 @@ public class AutoCycleShootControl {
                 IntakeStates.setLockServoState(LockServoStates.unlock);
                 break;
             case turnBack:
-
+                IntakeStates.setTransferMotorState(TransferMotorStates.backward);
                 break;
             case turnTransfer:
                 if (GlobalVariables.far) {
@@ -60,7 +60,7 @@ public class AutoCycleShootControl {
                     }
                 } else {
                     IntakeStates.setIntakeMotorState(IntakeMotorStates.forward);
-                    OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
+                    IntakeStates.setTransferMotorState(TransferMotorStates.forward);
                 }
                 break;
             case stop:

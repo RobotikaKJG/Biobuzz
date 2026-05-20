@@ -108,7 +108,6 @@ public class SensorControl {
     }
 
     public double getLocalizerAngle() {
-        resetLocalizerAngle();
         return localizer.getPoseEstimate().getHeading();
     }
 
@@ -132,7 +131,11 @@ public class SensorControl {
     public void resetLocalizerAngle() {
         if (edgeDetection.rising(GamepadIndexValues.options)) {
             Pose2d current = localizer.getPoseEstimate();
-            localizer.setPoseEstimate(new Pose2d(current.getX(), current.getY(), 0));
+            Pose2d newPose = new Pose2d(current.getX(), current.getY(), 0);
+            localizer.setPoseEstimate(newPose);
+            if (roadRunnerPoseUpdater != null) {
+                roadRunnerPoseUpdater.accept(newPose);
+            }
         }
     }
 
@@ -208,11 +211,11 @@ public class SensorControl {
                 if (GlobalVariables.alliance == Alliance.Red) {
                     limelightXReadingsIn.add(-xIn);
                     limelightYReadingsIn.add(yIn);
-                    limelightYawReadingsRad.add(headingRad);
+                    limelightYawReadingsRad.add(headingRad - Math.toRadians(90));
                 } else {
                     limelightXReadingsIn.add(xIn);
                     limelightYReadingsIn.add(-yIn);
-                    limelightYawReadingsRad.add(headingRad);
+                    limelightYawReadingsRad.add(headingRad + Math.toRadians(90));
                 }
             }
         }

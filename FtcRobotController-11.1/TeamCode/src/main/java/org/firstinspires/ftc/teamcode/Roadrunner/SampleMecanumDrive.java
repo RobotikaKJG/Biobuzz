@@ -209,6 +209,10 @@ public class SampleMecanumDrive extends MecanumDrive {
         updatePoseEstimate();
     }
 
+    public StandardTrackingWheelLocalizer getStandardWheelLocalizer() {
+        return standardWheelLocalizer;
+    }
+
     public void waitForIdle() {
         while (!Thread.currentThread().isInterrupted() && isBusy())
             update();

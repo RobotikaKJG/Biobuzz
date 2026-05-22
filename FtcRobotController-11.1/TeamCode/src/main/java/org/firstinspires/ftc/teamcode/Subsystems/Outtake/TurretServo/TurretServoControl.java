@@ -31,7 +31,7 @@ public class TurretServoControl {
             return;
         }
 
-        targetAngleDeg = clamp(sensorControl.getTurretTargetAngleDegrees(), -turretLimit, turretLimit);
+        targetAngleDeg = clamp(sensorControl.getTurretTargetAngleDegrees(), -turretLimit, turretLimit-45);
         turretAngleDeg = getCurrentTurretAngleDeg();
 
         targetServoPos = (targetAngleDeg * gearRatio) / servoTravel + 0.5;

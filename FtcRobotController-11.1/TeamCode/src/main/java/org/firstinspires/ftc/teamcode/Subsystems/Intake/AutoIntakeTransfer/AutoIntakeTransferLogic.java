@@ -60,8 +60,8 @@ public class AutoIntakeTransferLogic {
 
     private void stopTransfer() {
         if (sensorControl.isFrontBall()) {
-            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainFront);
-            addWaitTime(IntakeConstants.checkAgainAfter);
+            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
+//            addWaitTime(IntakeConstants.checkAgainAfter);
         }
     }
 

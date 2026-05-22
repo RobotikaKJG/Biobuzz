@@ -34,11 +34,19 @@ public class SensorControl {
 
     private double ballDistanceIn = 4.0;
 
+    private double flywheelOffset = 0.0;
+
     // Goal coordinates in INCHES (Standardized)
     public static final double RedXInches = 66.0;
     public static final double RedYInches = 62.0;
-    public static final double BlueXInches = 66.0;
-    public static final double BlueYInches = -62.0;
+    public static final double BlueXInches = -66.0;
+    public static final double BlueYInches = 62.0;
+
+    public static Pose2d RedGoalPos = new Pose2d(RedXInches, RedYInches, 0);
+    public static Pose2d BlueGoalPos = new Pose2d(BlueXInches, BlueYInches, 0);
+    private static double scoreHeight = 26.0;
+    private static double scoreAngle = Math.toRadians(-30);
+    private static double passThroughtPointRadius = 5;
 
     // Field geometry: half-size offset in inches (~1.7m)
     private static final double FieldHalfInches = 66.93;
@@ -273,6 +281,21 @@ public class SensorControl {
         }
         return -1;
     }
+
+    //
+    //  Predictive shooting
+    //
+
+
+    public double getHoodTicksFromDegrees(double degrees) {
+        return 0.02 * degrees - 0.7;    // multiplier * degrees - offset
+    }
+
+    public double getFlywheelTicksFromVelocity(double velocity) {
+        return 94.501 * velocity / 12 - 187.96 + flywheelOffset;
+    }
+
+
 
     //
     //  Other

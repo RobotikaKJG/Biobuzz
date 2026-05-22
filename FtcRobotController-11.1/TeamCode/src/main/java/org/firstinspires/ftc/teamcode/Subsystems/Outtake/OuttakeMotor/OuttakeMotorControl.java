@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
@@ -47,13 +48,21 @@ public class OuttakeMotorControl {
                 }
                 break;
             case forwardFar:
-                motorControl.setMotorSpeed(MotorConstants.outtake1, OuttakeConstants.outtakeSpeedFar);
-                motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedFar);
+                motorControl.setMotorSpeed(MotorConstants.outtake1, 0.52);//OuttakeConstants.outtakeSpeedFar);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, 0.52);//OuttakeConstants.outtakeSpeedFar);
                 break;
             case forwardClose:
                 calculateSpeed();
-                motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
-                motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
+
+                if (OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) {
+                    speed = speed + 0.2;
+                }
+//                motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
+//                motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
+
+                motorControl.setMotorSpeed(MotorConstants.outtake1, 0.756);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, 0.756);
+
                 break;
             case backward:
                 motorControl.setMotorSpeed(MotorConstants.outtake1, -0.5);

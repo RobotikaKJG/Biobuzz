@@ -33,10 +33,9 @@ public class SensorControl {
     private double currentDistanceInchesFront;
 
     private double ballDistanceIn = 4.0;
-
     private double flywheelOffset = 0.0;
 
-    // Goal coordinates in INCHES (Standardized)
+    // Goal coordinates in INCHES
     public static final double RedXInches = 66.0;
     public static final double RedYInches = 62.0;
     public static final double BlueXInches = -66.0;
@@ -48,36 +47,45 @@ public class SensorControl {
     private static double scoreAngle = Math.toRadians(-30);
     private static double passThroughtPointRadius = 5;
 
-    // Field geometry: half-size offset in inches (~1.7m)
     private static final double FieldHalfInches = 66.93;
 
-    /** When set, allows external classes to react to a position jump (e.g., updating a drive train class) */
     private Consumer<Pose2d> roadRunnerPoseUpdater = null;
 
-    /** Average filter for Limelight position jitter */
+    // --- CONTINUOUS INJECTION STORAGE & CONFIG ---
     private static final int LimelightFrames = 7;
+    // Continuous sliding windows (instead of one-shot buffers)
+    private final List<Double> rollingX = new ArrayList<>();
+    private final List<Double> rollingY = new ArrayList<>();
+    private final List<Double> rollingYaw = new ArrayList<>();
+
+    // Safety Thresholds
+    private static final double MAX_ALLOWED_DISTANCE_IN = 70.0;  // Don't trust far away tags
+    private static final double MIN_ALLOWED_DISTANCE_IN = 10.0;  // Don't trust if too close to lens
+    private static final double LINEAR_VELOCITY_THRESHOLD = 3.0; // Inches per second max
+    private static final double ANGULAR_VELOCITY_THRESHOLD = Math.toRadians(10); // Max rad/s rotation
+    private static final double MAX_HEADING_ERROR_RAD = Math.toRadians(20); // Throw out massive outlier spikes
+
+    // Velocity Tracking variables
+    private Pose2d lastPose = new Pose2d(0, 0, 0);
+    private long lastVelocityUpdateTimeMs = System.currentTimeMillis();
+    private double robotLinearVelocityInPerSec = 0.0;
+    private double robotAngularVelocityRadPerSec = 0.0;
+
+    private static final long LIMELIGHT_RESET_TIMEOUT_MS = 3000;
+    private long resetStartTimeMs = -1;
     private final List<Double> limelightXReadingsIn = new ArrayList<>();
     private final List<Double> limelightYReadingsIn = new ArrayList<>();
     private final List<Double> limelightYawReadingsRad = new ArrayList<>();
 
-    private static final long LIMELIGHT_RESET_TIMEOUT_MS = 3000;
-    private long resetStartTimeMs = -1;
-
-    // Vision Fusion Constants
-    private static final double FUSION_ALPHA_MULTI_TAG = 0.15;
-    private static final double FUSION_ALPHA_SINGLE_TAG_CLOSE = 0.05;
-    private static final double FUSION_MAX_VELOCITY_IN_S = 11.8; // ~300mm/s
-    private static final double FUSION_MAX_TURRET_ANGLE_DEG = 15.0;
+    // Fusion tuning: how much we nudge towards vision per frame (0.02 = 2% vision, 98% odometry)
+    private static final double CONTINUOUS_FUSION_ALPHA = 0.05;
 
     public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection, StandardTrackingWheelLocalizer localizer) {
         this.localizer = localizer;
         this.edgeDetection = edgeDetection;
 
-        // Distance Sensor (Color Sensor)
         rangeSensorMid = hardwareMap.get(LynxI2cColorRangeSensor.class, "MidColorSensor");
         rangeSensorFront = hardwareMap.get(LynxI2cColorRangeSensor.class, "FrontColorSensor");
-
-        // Limelight Initialization
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         setInitialLocalisationAngle();
@@ -90,25 +98,144 @@ public class SensorControl {
             GlobalVariables.wasAutonomous = false;
             localizer.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(-45)));
         }
+        lastPose = localizer.getPoseEstimate();
     }
 
-
     //
-    //  Localizer
+    //  Localizer Loop Updates
     //
 
     public void updateLocalizer() {
         localizer.update();
+        calculateRobotVelocity();
+    }
+
+    /**
+     * Calculates current velocities from the odometry localizer to ensure
+     * we are stationary before injecting vision data.
+     */
+    public void calculateRobotVelocity() {
+        long currentTime = System.currentTimeMillis();
+        double dt = (currentTime - lastVelocityUpdateTimeMs) / 1000.0;
+
+        if (dt > 0.005) { // Protect against divide-by-zero
+            Pose2d currentPose = localizer.getPoseEstimate();
+            double dx = currentPose.getX() - lastPose.getX();
+            double dy = currentPose.getY() - lastPose.getY();
+            double dHeading = normalizeRadians(currentPose.getHeading() - lastPose.getHeading());
+
+            robotLinearVelocityInPerSec = Math.hypot(dx, dy) / dt;
+            robotAngularVelocityRadPerSec = Math.abs(dHeading) / dt;
+
+            lastPose = currentPose;
+            lastVelocityUpdateTimeMs = currentTime;
+        }
+    }
+
+    /**
+     * Continuous Odometry Injection Pipeline
+     * Filters noise based on velocity, distance, orientation, and a rolling trimmed average.
+     */
+    public void applyContinuousVisionFusion() {
+        // GATE 1: Is the robot moving too fast? (Eliminates motion blur and latency errors)
+        if (robotLinearVelocityInPerSec > LINEAR_VELOCITY_THRESHOLD ||
+                robotAngularVelocityRadPerSec > ANGULAR_VELOCITY_THRESHOLD) {
+            return;
+        }
+
+        // GATE 2: Do we have a high-quality vision target?
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) {
+            return;
+        }
+
+        // GATE 3: Is the distance to the tags reasonable?
+        double distance = getTagDistance();
+        if (distance < MIN_ALLOWED_DISTANCE_IN || distance > MAX_ALLOWED_DISTANCE_IN) {
+            return;
+        }
+
+        Pose3D botpose = result.getBotpose();
+        if (botpose == null) return;
+
+        // Extract and map coordinates identically to your autonomous reset method
+        double xIn = botpose.getPosition().x * 39.37;
+        double yIn = botpose.getPosition().y * 39.37;
+        double headingRad = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
+
+        double visionCalculatedX;
+        double visionCalculatedY;
+        double visionCalculatedHeading;
+
+        if (GlobalVariables.alliance == Alliance.Red) {
+            visionCalculatedX = -xIn;
+            visionCalculatedY = yIn;
+            visionCalculatedHeading = normalizeRadians(headingRad - Math.toRadians(90));
+        } else {
+            visionCalculatedX = xIn;
+            visionCalculatedY = -yIn;
+            visionCalculatedHeading = normalizeRadians(headingRad + Math.toRadians(90));
+        }
+
+        // Remap to match Road Runner configuration (RR X = Vision Y, RR Y = Vision X)
+        double visionRR_X = visionCalculatedY;
+        double visionRR_Y = visionCalculatedX;
+
+        // GATE 4: Sanity check heading deviation to destroy wild anomalous frames
+        Pose2d currentPose = localizer.getPoseEstimate();
+        double headingError = Math.abs(normalizeRadians(visionCalculatedHeading - currentPose.getHeading()));
+        if (headingError > MAX_HEADING_ERROR_RAD) {
+            return;
+        }
+
+        // --- ROLLING SLIDING WINDOW BUFFER ---
+        rollingX.add(visionRR_X);
+        rollingY.add(visionRR_Y);
+        rollingYaw.add(visionCalculatedHeading);
+
+        // Keep buffer clamped to your preferred window size (7 frames)
+        if (rollingX.size() > LimelightFrames) {
+            rollingX.remove(0);
+            rollingY.remove(0);
+            rollingYaw.remove(0);
+        }
+
+        // Wait until the sliding window is full to begin filtering data
+        if (rollingX.size() < LimelightFrames) {
+            return;
+        }
+
+        // Compute the Trimmed Mean across the rolling frame window to isolate outliers
+        double filteredVisionX = getTrimmedAverage(rollingX);
+        double filteredVisionY = getTrimmedAverage(rollingY);
+        double filteredVisionHeading = getTrimmedAverage(rollingYaw);
+
+        // --- COMPLEMENTARY FUSION INJECTION ---
+        // Smoothly blend the current odometry coordinates with the vision coordinates
+        double fusedX = currentPose.getX() + CONTINUOUS_FUSION_ALPHA * (filteredVisionX - currentPose.getX());
+        double fusedY = currentPose.getY() + CONTINUOUS_FUSION_ALPHA * (filteredVisionY - currentPose.getY());
+
+        // Handle angle wrapping elegantly during blending to avoid sudden full 360 spins
+        double angleDifference = normalizeRadians(filteredVisionHeading - currentPose.getHeading());
+        double fusedHeading = normalizeRadians(currentPose.getHeading() + CONTINUOUS_FUSION_ALPHA * angleDifference);
+
+        // Inject the fused position smoothly back into Road Runner
+        Pose2d fusedPose = new Pose2d(fusedX, fusedY, fusedHeading);
+        localizer.setPoseEstimate(fusedPose);
+
+        if (roadRunnerPoseUpdater != null) {
+            roadRunnerPoseUpdater.accept(fusedPose);
+        }
     }
 
     public void initLocalizerPose() {
         localizer.setPoseEstimate(new Pose2d(0, 0, 0));
+        lastPose = new Pose2d(0, 0, 0);
     }
 
     public void setPositionFromRoadRunner(Pose2d poseInches) {
-        // We directly update the localizer's estimate so all internal
-        // calculations (turret, distance, etc.) use this new coordinate.
         localizer.setPoseEstimate(poseInches);
+        lastPose = poseInches;
     }
 
     public void setRoadRunnerPoseUpdater(Consumer<Pose2d> updater) {
@@ -121,9 +248,6 @@ public class SensorControl {
 
     public double getDistanceFromLocalizer() {
         Pose2d currentPose = localizer.getPoseEstimate();
-
-        // Match the coordinate mapping used in turret targeting:
-        // Localizer Y is side-to-side (Robot X), Localizer X is forward-back (Robot Y)
         double robotX = currentPose.getY();
         double robotY = currentPose.getX();
 
@@ -195,10 +319,6 @@ public class SensorControl {
         return limelight.getLatestResult();
     }
 
-    /**
-     * Collects and averages Limelight readings to reset the Localizer.
-     * Returns true when the reset is complete or timed out.
-     */
     public boolean resetLocalizerWithLimelight() {
         if (resetStartTimeMs < 0) resetStartTimeMs = System.currentTimeMillis();
 
@@ -211,7 +331,6 @@ public class SensorControl {
         if (result != null && result.isValid()) {
             Pose3D botpose = result.getBotpose();
             if (botpose != null) {
-                // Converting Limelight meters to inches
                 double xIn = botpose.getPosition().x * 39.37;
                 double yIn = botpose.getPosition().y * 39.37;
                 double headingRad = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
@@ -230,7 +349,6 @@ public class SensorControl {
 
         if (limelightXReadingsIn.size() < LimelightFrames) return false;
 
-        // Trimmed Mean filter (removes outliers)
         double avgX = getTrimmedAverage(limelightXReadingsIn);
         double avgY = getTrimmedAverage(limelightYReadingsIn);
         double avgHeading = getTrimmedAverage(limelightYawReadingsRad);
@@ -256,9 +374,7 @@ public class SensorControl {
 
     public double getTagDistance() {
         double y = 0;
-
         LLResult result = limelightResult();
-
         int targetID = (GlobalVariables.alliance == Alliance.Red) ? 24 : 20;
 
         if (result != null && result.isValid()) {
@@ -274,7 +390,7 @@ public class SensorControl {
                             y = botpose.getPosition().y + FieldHalfInches * 25.4;
 
                         double x = botpose.getPosition().x + FieldHalfInches * 25.4;
-                        return Math.sqrt(x * x + y * y);
+                        return Math.sqrt(x * x + y * y) / 25.4; // Convert mm to inches
                     }
                 }
             }
@@ -286,26 +402,20 @@ public class SensorControl {
     //  Predictive shooting
     //
 
-
     public double getHoodTicksFromDegrees(double degrees) {
-        return 0.02 * degrees - 0.7;    // multiplier * degrees - offset
+        return 0.02 * degrees - 0.7;
     }
 
     public double getFlywheelTicksFromVelocity(double velocity) {
         return 94.501 * velocity / 12 - 187.96 + flywheelOffset;
     }
 
-
-
     //
-    //  Other
+    //  Other Utilities
     //
 
     public double getTurretTargetAngleDegrees() {
         Pose2d currentPose = localizer.getPoseEstimate();
-
-        // Match original logic: localizer Y is robot side-to-side (X-axis in turret math)
-        // localizer X is robot forward-back (Y-axis in turret math)
         double robotX = currentPose.getY();
         double robotY = currentPose.getX();
         double robotHeading = currentPose.getHeading();
@@ -318,7 +428,6 @@ public class SensorControl {
 
         double angleToTargetRad;
 
-        // Targeting Logic
         if (!GlobalVariables.isAutonomous) {
             angleToTargetRad = (!GlobalVariables.far) ? Math.atan2(dx, dy) :
                     Math.toRadians(GlobalVariables.alliance == Alliance.Red ? 61.67 : -61.67);
@@ -335,17 +444,30 @@ public class SensorControl {
     }
 
     private double getTrimmedAverage(List<Double> data) {
-        Collections.sort(data);
-        double sum = 0;
-        for (int i = 1; i < data.size() - 1; i++) {
-            sum += data.get(i);
+        if (data.isEmpty()) return 0;
+        List<Double> copy = new ArrayList<>(data);
+        Collections.sort(copy);
+        if (copy.size() <= 2) {
+            double sum = 0;
+            for (double d : copy) sum += d;
+            return sum / copy.size();
         }
-        return sum / (data.size() - 2);
+        double sum = 0;
+        for (int i = 1; i < copy.size() - 1; i++) {
+            sum += copy.get(i);
+        }
+        return sum / (copy.size() - 2);
     }
 
     private double normalizeDegrees(double angle) {
         while (angle > 180) angle -= 360;
         while (angle < -180) angle += 360;
         return angle;
+    }
+
+    private double normalizeRadians(double radians) {
+        while (radians > Math.PI) radians -= 2 * Math.PI;
+        while (radians < -Math.PI) radians += 2 * Math.PI;
+        return radians;
     }
 }

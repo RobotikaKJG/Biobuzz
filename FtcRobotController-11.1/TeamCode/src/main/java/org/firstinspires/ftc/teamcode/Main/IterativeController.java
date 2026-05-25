@@ -98,6 +98,7 @@ public class IterativeController {
         sensorControl.updateLocalizer();
         sensorControl.updateDistance();
         sensorControl.resetLocalizerAngle();
+        sensorControl.applyContinuousVisionFusion();
 
         // Continuous vision correction: blend Pinpoint position toward Limelight when tags visible
         // Only when turret is near center (Limelight is mounted on turret)

@@ -54,7 +54,9 @@ public class GeneralBlueTeleOp extends LinearOpMode {
             telemetry.addData("TurretTarget", dependencies.sensorControl.getTurretTargetAngleDegrees());
             telemetry.addData("Front distance", dependencies.sensorControl.getDistanceFront());
             telemetry.addData("Mid distance", dependencies.sensorControl.getDistanceMid());
-            telemetry.addData("Auto Intake Transfer state, ", IntakeStates.getAutoIntakeTransferState());
+            telemetry.addData("forward", dependencies.sensorControl.isDrivingForward());
+            telemetry.addData("backward", dependencies.sensorControl.isDrivingBackward());
+            telemetry.addData("AutoIntakeMovement state", IntakeStates.getAutoIntakeMovementState());
 
             if (gamepad1.triangle) break;
             calculateLoopTime();

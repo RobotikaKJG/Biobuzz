@@ -15,6 +15,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeMovement.AutoIntakeMovementControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
@@ -87,11 +88,15 @@ public class Dependencies {
     }
 
     public IntakeControl createIntakeControl() {
-        return new IntakeControl(createAutoIntakeTransferControl(), createAutoIntakeTransferLogic(), createIntakeMotorControl(), createTransferMotorControl(), createLockServoControl());
+        return new IntakeControl(createAutoIntakeMovementControl(), createAutoIntakeTransferControl(), createAutoIntakeTransferLogic(), createIntakeMotorControl(), createTransferMotorControl(), createLockServoControl());
     }
 
     private AutoIntakeTransferControl createAutoIntakeTransferControl() {
         return new AutoIntakeTransferControl();
+    }
+
+    public AutoIntakeMovementControl createAutoIntakeMovementControl() {
+        return new AutoIntakeMovementControl(sensorControl);
     }
 
     public AutoIntakeTransferLogic createAutoIntakeTransferLogic() {

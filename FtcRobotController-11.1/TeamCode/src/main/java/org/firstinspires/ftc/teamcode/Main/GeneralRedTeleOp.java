@@ -50,6 +50,11 @@ public class GeneralRedTeleOp extends LinearOpMode {
             telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
             telemetry.addData("TurretTarget", dependencies.sensorControl.getTurretTargetAngleDegrees());
             telemetry.addData("OuttakeSpeed", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+            telemetry.addData("forward", dependencies.sensorControl.isDrivingForward());
+            telemetry.addData("backward", dependencies.sensorControl.isDrivingBackward());
+            telemetry.addData("Vel X", dependencies.sensorControl.robotVelocityXInPerSec);
+            telemetry.addData("Vel Y", dependencies.sensorControl.robotVelocityYInPerSec);
+
 
             calculateLoopTime();
             telemetry.update();

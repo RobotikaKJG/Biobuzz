@@ -52,9 +52,9 @@ public class ServoControl {
     }
 
     public void setTurretServosPos(double position) {
-        servos[ServoConstants.turretServo1].setPosition(position * OuttakeConstants.turretServo1Max);
-        servos[ServoConstants.turretServo2].setPosition(position * OuttakeConstants.turretServo2Max);
-        servos[ServoConstants.turretServo3].setPosition(position * OuttakeConstants.turretServo3Max);
+        servos[ServoConstants.turretServo1].setPosition(position * OuttakeConstants.turretServo1Mult);
+        servos[ServoConstants.turretServo2].setPosition(position * OuttakeConstants.turretServo2Mult);
+        servos[ServoConstants.turretServo3].setPosition(position * OuttakeConstants.turretServo3Mult);
     }
 
 //    public void setServoSpeed(int index, double speed) {

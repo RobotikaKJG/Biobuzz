@@ -20,15 +20,15 @@ public class ServoConstants {
     public static final double[] servoMinPos =
             {
                     IntakeConstants.lockServoMinPos,
-                    OuttakeConstants.turretServo1Min,
-                    OuttakeConstants.turretServo2Min,
-                    OuttakeConstants.turretServo3Min
+                    0.0,
+                    0.0,
+                    0.0
             };
     public static final double[] servoMaxPos =
             {
                     IntakeConstants.lockServoMaxPos,
-                    OuttakeConstants.turretServo1Max,
-                    OuttakeConstants.turretServo2Max,
-                    OuttakeConstants.turretServo3Max
+                    OuttakeConstants.turretServo1Mult,
+                    OuttakeConstants.turretServo2Mult,
+                    OuttakeConstants.turretServo3Mult
             };
 }

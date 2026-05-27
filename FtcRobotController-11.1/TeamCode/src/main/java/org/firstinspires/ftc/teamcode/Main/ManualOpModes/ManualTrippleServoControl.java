@@ -8,10 +8,9 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValu
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoConstants;
 import org.firstinspires.ftc.teamcode.Main.Dependencies;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 
 @TeleOp
-public class TrippleServoControl extends LinearOpMode {
+public class ManualTrippleServoControl extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -23,6 +22,8 @@ public class TrippleServoControl extends LinearOpMode {
         prevGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
         int currentServo = 0;
+        double currentPos = 0.5;
+        double increment = 0.01;
         waitForStart();
 
         if (isStopRequested()) return;
@@ -33,36 +34,22 @@ public class TrippleServoControl extends LinearOpMode {
             currentGamepad1.copy(gamepad1);
             if(gamepad1.triangle) break;
             dependencies.edgeDetection.refreshGamepadIndex(currentGamepad1,prevGamepad1);
-            telemetry.addLine("Press left bumper for min pos, press right bumper for max pos");
+            telemetry.addLine("Press left bumper for decrease, press right bumper for increase");
             telemetry.addLine("Press square to cycle through servos");
             if(dependencies.edgeDetection.rising(GamepadIndexValues.leftBumper))
             {
-                dependencies.servoControl.setServoPos(1, ServoConstants.servoMinPos[1]);
-                dependencies.servoControl.setServoPos(2, ServoConstants.servoMinPos[2]);
-                dependencies.servoControl.setServoPos(3, ServoConstants.servoMinPos[3]);
+                currentPos -= increment;
             }
             if(dependencies.edgeDetection.rising(GamepadIndexValues.rightBumper))
             {
-                dependencies.servoControl.setServoPos(1, OuttakeConstants.turretServo1Max);
-                dependencies.servoControl.setServoPos(2, OuttakeConstants.turretServo2Max);
-                dependencies.servoControl.setServoPos(3, OuttakeConstants.turretServo3Max);
-            }
-            if(dependencies.edgeDetection.rising(GamepadIndexValues.square))
-            {
-                if(currentServo < 1)
-                    currentServo ++;
-                else currentServo = 0;
+                currentPos += increment;
             }
 
-            telemetry.addLine("Currently selected servo:");
-            switch (currentServo) {
-                case 0:
-                    telemetry.addLine("outtake 1");
-                    break;
-                case 1:
-                    telemetry.addLine("outtake 2");
-                    break;
-            }
+            dependencies.servoControl.setServoPos(1, ServoConstants.servoMaxPos[1] * currentPos);
+            dependencies.servoControl.setServoPos(2, ServoConstants.servoMaxPos[2] * currentPos);
+            dependencies.servoControl.setServoPos(3, ServoConstants.servoMaxPos[3] * currentPos);
+
+            telemetry.addData("current position", currentPos);
             telemetry.update();
 
         }

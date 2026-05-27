@@ -68,8 +68,12 @@ public class SensorControl {
     // Velocity Tracking variables
     private Pose2d lastPose = new Pose2d(0, 0, 0);
     private long lastVelocityUpdateTimeMs = System.currentTimeMillis();
+    public double robotVelocityXInPerSec = 0.0;
+    public double robotVelocityYInPerSec = 0.0;
     private double robotLinearVelocityInPerSec = 0.0;
     private double robotAngularVelocityRadPerSec = 0.0;
+    private double forwardBackwardSeparationDegrees = 90.0;
+    private static final double MIN_DRIVE_DIRECTION_VELOCITY_IN_PER_SEC = 6.9;
 
     private static final long LIMELIGHT_RESET_TIMEOUT_MS = 3000;
     private long resetStartTimeMs = -1;
@@ -120,12 +124,22 @@ public class SensorControl {
 
         if (dt > 0.005) { // Protect against divide-by-zero
             Pose2d currentPose = localizer.getPoseEstimate();
+            Pose2d poseVelocity = localizer.getPoseVelocity();
             double dx = currentPose.getX() - lastPose.getX();
             double dy = currentPose.getY() - lastPose.getY();
             double dHeading = normalizeRadians(currentPose.getHeading() - lastPose.getHeading());
 
-            robotLinearVelocityInPerSec = Math.hypot(dx, dy) / dt;
-            robotAngularVelocityRadPerSec = Math.abs(dHeading) / dt;
+            if (poseVelocity != null) {
+                robotVelocityXInPerSec = poseVelocity.getX();
+                robotVelocityYInPerSec = poseVelocity.getY();
+                robotLinearVelocityInPerSec = Math.hypot(robotVelocityXInPerSec, robotVelocityYInPerSec);
+                robotAngularVelocityRadPerSec = Math.abs(poseVelocity.getHeading());
+            } else {
+                robotVelocityXInPerSec = dx / dt;
+                robotVelocityYInPerSec = dy / dt;
+                robotLinearVelocityInPerSec = Math.hypot(dx, dy) / dt;
+                robotAngularVelocityRadPerSec = Math.abs(dHeading) / dt;
+            }
 
             lastPose = currentPose;
             lastVelocityUpdateTimeMs = currentTime;
@@ -244,6 +258,32 @@ public class SensorControl {
 
     public double getLocalizerAngle() {
         return localizer.getPoseEstimate().getHeading();
+    }
+
+    public boolean isDrivingForward() {
+        return isDrivingForward(forwardBackwardSeparationDegrees);
+    }
+
+    public boolean isDrivingForward(double separationDegrees) {
+        if (robotLinearVelocityInPerSec < MIN_DRIVE_DIRECTION_VELOCITY_IN_PER_SEC / 2) {
+            return false;
+        }
+
+        double clampedSeparationDegrees = Math.max(0.0, Math.min(180.0, separationDegrees));
+        double drivingAngleDegrees = Math.toDegrees(Math.atan2(robotVelocityYInPerSec, robotVelocityXInPerSec));
+        return Math.abs(normalizeDegrees(drivingAngleDegrees)) <= clampedSeparationDegrees;
+    }
+
+    public boolean isDrivingBackward() {
+        return isDrivingBackward(forwardBackwardSeparationDegrees);
+    }
+
+    public boolean isDrivingBackward(double separationDegrees) {
+        if (robotLinearVelocityInPerSec < MIN_DRIVE_DIRECTION_VELOCITY_IN_PER_SEC) {
+            return false;
+        }
+
+        return !isDrivingForward(separationDegrees);
     }
 
     public double getDistanceFromLocalizer() {

@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Circle;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeMovement.AutoIntakeMovementStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoStates;
 
@@ -8,8 +10,8 @@ public class CircleLogic {
     private final CircleControl circleControl = new CircleControl();
 
     public void update() {
-        if (turretAdjust()) return;
-        stopTurret();
+        if (intakeOn()) return;
+        intakeOff();
     }
 
     private void completeAction(){
@@ -17,15 +19,15 @@ public class CircleLogic {
         ButtonStates.setCircleState(CircleStates.idle);
     }
 
-    private boolean turretAdjust() {
-        if(OuttakeStates.getTurretServoState() != TurretServoStates.idle) return false;
-        ButtonStates.setCircleState(CircleStates.turretAdjust);
+    private boolean intakeOn() {
+        if(IntakeStates.getAutoIntakeMovementState() == AutoIntakeMovementStates.activate) return false;
+        ButtonStates.setCircleState(CircleStates.intakeOn);
         completeAction();
         return true;
     }
 
-    private void stopTurret() {
-        ButtonStates.setCircleState(CircleStates.idle);
+    private void intakeOff() {
+        ButtonStates.setCircleState(CircleStates.intakeOff);
         completeAction();
     }
 }

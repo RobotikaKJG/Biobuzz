@@ -479,8 +479,20 @@ public class SensorControl {
             }
         }
 
-        double turretAngleRad = angleToTargetRad - robotHeading;
+        double turretAngleRad = angleToTargetRad - robotHeading + getTurretTargetAngleVelocityModifier();;
         return normalizeDegrees(Math.toDegrees(turretAngleRad));
+    }
+
+    public double getTurretTargetAngleVelocityModifier(){
+        Pose2d currentVelocity = localizer.getPoseVelocity();
+        double velocityX = currentVelocity.getX();
+        double velocityY = currentVelocity.getY();
+
+        double weightedX = velocityX * 0.005;
+        double weightedY = velocityY * 0.005;
+
+        if (GlobalVariables.alliance == Alliance.Red) return weightedX - weightedY;
+        return - weightedX - weightedY;
     }
 
     private double getTrimmedAverage(List<Double> data) {

@@ -16,8 +16,8 @@ public class OuttakeConstants {
     public static double turretServo2Min = turretServoMin * turretServo2Mult;
     public static double turretServo3Min = turretServoMin * turretServo3Mult;
 
-    public static double maxDistance = 2.5;
-    public static double minDistance = 1.37;
+    public static double maxDistance = 98.43;
+    public static double minDistance = 53.94;
 
     public static double oneBallWait = 0.1;
     public static double servoOpenWait = 0.1;
@@ -27,7 +27,7 @@ public class OuttakeConstants {
 
     public static double outtakeSpeedCloseClose = 0.62;
     public static double outtakeSpeedFar = 0.89;
-    public static double outtakeSpeedCloseFar = 0.73;
+    public static double outtakeSpeedCloseFar = 0.78;
 
     public static double farShootingThreshold = 2300;
     public static double targetSpeedThreshold = 0.02;

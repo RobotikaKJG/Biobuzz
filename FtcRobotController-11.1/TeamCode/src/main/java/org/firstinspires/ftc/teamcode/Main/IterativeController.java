@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Main;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -100,11 +101,6 @@ public class IterativeController {
         sensorControl.resetLocalizerAngle();
         sensorControl.applyContinuousVisionFusion();
 
-        // Continuous vision correction: blend Pinpoint position toward Limelight when tags visible
-        // Only when turret is near center (Limelight is mounted on turret)
-//        sensorControl.continuousVisionUpdate(turretServoControl.getTurretAngleDeg());
-
-        // Use same TwoWheelTrackingLocalizer as autonomous so turret angle has tuned position
         drive.updatePoseOnly();
         sensorControl.setPositionFromRoadRunner(drive.getPoseEstimate());
     }

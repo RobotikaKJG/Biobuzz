@@ -48,20 +48,18 @@ public class OuttakeMotorControl {
                 }
                 break;
             case forwardFar:
-                motorControl.setMotorSpeed(MotorConstants.outtake1, 0.52);//OuttakeConstants.outtakeSpeedFar);
-                motorControl.setMotorSpeed(MotorConstants.outtake2, 0.52);//OuttakeConstants.outtakeSpeedFar);
+                motorControl.setMotorSpeed(MotorConstants.outtake1, OuttakeConstants.outtakeSpeedFar);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedFar);
                 break;
             case forwardClose:
                 calculateSpeed();
 
-                if (OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) {
-                    speed = speed + 0.2;
-                }
-//                motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
-//                motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
 
-                motorControl.setMotorSpeed(MotorConstants.outtake1, 0.756);
-                motorControl.setMotorSpeed(MotorConstants.outtake2, 0.756);
+                motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
+                motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
+
+//                motorControl.setMotorSpeed(MotorConstants.outtake1, 0.6);
+//                motorControl.setMotorSpeed(MotorConstants.outtake2, 0.6);
 
                 break;
             case backward:

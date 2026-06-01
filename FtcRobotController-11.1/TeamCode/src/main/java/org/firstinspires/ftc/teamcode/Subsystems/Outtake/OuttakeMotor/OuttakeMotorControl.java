@@ -55,11 +55,20 @@ public class OuttakeMotorControl {
                 calculateSpeed();
 
 
-                motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
-                motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
+//                motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
+//                motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
 
-//                motorControl.setMotorSpeed(MotorConstants.outtake1, 0.6);
-//                motorControl.setMotorSpeed(MotorConstants.outtake2, 0.6);
+//                if (OuttakeStates.getAutoCycleShootState() == AutoCycleShootStates.turnTransfer) {
+//                    motorControl.setMotorSpeed(MotorConstants.outtake1, 0.9);
+//                    motorControl.setMotorSpeed(MotorConstants.outtake2, 0.9);
+//                }
+//                else {
+//                    motorControl.setMotorSpeed(MotorConstants.outtake1, 0.68);
+//                    motorControl.setMotorSpeed(MotorConstants.outtake2, 0.68);
+//                }
+
+                motorControl.setMotorRPM(MotorConstants.outtake1, 2100);
+                motorControl.setMotorRPM(MotorConstants.outtake2, 2100);
 
                 break;
             case backward:

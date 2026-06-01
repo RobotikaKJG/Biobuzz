@@ -170,9 +170,9 @@ public class MotorControl {
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             PIDFCoefficients pidf = new PIDFCoefficients(
-                    0.02,   // P ↓ (lower to stop overshoot)
+                    100,   // P ↓ (lower to stop overshoot)
                     0.0,     // I off
-                    0.03,   // D ↑ (more damping)
+                    0.0,   // D ↑ (more damping)
                     15.0     // F unchanged
             );
 

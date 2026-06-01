@@ -4,6 +4,7 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
 import java.util.List;
@@ -52,11 +53,9 @@ public class GeneralBlueTeleOp extends LinearOpMode {
             telemetry.addData("PinpointDist", dependencies.sensorControl.getDistanceFromLocalizer());
             telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
             telemetry.addData("TurretTarget", dependencies.sensorControl.getTurretTargetAngleDegrees());
-            telemetry.addData("Front distance", dependencies.sensorControl.getDistanceFront());
-            telemetry.addData("Mid distance", dependencies.sensorControl.getDistanceMid());
-            telemetry.addData("forward", dependencies.sensorControl.isDrivingForward());
-            telemetry.addData("backward", dependencies.sensorControl.isDrivingBackward());
-            telemetry.addData("AutoIntakeMovement state", IntakeStates.getAutoIntakeMovementState());
+            telemetry.addData("OuttakeSpeed", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+            telemetry.addData("Outtake current", dependencies.motorControl.getMotorCurrent(MotorConstants.outtake1));
+            telemetry.addData("Transfer current", dependencies.motorControl.getMotorCurrent(MotorConstants.transfer));
 
             if (gamepad1.triangle) break;
             calculateLoopTime();

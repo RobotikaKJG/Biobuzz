@@ -36,9 +36,9 @@ public class SensorControl {
     private double flywheelOffset = 0.0;
 
     // Goal coordinates in INCHES
-    public static final double RedXInches = 66.0;
+    public static final double RedXInches = 62.0;
     public static final double RedYInches = 62.0;
-    public static final double BlueXInches = -66.0;
+    public static final double BlueXInches = -62.0;
     public static final double BlueYInches = 62.0;
 
     public static Pose2d RedGoalPos = new Pose2d(RedXInches, RedYInches, 0);
@@ -59,11 +59,11 @@ public class SensorControl {
     private final List<Double> rollingYaw = new ArrayList<>();
 
     // Safety Thresholds
-    private static final double MAX_ALLOWED_DISTANCE_IN = 70.0;  // Don't trust far away tags
+    private static final double MAX_ALLOWED_DISTANCE_IN = 120.0;  // Don't trust far away tags
     private static final double MIN_ALLOWED_DISTANCE_IN = 10.0;  // Don't trust if too close to lens
-    private static final double LINEAR_VELOCITY_THRESHOLD = 3.0; // Inches per second max
+    private static final double LINEAR_VELOCITY_THRESHOLD = 6.0; // Inches per second max
     private static final double ANGULAR_VELOCITY_THRESHOLD = Math.toRadians(10); // Max rad/s rotation
-    private static final double MAX_HEADING_ERROR_RAD = Math.toRadians(20); // Throw out massive outlier spikes
+    private static final double CONTINUOUS_FUSION_ALPHA = 0.1;
 
     // Velocity Tracking variables
     private Pose2d lastPose = new Pose2d(0, 0, 0);
@@ -82,7 +82,6 @@ public class SensorControl {
     private final List<Double> limelightYawReadingsRad = new ArrayList<>();
 
     // Fusion tuning: how much we nudge towards vision per frame (0.02 = 2% vision, 98% odometry)
-    private static final double CONTINUOUS_FUSION_ALPHA = 0.05;
 
     public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection, StandardTrackingWheelLocalizer localizer) {
         this.localizer = localizer;
@@ -151,20 +150,20 @@ public class SensorControl {
      * Filters noise based on velocity, distance, orientation, and a rolling trimmed average.
      */
     public void applyContinuousVisionFusion() {
-        // GATE 1: Is the robot moving too fast? (Eliminates motion blur and latency errors)
+        // GATE 1: Speed check
         if (robotLinearVelocityInPerSec > LINEAR_VELOCITY_THRESHOLD ||
                 robotAngularVelocityRadPerSec > ANGULAR_VELOCITY_THRESHOLD) {
             return;
         }
 
-        // GATE 2: Do we have a high-quality vision target?
+        // GATE 2: Cache Result
         LLResult result = limelight.getLatestResult();
         if (result == null || !result.isValid()) {
             return;
         }
 
-        // GATE 3: Is the distance to the tags reasonable?
-        double distance = getTagDistance();
+        // GATE 3: Distance check with cached result
+        double distance = getTagDistance(result);
         if (distance < MIN_ALLOWED_DISTANCE_IN || distance > MAX_ALLOWED_DISTANCE_IN) {
             return;
         }
@@ -172,7 +171,6 @@ public class SensorControl {
         Pose3D botpose = result.getBotpose();
         if (botpose == null) return;
 
-        // Extract and map coordinates identically to your autonomous reset method
         double xIn = botpose.getPosition().x * 39.37;
         double yIn = botpose.getPosition().y * 39.37;
         double headingRad = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
@@ -191,51 +189,36 @@ public class SensorControl {
             visionCalculatedHeading = normalizeRadians(headingRad + Math.toRadians(90));
         }
 
-        // Remap to match Road Runner configuration (RR X = Vision Y, RR Y = Vision X)
         double visionRR_X = visionCalculatedY;
         double visionRR_Y = visionCalculatedX;
 
-        // GATE 4: Sanity check heading deviation to destroy wild anomalous frames
         Pose2d currentPose = localizer.getPoseEstimate();
-        double headingError = Math.abs(normalizeRadians(visionCalculatedHeading - currentPose.getHeading()));
-        if (headingError > MAX_HEADING_ERROR_RAD) {
-            return;
-        }
 
-        // --- ROLLING SLIDING WINDOW BUFFER ---
         rollingX.add(visionRR_X);
         rollingY.add(visionRR_Y);
         rollingYaw.add(visionCalculatedHeading);
 
-        // Keep buffer clamped to your preferred window size (7 frames)
         if (rollingX.size() > LimelightFrames) {
             rollingX.remove(0);
             rollingY.remove(0);
             rollingYaw.remove(0);
         }
 
-        // Wait until the sliding window is full to begin filtering data
-        if (rollingX.size() < LimelightFrames) {
-            return;
-        }
+        if (rollingX.size() < LimelightFrames) return;
 
-        // Compute the Trimmed Mean across the rolling frame window to isolate outliers
         double filteredVisionX = getTrimmedAverage(rollingX);
         double filteredVisionY = getTrimmedAverage(rollingY);
         double filteredVisionHeading = getTrimmedAverage(rollingYaw);
 
-        // --- COMPLEMENTARY FUSION INJECTION ---
-        // Smoothly blend the current odometry coordinates with the vision coordinates
         double fusedX = currentPose.getX() + CONTINUOUS_FUSION_ALPHA * (filteredVisionX - currentPose.getX());
         double fusedY = currentPose.getY() + CONTINUOUS_FUSION_ALPHA * (filteredVisionY - currentPose.getY());
+        double angleDiff = normalizeRadians(filteredVisionHeading - currentPose.getHeading());
+        double fusedHeading = normalizeRadians(currentPose.getHeading() + CONTINUOUS_FUSION_ALPHA * angleDiff);
 
-        // Handle angle wrapping elegantly during blending to avoid sudden full 360 spins
-        double angleDifference = normalizeRadians(filteredVisionHeading - currentPose.getHeading());
-        double fusedHeading = normalizeRadians(currentPose.getHeading() + CONTINUOUS_FUSION_ALPHA * angleDifference);
-
-        // Inject the fused position smoothly back into Road Runner
         Pose2d fusedPose = new Pose2d(fusedX, fusedY, fusedHeading);
+        
         localizer.setPoseEstimate(fusedPose);
+        lastPose = fusedPose; // SYNC: Prevent velocity spike
 
         if (roadRunnerPoseUpdater != null) {
             roadRunnerPoseUpdater.accept(fusedPose);
@@ -320,9 +303,15 @@ public class SensorControl {
     //  Color / Range Sensor
     //
 
+    private long lastDistanceUpdateMs = 0;
+    private static final long DISTANCE_UPDATE_INTERVAL_MS = 50; // Update every 50ms
+
     public void updateDistance() {
+        if (System.currentTimeMillis() - lastDistanceUpdateMs < DISTANCE_UPDATE_INTERVAL_MS) return;
+        
         currentDistanceInchesMid = rangeSensorMid.getDistance(DistanceUnit.INCH);
         currentDistanceInchesFront = rangeSensorFront.getDistance(DistanceUnit.INCH);
+        lastDistanceUpdateMs = System.currentTimeMillis();
     }
 
     public double getDistanceMid() {
@@ -413,8 +402,11 @@ public class SensorControl {
     }
 
     public double getTagDistance() {
+        return getTagDistance(limelight.getLatestResult());
+    }
+
+    public double getTagDistance(LLResult result) {
         double y = 0;
-        LLResult result = limelightResult();
         int targetID = (GlobalVariables.alliance == Alliance.Red) ? 24 : 20;
 
         if (result != null && result.isValid()) {
@@ -424,13 +416,24 @@ public class SensorControl {
                     if (f.getFiducialId() == targetID) {
                         Pose3D botpose = result.getBotpose();
 
-                        if (GlobalVariables.alliance == Alliance.Red)
-                            y = botpose.getPosition().y - FieldHalfInches * 25.4;
-                        else
-                            y = botpose.getPosition().y + FieldHalfInches * 25.4;
+                        // Coordinate mapping fix: ensure we use meters correctly then convert to inches
+                        // Botpose coordinates are in meters
+                        double botX_m = botpose.getPosition().x;
+                        double botY_m = botpose.getPosition().y;
+                        
+                        // FieldHalfInches is in inches, convert to meters for calculation
+                        double fieldHalf_m = FieldHalfInches * 0.0254;
 
-                        double x = botpose.getPosition().x + FieldHalfInches * 25.4;
-                        return Math.sqrt(x * x + y * y) / 25.4; // Convert mm to inches
+                        double dx_m, dy_m;
+                        if (GlobalVariables.alliance == Alliance.Red) {
+                            dx_m = botX_m + fieldHalf_m;
+                            dy_m = botY_m - fieldHalf_m;
+                        } else {
+                            dx_m = botX_m + fieldHalf_m;
+                            dy_m = botY_m + fieldHalf_m;
+                        }
+
+                        return Math.sqrt(dx_m * dx_m + dy_m * dy_m) * 39.37; // Convert meters back to inches
                     }
                 }
             }

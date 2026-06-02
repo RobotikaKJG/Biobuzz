@@ -4,8 +4,6 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
@@ -39,45 +37,36 @@ public class OuttakeMotorControl {
         switch (OuttakeStates.getMotorState()) {
             case autonomous:
                 if (!GlobalVariables.far) {
-                    motorControl.setMotorSpeed(MotorConstants.outtake1, 0.64);
-                    motorControl.setMotorSpeed(MotorConstants.outtake2, 0.64);
+                    motorControl.setMotorSpeed(MotorConstants.outtake, 0.64);
                 }
                 else {
-                    motorControl.setMotorSpeed(MotorConstants.outtake1, OuttakeConstants.outtakeSpeedFar - 0.03);
-                    motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedFar - 0.03);
+                    motorControl.setMotorSpeed(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar - 0.03);
                 }
                 break;
             case forwardFar:
-                motorControl.setMotorSpeed(MotorConstants.outtake1, OuttakeConstants.outtakeSpeedFar);
-                motorControl.setMotorSpeed(MotorConstants.outtake2, OuttakeConstants.outtakeSpeedFar);
+                motorControl.setMotorSpeed(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar);
                 break;
             case forwardClose:
                 calculateSpeed();
 
 
-//                motorControl.setMotorSpeed(MotorConstants.outtake1, speed);
-//                motorControl.setMotorSpeed(MotorConstants.outtake2, speed);
+//                motorControl.setMotorSpeed(MotorConstants.outtake, speed);
 
 //                if (OuttakeStates.getAutoCycleShootState() == AutoCycleShootStates.turnTransfer) {
-//                    motorControl.setMotorSpeed(MotorConstants.outtake1, 0.9);
-//                    motorControl.setMotorSpeed(MotorConstants.outtake2, 0.9);
+//                    motorControl.setMotorSpeed(MotorConstants.outtake, 0.9);
 //                }
 //                else {
-//                    motorControl.setMotorSpeed(MotorConstants.outtake1, 0.68);
-//                    motorControl.setMotorSpeed(MotorConstants.outtake2, 0.68);
+//                    motorControl.setMotorSpeed(MotorConstants.outtake, 0.68);
 //                }
 
-                motorControl.setMotorRPM(MotorConstants.outtake1, 2100);
-                motorControl.setMotorRPM(MotorConstants.outtake2, 2100);
+                motorControl.setMotorRPM(MotorConstants.outtake, 1900);
 
                 break;
             case backward:
-                motorControl.setMotorSpeed(MotorConstants.outtake1, -0.5);
-                motorControl.setMotorSpeed(MotorConstants.outtake2, -0.5);
+                motorControl.setMotorSpeed(MotorConstants.outtake, -0.5);
                 break;
             case idle:
-                motorControl.setMotorSpeed(MotorConstants.outtake1, 0);
-                motorControl.setMotorSpeed(MotorConstants.outtake2, 0);
+                motorControl.setMotorRPM(MotorConstants.outtake, 0);
                 break;
         }
     }

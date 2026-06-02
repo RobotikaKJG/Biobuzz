@@ -23,7 +23,7 @@ public class TransferMotorControl {
     public void updateStates() {
         switch (IntakeStates.getTransferMotorState()) {
             case forward:
-                motorControl.setMotorSpeed(MotorConstants.transfer, 0.8);
+                motorControl.setMotorSpeed(MotorConstants.transfer, 0.7);
                 break;
             case backward:
                 motorControl.setMotorSpeed(MotorConstants.transfer, -1.0);

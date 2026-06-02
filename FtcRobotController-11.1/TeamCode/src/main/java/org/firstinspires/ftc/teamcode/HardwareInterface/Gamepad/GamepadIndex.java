@@ -12,6 +12,12 @@ public class GamepadIndex {
 
     // Update the boolean values based on the current state of the controls
     public void updateControls(Gamepad gamepad) {
+        if (gamepad == null) {
+            for (GamepadIndexValues control : GamepadIndexValues.values()) {
+                controls.put(control, false);
+            }
+            return;
+        }
         controls.put(GamepadIndexValues.cross, gamepad.cross);
         controls.put(GamepadIndexValues.circle, gamepad.circle);
         controls.put(GamepadIndexValues.dpadDown, gamepad.dpad_down);

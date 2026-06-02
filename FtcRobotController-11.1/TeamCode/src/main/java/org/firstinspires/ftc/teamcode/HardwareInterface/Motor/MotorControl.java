@@ -165,17 +165,13 @@ public class MotorControl {
     }
 
     public void setMotorRPM(int index, double velocityTicksPerSecond) {
+        setMotorRPM(index, velocityTicksPerSecond, new PIDFCoefficients(60, 0, 0, 11.75));
+    }
+
+    public void setMotorRPM(int index, double velocityTicksPerSecond, PIDFCoefficients pidf) {
         for (int i = 0; i < Utilities.configLength(index); i++) {
             DcMotorEx motor = motors[Utilities.motorIndex(index, i)];
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-            PIDFCoefficients pidf = new PIDFCoefficients(
-                    100,   // P ↓ (lower to stop overshoot)
-                    0.0,     // I off
-                    0.0,   // D ↑ (more damping)
-                    15.0     // F unchanged
-            );
-
             motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
             motor.setVelocity(velocityTicksPerSecond);
         }

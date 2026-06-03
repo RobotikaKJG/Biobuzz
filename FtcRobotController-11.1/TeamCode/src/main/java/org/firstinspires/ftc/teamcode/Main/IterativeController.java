@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
+import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
@@ -31,7 +32,7 @@ public class IterativeController {
     private final EdgeDetection edgeDetection;
     private final EdgeDetection gamepad2EdgeDetection;
     private final DrivebaseController drivebaseController;
-    private final StandardTrackingWheelLocalizer localizer;
+    private final TwoWheelTrackingLocalizer localizer;
     private final SampleMecanumDrive drive;
     private final ButtonControl buttonControl;
     private final ButtonControl subsystemControl2;
@@ -95,12 +96,13 @@ public class IterativeController {
         currentGamepad1.copy(gamepad1);
         edgeDetection.refreshGamepadIndex(currentGamepad1, prevGamepad1);
 
-        sensorControl.updateLocalizer();
-        sensorControl.updateDistance();
-        sensorControl.resetLocalizerAngle();
-        sensorControl.applyContinuousVisionFusion();
+//        drive.updatePoseOnly(); //only localizer update
+        sensorControl.updateLocalizer(); //update localizer and calc velocity
+//        sensorControl.updateDistance();
+//        sensorControl.resetLocalizerAngle();
+//        sensorControl.applyContinuousVisionFusion();
 
-        drive.updatePoseOnly();
+//        drive.updatePoseOnly(); //only localizer update
         sensorControl.setPositionFromRoadRunner(drive.getPoseEstimate());
     }
 

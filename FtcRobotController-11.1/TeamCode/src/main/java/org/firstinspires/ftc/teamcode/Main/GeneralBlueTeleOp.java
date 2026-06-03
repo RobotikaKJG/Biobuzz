@@ -46,16 +46,16 @@ public class GeneralBlueTeleOp extends LinearOpMode {
 
 //            dependencies.sensorControl.updateDistance();
 
-            telemetry.addData("yaw", dependencies.sensorControl.getLocalizerAngle());
-            telemetry.addData("PosX mm", dependencies.sensorControl.getLocalizerPose().getX());
-            telemetry.addData("PosY mm", dependencies.sensorControl.getLocalizerPose().getY());
-            telemetry.addData("TagDist", dependencies.sensorControl.getTagDistance());
-            telemetry.addData("PinpointDist", dependencies.sensorControl.getDistanceFromLocalizer());
-            telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
-            telemetry.addData("TurretTarget", dependencies.sensorControl.getTurretTargetAngleDegrees());
-            telemetry.addData("OuttakeSpeed", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
-            telemetry.addData("Outtake current", dependencies.motorControl.getMotorCurrent(MotorConstants.outtake1));
-            telemetry.addData("Transfer current", dependencies.motorControl.getMotorCurrent(MotorConstants.transfer));
+//            telemetry.addData("yaw", dependencies.sensorControl.getLocalizerAngle());
+//            telemetry.addData("PosX mm", dependencies.sensorControl.getLocalizerPose().getX());
+//            telemetry.addData("PosY mm", dependencies.sensorControl.getLocalizerPose().getY());
+//            telemetry.addData("TagDist", dependencies.sensorControl.getTagDistance());
+//            telemetry.addData("PinpointDist", dependencies.sensorControl.getDistanceFromLocalizer());
+//            telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
+//            telemetry.addData("TurretTarget", dependencies.sensorControl.getTurretTargetAngleDegrees());
+//            telemetry.addData("OuttakeSpeed", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+//            telemetry.addData("Outtake current", dependencies.motorControl.getMotorCurrent(MotorConstants.outtake1));
+//            telemetry.addData("Transfer current", dependencies.motorControl.getMotorCurrent(MotorConstants.transfer));
 
             if (gamepad1.triangle) break;
             calculateLoopTime();

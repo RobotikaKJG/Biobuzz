@@ -12,6 +12,8 @@ import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+
+import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
@@ -34,7 +36,9 @@ public class Dependencies {
     public final Gamepad gamepad1;
     public final Gamepad gamepad2;
     public final Telemetry telemetry;
-    public final StandardTrackingWheelLocalizer localizer;
+//    public final StandardTrackingWheelLocalizer localizer;
+    public final GoBildaPinpointDriver imu;
+    public final TwoWheelTrackingLocalizer localizer;
     public final SampleMecanumDrive drive;
     public MotorControl motorControl;
     public SensorControl sensorControl;
@@ -49,8 +53,12 @@ public class Dependencies {
         this.gamepad1 = gamepad1;
         this.gamepad2 = gamepad2;
         this.telemetry = telemetry;
-        localizer = new StandardTrackingWheelLocalizer(hardwareMap);
+//        localizer = new StandardTrackingWheelLocalizer(hardwareMap);
+//        imu = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointIMU");
         drive = new SampleMecanumDrive(hardwareMap);
+        imu = drive.getImu();
+        localizer = drive.getTwoWheelLocalizer();
+
         if (GlobalVariables.wasAutonomous) {
             drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(-45)));
         } else {

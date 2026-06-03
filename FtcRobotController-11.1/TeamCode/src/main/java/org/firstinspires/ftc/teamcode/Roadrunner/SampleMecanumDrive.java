@@ -106,6 +106,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 //        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
 //                DriveConstants.LOGO_FACING_DIR, DriveConstants.USB_FACING_DIR));
 //        imu.initialize(parameters);
+//        this.imu = imu;
         imu.initialize();
 
         leftFront = hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
@@ -167,6 +168,14 @@ public class SampleMecanumDrive extends MecanumDrive {
                 getVelocityConstraint(maxVel, MAX_ANG_VEL, TRACK_WIDTH), ACCEL_CONSTRAINT,
                 MAX_ANG_VEL, MAX_ANG_ACCEL
         );
+    }
+
+    public GoBildaPinpointDriver getImu (){
+        return imu;
+    }
+
+    public TwoWheelTrackingLocalizer getTwoWheelLocalizer(){
+        return twoWheelLocalizer;
     }
 
     public void turnAsync(double angle) {

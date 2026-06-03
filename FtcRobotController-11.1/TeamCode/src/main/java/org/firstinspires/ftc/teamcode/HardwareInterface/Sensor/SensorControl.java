@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValu
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
+import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +26,7 @@ public class SensorControl {
 
     private final Limelight3A limelight;
     private final EdgeDetection edgeDetection;
-    private final StandardTrackingWheelLocalizer localizer;
+    private final TwoWheelTrackingLocalizer localizer;
 
     public final LynxI2cColorRangeSensor rangeSensorMid;
     public final LynxI2cColorRangeSensor rangeSensorFront;
@@ -83,7 +84,7 @@ public class SensorControl {
 
     // Fusion tuning: how much we nudge towards vision per frame (0.02 = 2% vision, 98% odometry)
 
-    public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection, StandardTrackingWheelLocalizer localizer) {
+    public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection, TwoWheelTrackingLocalizer localizer) {
         this.localizer = localizer;
         this.edgeDetection = edgeDetection;
 
@@ -109,8 +110,10 @@ public class SensorControl {
     //
 
     public void updateLocalizer() {
+
         localizer.update();
         calculateRobotVelocity();
+
     }
 
     /**

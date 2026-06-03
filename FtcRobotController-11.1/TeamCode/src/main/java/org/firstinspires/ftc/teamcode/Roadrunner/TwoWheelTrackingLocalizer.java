@@ -81,8 +81,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     }
 
     public static double encoderTicksToInches(double ticks) {
-//        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
-        return 0.002004367*ticks;
+//    return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
+        return 0.0030065505 * ticks;
     }
 
     @Override

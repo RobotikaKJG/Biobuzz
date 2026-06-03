@@ -78,10 +78,12 @@ public class SampleMecanumDrive extends MecanumDrive {
     private final List<DcMotorEx> motors;
 
     private final VoltageSensor batteryVoltageSensor;
+    private final GoBildaPinpointDriver imu;
 
     private final List<Integer> lastEncPositions = new ArrayList<>();
     private final List<Integer> lastEncVels = new ArrayList<>();
     private StandardTrackingWheelLocalizer standardWheelLocalizer;
+    private TwoWheelTrackingLocalizer twoWheelLocalizer;
 
     public SampleMecanumDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
@@ -98,6 +100,13 @@ public class SampleMecanumDrive extends MecanumDrive {
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
+
+        // TODO: adjust the names of the following hardware devices to match your configuration
+        imu = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointIMU");
+//        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+//                DriveConstants.LOGO_FACING_DIR, DriveConstants.USB_FACING_DIR));
+//        imu.initialize(parameters);
+        imu.initialize();
 
         leftFront = hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
         leftRear = hardwareMap.get(DcMotorEx.class, "backLeftMotor");
@@ -131,8 +140,8 @@ public class SampleMecanumDrive extends MecanumDrive {
         List<Integer> lastTrackingEncVels = new ArrayList<>();
 
         // TODO: if desired, use setLocalizer() to change the localization method
-        standardWheelLocalizer = new StandardTrackingWheelLocalizer(hardwareMap);
-        setLocalizer(standardWheelLocalizer);
+        twoWheelLocalizer = new TwoWheelTrackingLocalizer(hardwareMap, imu);
+        setLocalizer(twoWheelLocalizer);
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(
                 follower, HEADING_PID, batteryVoltageSensor,

@@ -46,7 +46,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
 
 //            dependencies.sensorControl.updateDistance();
 
-//            telemetry.addData("yaw", dependencies.sensorControl.getLocalizerAngle());
+            telemetry.addData("yaw", dependencies.sensorControl.getLocalizerAngle());
 //            telemetry.addData("PosX mm", dependencies.sensorControl.getLocalizerPose().getX());
 //            telemetry.addData("PosY mm", dependencies.sensorControl.getLocalizerPose().getY());
 //            telemetry.addData("TagDist", dependencies.sensorControl.getTagDistance());

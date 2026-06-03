@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
 
 import java.util.ArrayList;
@@ -30,10 +29,8 @@ public class SensorControl {
 
     public final LynxI2cColorRangeSensor rangeSensorMid;
     public final LynxI2cColorRangeSensor rangeSensorFront;
-    private double currentDistanceInchesMid;
-    private double currentDistanceInchesFront;
 
-    private double ballDistanceIn = 4.0;
+    public double ballDistanceIn = 4.0;
     private double flywheelOffset = 0.0;
 
     // Goal coordinates in INCHES
@@ -110,10 +107,8 @@ public class SensorControl {
     //
 
     public void updateLocalizer() {
-
         localizer.update();
         calculateRobotVelocity();
-
     }
 
     /**
@@ -300,43 +295,6 @@ public class SensorControl {
     public Pose2d getLocalizerPose() {
         return localizer.getPoseEstimate();
     }
-
-
-    //
-    //  Color / Range Sensor
-    //
-
-    private long lastDistanceUpdateMs = 0;
-    private static final long DISTANCE_UPDATE_INTERVAL_MS = 50; // Update every 50ms
-
-    public void updateDistance() {
-        if (System.currentTimeMillis() - lastDistanceUpdateMs < DISTANCE_UPDATE_INTERVAL_MS) return;
-        
-        currentDistanceInchesMid = rangeSensorMid.getDistance(DistanceUnit.INCH);
-        currentDistanceInchesFront = rangeSensorFront.getDistance(DistanceUnit.INCH);
-        lastDistanceUpdateMs = System.currentTimeMillis();
-    }
-
-    public double getDistanceMid() {
-        return currentDistanceInchesMid;
-    }
-
-    public double getDistanceFront() {
-        return currentDistanceInchesFront;
-    }
-
-    public boolean isMidBall() {
-        return currentDistanceInchesMid < ballDistanceIn;
-    }
-
-    public boolean isFrontBall() {
-        return currentDistanceInchesFront < ballDistanceIn;
-    }
-
-    public boolean isNoBallSeen() {
-        return !isMidBall() && !isFrontBall();
-    }
-
 
     //
     //  Limelight

@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Main.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
+import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -25,7 +26,8 @@ public class LocalizationTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         ElapsedTime elapsedTime = new ElapsedTime();
-        StandardTrackingWheelLocalizer localizer = new StandardTrackingWheelLocalizer(hardwareMap);
+//        StandardTrackingWheelLocalizer localizer = new StandardTrackingWheelLocalizer(hardwareMap);
+        TwoWheelTrackingLocalizer localizer = new TwoWheelTrackingLocalizer(hardwareMap, hardwareMap.get(GoBildaPinpointDriver.class, "pinpointIMU"));
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 

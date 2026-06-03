@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
@@ -44,7 +45,7 @@ public class AutoCycleShootLogic {
 
     private void activate() {
         if(!wasIfCalled) {
-            if (sensorControl.isNoBallSeen()) {
+            if (isNoBallSeen()) {
                 OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnBack);
                 addWaitTime(OuttakeConstants.oneBallWait);
             }
@@ -80,6 +81,13 @@ public class AutoCycleShootLogic {
 
     private void deactivate() {
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
+    }
+
+    private boolean isNoBallSeen() {
+        if (sensorControl.rangeSensorFront.getDistance(DistanceUnit.INCH) < sensorControl.ballDistanceIn && sensorControl.rangeSensorMid.getDistance(DistanceUnit.INCH) < sensorControl.ballDistanceIn) {
+            return true;
+        }
+        return false;
     }
 
     private void addWaitTime(double waitTime) {

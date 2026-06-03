@@ -31,9 +31,17 @@ public class MotorControl {
     private final double[] lastWrittenSpeeds = new double[8];
     private static final double POWER_EPSILON = 0.005;
 
+    // Per-motor caches so RPM/velocity mode does not re-issue blocking config
+    // (setMode / setPIDFCoefficients) every loop. These are the single biggest
+    // per-loop I2C cost on the outtake when shooting.
+    private final DcMotor.RunMode[] lastMode = new DcMotor.RunMode[8];
+    private final PIDFCoefficients[] lastPidf = new PIDFCoefficients[8];
+    private final double[] lastWrittenVelocity = new double[8];
+
     public MotorControl(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
         java.util.Arrays.fill(lastWrittenSpeeds, Double.POSITIVE_INFINITY);
+        java.util.Arrays.fill(lastWrittenVelocity, Double.POSITIVE_INFINITY);
         getMotors();
     }
 
@@ -98,14 +106,20 @@ public class MotorControl {
             if (Math.abs(speed - lastWrittenSpeeds[mi]) > POWER_EPSILON) {
                 motors[mi].setPower(speed);
                 lastWrittenSpeeds[mi] = speed;
+                // A power write overrides any velocity target; force the next
+                // setMotorRPM to re-issue setVelocity for this motor.
+                lastWrittenVelocity[mi] = Double.POSITIVE_INFINITY;
             }
         }
     }
 
     public void setMotorMode(int index, DcMotor.RunMode mode)
     {
-        for (int i = 0; i < Utilities.configLength(index); i++)
-            motors[Utilities.motorIndex(index, i)].setMode(mode);
+        for (int i = 0; i < Utilities.configLength(index); i++) {
+            int mi = Utilities.motorIndex(index, i);
+            motors[mi].setMode(mode);
+            lastMode[mi] = mode;
+        }
     }
 
     public void setMotorPos(int index, int position){
@@ -113,9 +127,22 @@ public class MotorControl {
             motors[Utilities.motorIndex(index, i)].setTargetPosition(position);
     }
 
+    // getCurrent() is a blocking ADC read that is NOT covered by bulk caching.
+    // For telemetry/monitoring use this throttled version so it costs an I2C
+    // round-trip only every CURRENT_REFRESH_MS instead of every loop.
+    private static final long CURRENT_REFRESH_MS = 150;
+    private final long[] lastCurrentReadMs = new long[8];
+    private final double[] cachedCurrent = new double[8];
+
     public double getMotorCurrent(int index)
     {
-        return motors[Utilities.motorIndex(index, 0)].getCurrent(CurrentUnit.AMPS);
+        int mi = Utilities.motorIndex(index, 0);
+        long now = System.currentTimeMillis();
+        if (now - lastCurrentReadMs[mi] >= CURRENT_REFRESH_MS) {
+            cachedCurrent[mi] = motors[mi].getCurrent(CurrentUnit.AMPS);
+            lastCurrentReadMs[mi] = now;
+        }
+        return cachedCurrent[mi];
     }
 
     public void setMotorCurrentAlert(int index, double current)
@@ -170,11 +197,31 @@ public class MotorControl {
 
     public void setMotorRPM(int index, double velocityTicksPerSecond, PIDFCoefficients pidf) {
         for (int i = 0; i < Utilities.configLength(index); i++) {
-            DcMotorEx motor = motors[Utilities.motorIndex(index, i)];
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
-            motor.setVelocity(velocityTicksPerSecond);
+            int mi = Utilities.motorIndex(index, i);
+            DcMotorEx motor = motors[mi];
+
+            // setMode and setPIDFCoefficients are blocking config writes; only
+            // issue them when they actually change instead of every loop.
+            if (lastMode[mi] != DcMotor.RunMode.RUN_USING_ENCODER) {
+                motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                lastMode[mi] = DcMotor.RunMode.RUN_USING_ENCODER;
+            }
+            if (!pidfEquals(lastPidf[mi], pidf)) {
+                motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
+                lastPidf[mi] = pidf;
+            }
+            if (lastWrittenVelocity[mi] != velocityTicksPerSecond) {
+                motor.setVelocity(velocityTicksPerSecond);
+                lastWrittenVelocity[mi] = velocityTicksPerSecond;
+                // A velocity write overrides any power; force the next setMotors
+                // to re-issue setPower for this motor.
+                lastWrittenSpeeds[mi] = Double.POSITIVE_INFINITY;
+            }
         }
     }
 
+    private static boolean pidfEquals(PIDFCoefficients a, PIDFCoefficients b) {
+        if (a == null || b == null) return false;
+        return a.p == b.p && a.i == b.i && a.d == b.d && a.f == b.f;
+    }
 }

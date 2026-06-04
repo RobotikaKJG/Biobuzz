@@ -485,7 +485,7 @@ public class SensorControl {
             }
         }
 
-        double turretAngleRad = angleToTargetRad - robotHeading + getTurretTargetAngleVelocityModifier();;
+        double turretAngleRad = Math.toRadians(45) - robotHeading + getTurretTargetAngleVelocityModifier();;
         double targetAngle = normalizeDegrees(Math.toDegrees(turretAngleRad));
         recordInstantSection("sensor.calculateTurretTargetAngle");
         return targetAngle;

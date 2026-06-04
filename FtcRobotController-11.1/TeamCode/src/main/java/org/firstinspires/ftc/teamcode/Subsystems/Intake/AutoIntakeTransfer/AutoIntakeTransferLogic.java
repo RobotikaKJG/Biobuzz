@@ -70,8 +70,8 @@ public class AutoIntakeTransferLogic {
     private void stopTransfer() {
         updateFront();
         if (isFrontBall()) {
-            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
-//            addWaitTime(IntakeConstants.checkAgainAfter);
+            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainFront);
+            addWaitTime(IntakeConstants.checkAgainAfter);
         }
     }
 
@@ -92,10 +92,12 @@ public class AutoIntakeTransferLogic {
     }
 
     private boolean isMidBall() {
+        System.out.println("Mid: " + currentDistanceInchesMid);
         return currentDistanceInchesMid < sensorControl.ballDistanceIn;
     }
 
     private boolean isFrontBall() {
+        System.out.println("Front: " + currentDistanceInchesFront);
         return currentDistanceInchesFront < sensorControl.ballDistanceIn;
     }
 

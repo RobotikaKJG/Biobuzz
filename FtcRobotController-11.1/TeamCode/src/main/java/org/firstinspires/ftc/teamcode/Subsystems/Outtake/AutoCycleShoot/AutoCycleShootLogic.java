@@ -84,7 +84,7 @@ public class AutoCycleShootLogic {
     }
 
     private boolean isNoBallSeen() {
-        if (sensorControl.rangeSensorFront.getDistance(DistanceUnit.INCH) < sensorControl.ballDistanceIn && sensorControl.rangeSensorMid.getDistance(DistanceUnit.INCH) < sensorControl.ballDistanceIn) {
+        if (sensorControl.getFrontColorSensorDistance(DistanceUnit.INCH) < sensorControl.ballDistanceIn && sensorControl.getMidColorSensorDistance(DistanceUnit.INCH) < sensorControl.ballDistanceIn) {
             return true;
         }
         return false;

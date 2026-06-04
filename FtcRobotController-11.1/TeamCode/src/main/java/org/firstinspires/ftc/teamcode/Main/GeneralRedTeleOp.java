@@ -12,7 +12,6 @@ import java.util.List;
 @TeleOp
 public class GeneralRedTeleOp extends LinearOpMode {
 
-    private double prevTime;
     @Override
     public void runOpMode() throws InterruptedException {
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
@@ -34,35 +33,44 @@ public class GeneralRedTeleOp extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        while (opModeIsActive()) {
-            for (LynxModule hub : allHubs) {
-                hub.clearBulkCache();
+        LoopTimeLogger loopTimeLogger = new LoopTimeLogger(hardwareMap.appContext, "GeneralRedTeleOp");
+        dependencies.setLoopTimeLogger(loopTimeLogger);
+        iterativeController.setLoopTimeLogger(loopTimeLogger);
+        loopTimeLogger.start();
+
+        try {
+            while (opModeIsActive()) {
+                loopTimeLogger.startLoop();
+
+                for (LynxModule hub : allHubs) {
+                    hub.clearBulkCache();
+                }
+                loopTimeLogger.recordSection("clearBulkCache");
+
+                iterativeController.TeleOp();
+                loopTimeLogger.recordSection("iterativeController.TeleOp");
+
+                telemetry.addData("yaw", dependencies.sensorControl.getLocalizerAngle());
+                telemetry.addData("PosX mm", dependencies.sensorControl.getLocalizerPose().getX());
+                telemetry.addData("PosY mm", dependencies.sensorControl.getLocalizerPose().getY());
+                telemetry.addData("TagDist", dependencies.sensorControl.getTagDistance());
+                telemetry.addData("PinpointDist", dependencies.sensorControl.getDistanceFromLocalizer());
+                telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
+                telemetry.addData("TurretTarget", dependencies.sensorControl.getTurretTargetAngleDegrees());
+                telemetry.addData("OuttakeSpeed", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+                telemetry.addData("Outtake current", dependencies.motorControl.getMotorCurrent(MotorConstants.outtake1));
+                telemetry.addData("Transfer current", dependencies.motorControl.getMotorCurrent(MotorConstants.transfer) + dependencies.motorControl.getMotorCurrent(MotorConstants.intake));
+                loopTimeLogger.recordSection("telemetryData");
+
+                telemetry.addData("Loop time ms", loopTimeLogger.getCurrentLoopMs());
+                telemetry.update();
+                loopTimeLogger.recordSection("telemetry.update");
+                loopTimeLogger.finishLoop();
+
+                if (gamepad1.triangle) break;
             }
-
-            iterativeController.TeleOp();
-            if (gamepad1.triangle) break;
-
-            telemetry.addData("yaw", dependencies.sensorControl.getLocalizerAngle());
-            telemetry.addData("PosX mm", dependencies.sensorControl.getLocalizerPose().getX());
-            telemetry.addData("PosY mm", dependencies.sensorControl.getLocalizerPose().getY());
-            telemetry.addData("TagDist", dependencies.sensorControl.getTagDistance());
-            telemetry.addData("PinpointDist", dependencies.sensorControl.getDistanceFromLocalizer());
-            telemetry.addData("TurretAngle", dependencies.turretServoControl.getTurretAngleDeg());
-            telemetry.addData("TurretTarget", dependencies.sensorControl.getTurretTargetAngleDegrees());
-            telemetry.addData("OuttakeSpeed", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
-            telemetry.addData("Outtake current", dependencies.motorControl.getMotorCurrent(MotorConstants.outtake1));
-            telemetry.addData("Transfer current", dependencies.motorControl.getMotorCurrent(MotorConstants.transfer) + dependencies.motorControl.getMotorCurrent(MotorConstants.intake));
-
-
-            calculateLoopTime();
-            telemetry.update();
+        } finally {
+            loopTimeLogger.saveToTelemetry(telemetry);
         }
-    }
-
-    private void calculateLoopTime()
-    {
-        double currentTime = System.nanoTime() / 1_000_000.0;
-        telemetry.addData("Loop time:", currentTime - prevTime);
-        prevTime = currentTime;
     }
 }

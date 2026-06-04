@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
+import org.firstinspires.ftc.teamcode.Main.LoopTimeLogger;
 import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
 
 import java.util.ArrayList;
@@ -22,10 +23,15 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class SensorControl {
+    private static final String PINPOINT_NAME = "pinpointIMU";
+    private static final String LIMELIGHT_NAME = "limelight";
+    private static final String FRONT_COLOR_SENSOR_NAME = "FrontColorSensor";
+    private static final String MID_COLOR_SENSOR_NAME = "MidColorSensor";
 
     private final Limelight3A limelight;
     private final EdgeDetection edgeDetection;
     private final TwoWheelTrackingLocalizer localizer;
+    private LoopTimeLogger loopTimeLogger;
 
     public final LynxI2cColorRangeSensor rangeSensorMid;
     public final LynxI2cColorRangeSensor rangeSensorFront;
@@ -85,11 +91,15 @@ public class SensorControl {
         this.localizer = localizer;
         this.edgeDetection = edgeDetection;
 
-        rangeSensorMid = hardwareMap.get(LynxI2cColorRangeSensor.class, "MidColorSensor");
-        rangeSensorFront = hardwareMap.get(LynxI2cColorRangeSensor.class, "FrontColorSensor");
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        rangeSensorMid = hardwareMap.get(LynxI2cColorRangeSensor.class, MID_COLOR_SENSOR_NAME);
+        rangeSensorFront = hardwareMap.get(LynxI2cColorRangeSensor.class, FRONT_COLOR_SENSOR_NAME);
+        limelight = hardwareMap.get(Limelight3A.class, LIMELIGHT_NAME);
 
         setInitialLocalisationAngle();
+    }
+
+    public void setLoopTimeLogger(LoopTimeLogger loopTimeLogger) {
+        this.loopTimeLogger = loopTimeLogger;
     }
 
     private void setInitialLocalisationAngle() {
@@ -107,8 +117,13 @@ public class SensorControl {
     //
 
     public void updateLocalizer() {
+        long startNs = System.nanoTime();
         localizer.update();
+        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.update", startNs);
+
+        startNs = System.nanoTime();
         calculateRobotVelocity();
+        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.calculateRobotVelocity", startNs);
     }
 
     /**
@@ -120,8 +135,13 @@ public class SensorControl {
         double dt = (currentTime - lastVelocityUpdateTimeMs) / 1000.0;
 
         if (dt > 0.005) { // Protect against divide-by-zero
+            long startNs = System.nanoTime();
             Pose2d currentPose = localizer.getPoseEstimate();
+            recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
+
+            startNs = System.nanoTime();
             Pose2d poseVelocity = localizer.getPoseVelocity();
+            recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseVelocity", startNs);
             double dx = currentPose.getX() - lastPose.getX();
             double dy = currentPose.getY() - lastPose.getY();
             double dHeading = normalizeRadians(currentPose.getHeading() - lastPose.getHeading());
@@ -155,7 +175,9 @@ public class SensorControl {
         }
 
         // GATE 2: Cache Result
+        long startNs = System.nanoTime();
         LLResult result = limelight.getLatestResult();
+        recordHardwareDuration("sensor." + LIMELIGHT_NAME + ".getLatestResult", startNs);
         if (result == null || !result.isValid()) {
             return;
         }
@@ -190,7 +212,9 @@ public class SensorControl {
         double visionRR_X = visionCalculatedY;
         double visionRR_Y = visionCalculatedX;
 
+        startNs = System.nanoTime();
         Pose2d currentPose = localizer.getPoseEstimate();
+        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
 
         rollingX.add(visionRR_X);
         rollingY.add(visionRR_Y);
@@ -238,7 +262,10 @@ public class SensorControl {
     }
 
     public double getLocalizerAngle() {
-        return localizer.getPoseEstimate().getHeading();
+        long startNs = System.nanoTime();
+        double heading = localizer.getPoseEstimate().getHeading();
+        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getAngle", startNs);
+        return heading;
     }
 
     public boolean isDrivingForward() {
@@ -268,7 +295,9 @@ public class SensorControl {
     }
 
     public double getDistanceFromLocalizer() {
+        long startNs = System.nanoTime();
         Pose2d currentPose = localizer.getPoseEstimate();
+        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
         double robotX = currentPose.getY();
         double robotY = currentPose.getX();
 
@@ -293,7 +322,10 @@ public class SensorControl {
     }
 
     public Pose2d getLocalizerPose() {
-        return localizer.getPoseEstimate();
+        long startNs = System.nanoTime();
+        Pose2d pose = localizer.getPoseEstimate();
+        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
+        return pose;
     }
 
     //
@@ -306,7 +338,10 @@ public class SensorControl {
     }
 
     public LLResult limelightResult() {
-        return limelight.getLatestResult();
+        long startNs = System.nanoTime();
+        LLResult result = limelight.getLatestResult();
+        recordHardwareDuration("sensor." + LIMELIGHT_NAME + ".getLatestResult", startNs);
+        return result;
     }
 
     public boolean resetLocalizerWithLimelight() {
@@ -317,7 +352,9 @@ public class SensorControl {
             return true;
         }
 
+        long startNs = System.nanoTime();
         LLResult result = limelight.getLatestResult();
+        recordHardwareDuration("sensor." + LIMELIGHT_NAME + ".getLatestResult", startNs);
         if (result != null && result.isValid()) {
             Pose3D botpose = result.getBotpose();
             if (botpose != null) {
@@ -363,7 +400,10 @@ public class SensorControl {
     }
 
     public double getTagDistance() {
-        return getTagDistance(limelight.getLatestResult());
+        long startNs = System.nanoTime();
+        LLResult result = limelight.getLatestResult();
+        recordHardwareDuration("sensor." + LIMELIGHT_NAME + ".getLatestResult", startNs);
+        return getTagDistance(result);
     }
 
     public double getTagDistance(LLResult result) {
@@ -419,7 +459,9 @@ public class SensorControl {
     //
 
     public double getTurretTargetAngleDegrees() {
+        long startNs = System.nanoTime();
         Pose2d currentPose = localizer.getPoseEstimate();
+        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
         double robotX = currentPose.getY();
         double robotY = currentPose.getX();
         double robotHeading = currentPose.getHeading();
@@ -444,11 +486,15 @@ public class SensorControl {
         }
 
         double turretAngleRad = angleToTargetRad - robotHeading + getTurretTargetAngleVelocityModifier();;
-        return normalizeDegrees(Math.toDegrees(turretAngleRad));
+        double targetAngle = normalizeDegrees(Math.toDegrees(turretAngleRad));
+        recordInstantSection("sensor.calculateTurretTargetAngle");
+        return targetAngle;
     }
 
     public double getTurretTargetAngleVelocityModifier(){
+        long startNs = System.nanoTime();
         Pose2d currentVelocity = localizer.getPoseVelocity();
+        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseVelocity", startNs);
         double velocityX = currentVelocity.getX();
         double velocityY = currentVelocity.getY();
 
@@ -457,6 +503,20 @@ public class SensorControl {
 
         if (GlobalVariables.alliance == Alliance.Red) return weightedX - weightedY;
         return - weightedX - weightedY;
+    }
+
+    public double getFrontColorSensorDistance(DistanceUnit unit) {
+        long startNs = System.nanoTime();
+        double distance = rangeSensorFront.getDistance(unit);
+        recordHardwareDuration("sensor." + FRONT_COLOR_SENSOR_NAME + ".getDistance", startNs);
+        return distance;
+    }
+
+    public double getMidColorSensorDistance(DistanceUnit unit) {
+        long startNs = System.nanoTime();
+        double distance = rangeSensorMid.getDistance(unit);
+        recordHardwareDuration("sensor." + MID_COLOR_SENSOR_NAME + ".getDistance", startNs);
+        return distance;
     }
 
     private double getTrimmedAverage(List<Double> data) {
@@ -485,5 +545,17 @@ public class SensorControl {
         while (radians > Math.PI) radians -= 2 * Math.PI;
         while (radians < -Math.PI) radians += 2 * Math.PI;
         return radians;
+    }
+
+    private void recordHardwareDuration(String name, long startNs) {
+        if (loopTimeLogger != null) {
+            loopTimeLogger.recordDurationNs(name, System.nanoTime() - startNs);
+        }
+    }
+
+    private void recordInstantSection(String name) {
+        if (loopTimeLogger != null) {
+            loopTimeLogger.recordDurationNs(name, 0);
+        }
     }
 }

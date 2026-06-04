@@ -42,6 +42,7 @@ public class IterativeController {
     private final SensorControl sensorControl;
     private final TurretServoControl turretServoControl;
     private final RevBlinkinLedDriver led;
+    private LoopTimeLogger loopTimeLogger;
 
     public IterativeController(Dependencies dependencies) {
         drivebaseController = dependencies.createDrivebaseController();
@@ -72,8 +73,13 @@ public class IterativeController {
         ButtonStates.setInitialStates();
     }
 
+    public void setLoopTimeLogger(LoopTimeLogger loopTimeLogger) {
+        this.loopTimeLogger = loopTimeLogger;
+    }
+
     public void TeleOp() {
         updateCommonValues();
+        recordSection("iterative.updateCommonValues");
 
         if (edgeDetection.rising(GamepadIndexValues.rightStickButton))
             GlobalVariables.far = !GlobalVariables.far;
@@ -81,25 +87,43 @@ public class IterativeController {
         led.setPattern(GlobalVariables.far
                 ? RevBlinkinLedDriver.BlinkinPattern.SKY_BLUE
                 : RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+        recordSection("led.setPattern.led");
 
         drivebaseController.updateState();
+        recordSection("drivebaseController.updateState");
+
         buttonControl.update();
+        recordSection("buttonControl.update");
 
         intakeControl.update();
+        recordSection("intakeControl.update");
+
         outtakeControl.update();
+        recordSection("outtakeControl.update");
 
         // Write all motor powers ONCE, after all subsystems have computed their values
         motorControl.setMotors(MotorConstants.all);
+        recordSection("motorControl.setMotors.all");
     }
 
     private void updateCommonValues() {
         prevGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
         edgeDetection.refreshGamepadIndex(currentGamepad1, prevGamepad1);
+        recordSection("gamepad.edgeDetection.refresh");
 
         sensorControl.updateLocalizer(); // shared drive/SensorControl localizer update
+        recordSection("sensorControl.updateLocalizer");
+
         sensorControl.resetLocalizerAngle();
+        recordSection("sensorControl.resetLocalizerAngle");
 //        sensorControl.applyContinuousVisionFusion();
+    }
+
+    private void recordSection(String name) {
+        if (loopTimeLogger != null) {
+            loopTimeLogger.recordSection(name);
+        }
     }
 
     private boolean gamepad1Active(){

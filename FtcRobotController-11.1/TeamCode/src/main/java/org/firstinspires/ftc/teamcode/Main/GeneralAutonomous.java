@@ -35,17 +35,35 @@ public class GeneralAutonomous extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        while (opModeIsActive()) {
-            //Emergency stop.
+        LoopTimeLogger loopTimeLogger = new LoopTimeLogger(hardwareMap.appContext, "GeneralAutonomous");
+        dependencies.setLoopTimeLogger(loopTimeLogger);
+        loopTimeLogger.start();
 
-            if (gamepad1.triangle)
-                break;
+        try {
+            while (opModeIsActive()) {
+                loopTimeLogger.startLoop();
+                //Emergency stop.
 
-//            telemetry.addData("Webcam px", dependencies.sensorControl.getBallOffsetPx());
-            autonomousControl.runAutonomous();
-            drive.update();
-            telemetry.addData("outtake vel", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
-            telemetry.update();
+//                telemetry.addData("Webcam px", dependencies.sensorControl.getBallOffsetPx());
+                autonomousControl.runAutonomous();
+                loopTimeLogger.recordSection("autonomousControl.runAutonomous");
+
+                drive.update();
+                loopTimeLogger.recordSection("drive.update");
+
+                telemetry.addData("outtake vel", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+                loopTimeLogger.recordSection("telemetryData");
+
+                telemetry.addData("Loop time ms", loopTimeLogger.getCurrentLoopMs());
+                telemetry.update();
+                loopTimeLogger.recordSection("telemetry.update");
+                loopTimeLogger.finishLoop();
+
+                if (gamepad1.triangle)
+                    break;
+            }
+        } finally {
+            loopTimeLogger.saveToTelemetry(telemetry);
         }
     }
 

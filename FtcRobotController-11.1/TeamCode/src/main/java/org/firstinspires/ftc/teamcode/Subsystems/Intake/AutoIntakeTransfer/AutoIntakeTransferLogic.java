@@ -105,12 +105,12 @@ public class AutoIntakeTransferLogic {
 
     private void updateFront() {
         if (System.currentTimeMillis() - lastDistanceUpdateMs < DISTANCE_UPDATE_INTERVAL_MS) return;
-        currentDistanceInchesFront = sensorControl.rangeSensorFront.getDistance(DistanceUnit.INCH);
+        currentDistanceInchesFront = sensorControl.getFrontColorSensorDistance(DistanceUnit.INCH);
         lastDistanceUpdateMs = System.currentTimeMillis();
     }
     private void updateMid() {
         if (System.currentTimeMillis() - lastDistanceUpdateMs < DISTANCE_UPDATE_INTERVAL_MS) return;
-        currentDistanceInchesMid = sensorControl.rangeSensorMid.getDistance(DistanceUnit.INCH);
+        currentDistanceInchesMid = sensorControl.getMidColorSensorDistance(DistanceUnit.INCH);
         lastDistanceUpdateMs = System.currentTimeMillis();
     }
 

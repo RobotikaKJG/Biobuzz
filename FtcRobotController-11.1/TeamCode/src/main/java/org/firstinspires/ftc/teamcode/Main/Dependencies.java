@@ -71,6 +71,12 @@ public class Dependencies {
         turretServoControl = new TurretServoControl(servoControl, sensorControl);
     }
 
+    public void setLoopTimeLogger(LoopTimeLogger loopTimeLogger) {
+        motorControl.setLoopTimeLogger(loopTimeLogger);
+        sensorControl.setLoopTimeLogger(loopTimeLogger);
+        servoControl.setLoopTimeLogger(loopTimeLogger);
+    }
+
     public Drivebase createDrivebase() {
         return new Drivebase(gamepad1,gamepad2, motorControl, sensorControl);
     }

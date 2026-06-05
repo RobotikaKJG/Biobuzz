@@ -485,7 +485,9 @@ public class SensorControl {
             }
         }
 
-        double turretAngleRad = Math.toRadians(45) - robotHeading + getTurretTargetAngleVelocityModifier();;
+//        double turretAngleRad = Math.toRadians(45) - robotHeading + getTurretTargetAngleVelocityModifier(); // this does always 45
+        double turretAngleRad = angleToTargetRad - robotHeading + getTurretTargetAngleVelocityModifier(); // this does correct angle
+
         double targetAngle = normalizeDegrees(Math.toDegrees(turretAngleRad));
         recordInstantSection("sensor.calculateTurretTargetAngle");
         return targetAngle;
@@ -507,16 +509,16 @@ public class SensorControl {
 
     public double getFrontColorSensorDistance(DistanceUnit unit) {
         long startNs = System.nanoTime();
-        double distance = rangeSensorFront.getDistance(unit);
+//        double distance = rangeSensorFront.getDistance(unit);
         recordHardwareDuration("sensor." + FRONT_COLOR_SENSOR_NAME + ".getDistance", startNs);
-        return distance;
+        return 0;//distance;
     }
 
     public double getMidColorSensorDistance(DistanceUnit unit) {
         long startNs = System.nanoTime();
-        double distance = rangeSensorMid.getDistance(unit);
+//        double distance = rangeSensorMid.getDistance(unit);
         recordHardwareDuration("sensor." + MID_COLOR_SENSOR_NAME + ".getDistance", startNs);
-        return distance;
+        return 0;// distance;
     }
 
     private double getTrimmedAverage(List<Double> data) {

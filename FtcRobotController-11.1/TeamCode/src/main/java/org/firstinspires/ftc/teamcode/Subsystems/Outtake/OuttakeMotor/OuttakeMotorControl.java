@@ -59,7 +59,7 @@ public class OuttakeMotorControl {
 //                    motorControl.setMotorSpeed(MotorConstants.outtake, 0.68);
 //                }
 
-                motorControl.setMotorRPM(MotorConstants.outtake, 2300);
+                motorControl.setMotorRPM(MotorConstants.outtake, 1900);
 
                 break;
             case backward:

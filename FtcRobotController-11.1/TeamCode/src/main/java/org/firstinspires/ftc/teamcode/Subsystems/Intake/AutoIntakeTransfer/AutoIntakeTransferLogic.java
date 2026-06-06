@@ -1,22 +1,27 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer;
 
+import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
+import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
-/**
- * Ball-loading state machine. Reads ONLY the mid (back) sensor until a ball is
- * confirmed there, then ONLY the front sensor until a ball is confirmed there
- * (= 3 balls loaded) and stops. The sensor reads are centralized, throttled and
- * shared in {@link SensorControl}, so this never does a redundant I2C round-trip
- * (and "no ball" defaults to infinity, not 0, before the first real read).
- */
 public class AutoIntakeTransferLogic {
+    private static final String TAG = "Intake"; // RobotLog tag for the loading-sequence trace
     private double currentWait = 0;
-    private final SensorControl sensorControl;
-    private final Gamepad gamepad1;
+    private boolean wasIfCalled = false;
+    private SensorControl sensorControl;
+    private Gamepad gamepad1;
+
+    private double currentDistanceInchesMid;
+    private double currentDistanceInchesFront;
+    private long lastDistanceUpdateMs = 0;
+    private static final long DISTANCE_UPDATE_INTERVAL_MS = 50; // Update every 50ms
 
     public AutoIntakeTransferLogic(SensorControl sensorControl, Gamepad gamepad1) {
         this.sensorControl = sensorControl;
@@ -46,40 +51,76 @@ public class AutoIntakeTransferLogic {
     }
 
     private void activate() {
-        if (sensorControl.isMidBall()) {
+        updateMid();
+        if (isMidBall()) {
+            RobotLog.ii(TAG, "activate: MID ball (mid=%.1f) -> checkAgainMid", currentDistanceInchesMid);
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainMid);
             addWaitTime(IntakeConstants.checkAgainAfter);
         }
     }
 
     private void checkAgainMid() {
+        updateMid();
         if (currentWait > getSeconds()) return;
-        if (sensorControl.isMidBall()) {
+        if (isMidBall()) {
+            RobotLog.ii(TAG, "checkAgainMid: confirmed (mid=%.1f) -> stopTransfer (transfer off)", currentDistanceInchesMid);
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stopTransfer);
-        } else {
+        }
+        else {
+            RobotLog.ii(TAG, "checkAgainMid: lost (mid=%.1f) -> activate", currentDistanceInchesMid);
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
         }
     }
 
     private void stopTransfer() {
-        if (sensorControl.isFrontBall()) {
+        updateFront();
+        if (isFrontBall()) {
+            RobotLog.ii(TAG, "stopTransfer: FRONT ball (front=%.1f) -> checkAgainFront", currentDistanceInchesFront);
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainFront);
             addWaitTime(IntakeConstants.checkAgainAfter);
         }
     }
 
     private void checkAgainFront() {
+        updateFront();
         if (currentWait > getSeconds()) return;
-        if (sensorControl.isFrontBall()) {
+        if (isFrontBall()) {
+            RobotLog.ii(TAG, "checkAgainFront: confirmed (front=%.1f) -> stop (3 balls loaded)", currentDistanceInchesFront);
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
-        } else {
+        }
+        else {
+            RobotLog.ii(TAG, "checkAgainFront: lost (front=%.1f) -> stopTransfer", currentDistanceInchesFront);
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stopTransfer);
         }
     }
 
     private void stop() {
+        RobotLog.ii(TAG, "stop: intake complete (mid=%.1f front=%.1f)", currentDistanceInchesMid, currentDistanceInchesFront);
         gamepad1.rumble(300);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
+    }
+
+    private boolean isMidBall() {
+        return currentDistanceInchesMid < sensorControl.ballDistanceIn;
+    }
+
+    private boolean isFrontBall() {
+        return currentDistanceInchesFront < sensorControl.ballDistanceIn;
+    }
+
+    private boolean isNoBallSeen() {
+        return !isMidBall() && !isFrontBall();
+    }
+
+    private void updateFront() {
+        if (System.currentTimeMillis() - lastDistanceUpdateMs < DISTANCE_UPDATE_INTERVAL_MS) return;
+        currentDistanceInchesFront = sensorControl.getFrontColorSensorDistance(DistanceUnit.INCH);
+        lastDistanceUpdateMs = System.currentTimeMillis();
+    }
+    private void updateMid() {
+        if (System.currentTimeMillis() - lastDistanceUpdateMs < DISTANCE_UPDATE_INTERVAL_MS) return;
+        currentDistanceInchesMid = sensorControl.getMidColorSensorDistance(DistanceUnit.INCH);
+        lastDistanceUpdateMs = System.currentTimeMillis();
     }
 
     private void addWaitTime(double waitTime) {

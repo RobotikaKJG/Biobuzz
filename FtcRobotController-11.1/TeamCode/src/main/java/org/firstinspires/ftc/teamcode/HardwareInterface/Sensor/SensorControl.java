@@ -479,6 +479,10 @@ public class SensorControl {
         if (currentVelocity == null) return 0.0; // no velocity estimate yet -> no lead modifier (avoids NPE)
         double velocityX = currentVelocity.getX();
         double velocityY = currentVelocity.getY();
+        if (Double.isNaN(velocityX) || Double.isNaN(velocityY)
+                || Double.isInfinite(velocityX) || Double.isInfinite(velocityY)) {
+            return 0.0; // bad velocity estimate -> no lead modifier
+        }
 
         double weightedX = velocityX * 0.005;
         double weightedY = velocityY * 0.005;

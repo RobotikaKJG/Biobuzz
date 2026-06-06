@@ -32,13 +32,27 @@ public class TurretServoControl {
             return;
         }
 
-        targetAngleDeg = clamp(sensorControl.getTurretTargetAngleDegrees(), turretLimitRight, turretLimitLeft);
+        double target = sensorControl.getTurretTargetAngleDegrees();
+        if (!isFinite(target)) {
+            // Pose/velocity glitch produced a bad angle. Hold the last good aim rather
+            // than writing an illegal (NaN) servo position. Root cause is guarded in the
+            // Pinpoint driver; this is defense-in-depth so the turret never errors.
+            return;
+        }
+
+        targetAngleDeg = clamp(target, turretLimitRight, turretLimitLeft);
         turretAngleDeg = getCurrentTurretAngleDeg();
 
-        targetServoPos = (targetAngleDeg * gearRatio) / servoTravel + 0.5;
-        targetServoPos = clamp(targetServoPos, 0.01, 0.99);
-
+        double pos = clamp((targetAngleDeg * gearRatio) / servoTravel + 0.5, 0.01, 0.99);
+        if (!isFinite(pos)) {
+            return; // never write NaN to the servo
+        }
+        targetServoPos = pos;
         servoControl.setTurretServosPos(targetServoPos);
+    }
+
+    private static boolean isFinite(double v) {
+        return !Double.isNaN(v) && !Double.isInfinite(v);
     }
 
     private double getCurrentTurretAngleDeg() {

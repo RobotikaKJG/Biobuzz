@@ -52,6 +52,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     private int loopTime       = 0;
     private int xEncoderValue  = 0;
     private int yEncoderValue  = 0;
+    private long lastCorruptReadLogMs = 0; // throttle for corrupt-read warnings
     private float xPosition    = 0;
     private float yPosition    = 0;
     private float hOrientation = 0;
@@ -254,17 +255,41 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
      */
     public void update(){
         byte[] bArr = deviceClient.read(Register.BULK_READ.bVal, 40);
+        // A failed/corrupt I2C read (more likely under heavy Lynx-bus load) can return
+        // bytes that decode to NaN/Inf. If accepted, the fused pose/heading gets poisoned
+        // and stays NaN forever, freezing anything that uses it (e.g. the turret). So
+        // validate the whole packet and DISCARD it on any bad value — keep the last good.
+        if (bArr == null || bArr.length < 40) return;
         ByteBuffer buf = ByteBuffer.wrap(bArr).order(ByteOrder.LITTLE_ENDIAN);
+        float xPos = buf.getFloat(16);
+        float yPos = buf.getFloat(20);
+        float hOri = buf.getFloat(24);
+        float xVel = buf.getFloat(28);
+        float yVel = buf.getFloat(32);
+        float hVel = buf.getFloat(36);
+        if (badFloat(xPos) || badFloat(yPos) || badFloat(hOri)
+                || badFloat(xVel) || badFloat(yVel) || badFloat(hVel)) {
+            long now = System.currentTimeMillis();
+            if (now - lastCorruptReadLogMs >= 1000) {
+                com.qualcomm.robotcore.util.RobotLog.ww("Pinpoint", "discarded corrupt read (NaN/Inf); keeping last pose");
+                lastCorruptReadLogMs = now;
+            }
+            return;
+        }
         deviceStatus  = buf.getInt(0);
         loopTime      = buf.getInt(4);
         xEncoderValue = buf.getInt(8);
         yEncoderValue = buf.getInt(12);
-        xPosition     = buf.getFloat(16);
-        yPosition     = buf.getFloat(20);
-        hOrientation  = buf.getFloat(24);
-        xVelocity     = buf.getFloat(28);
-        yVelocity     = buf.getFloat(32);
-        hVelocity     = buf.getFloat(36);
+        xPosition     = xPos;
+        yPosition     = yPos;
+        hOrientation  = hOri;
+        xVelocity     = xVel;
+        yVelocity     = yVel;
+        hVelocity     = hVel;
+    }
+
+    private static boolean badFloat(float v) {
+        return Float.isNaN(v) || Float.isInfinite(v);
     }
 
     /**

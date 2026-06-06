@@ -10,11 +10,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 public class OuttakeStates {
     private static SubsystemState outtakeState = SubsystemState.Idle;
     private static OuttakeMotorStates outtakeMotorState = OuttakeMotorStates.idle;
-    private static AutoCycleShootStates autoCycleShootStates = AutoCycleShootStates.idle;
+    private static volatile AutoCycleShootStates autoCycleShootStates = AutoCycleShootStates.idle; // read cross-thread (cycle timer)
     private static TurretServoStates turretServoState = TurretServoStates.idle;
     private static AutoOuttakeFarCloseStates autoOuttakeFarCloseState = AutoOuttakeFarCloseStates.idle;
     private static AutoResetPosStates autoResetPosState = AutoResetPosStates.idle;
-    private static boolean turretTrackingEnabled = true;
+    private static volatile boolean turretTrackingEnabled = true; // read cross-thread (telemetry)
 
     public static void setInitialStates() {
         outtakeState = SubsystemState.Idle;

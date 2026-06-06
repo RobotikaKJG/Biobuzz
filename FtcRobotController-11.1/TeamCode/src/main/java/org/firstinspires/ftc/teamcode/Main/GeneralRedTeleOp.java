@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 import java.util.List;
@@ -53,6 +54,8 @@ public class GeneralRedTeleOp extends LinearOpMode {
         turretThread.start();
 
         LoopTimer driveTimer = new LoopTimer(10);
+        CycleTimer cycleTimer = new CycleTimer(10);
+        AutoCycleShootStates prevShootState = AutoCycleShootStates.idle;
         long lastTelemetryMs = 0;
         long prevLoopNs = System.nanoTime();
         long driveErrors = 0;
@@ -79,6 +82,18 @@ public class GeneralRedTeleOp extends LinearOpMode {
                     }
                 }
 
+                // Scoring cycle time: each idle -> active transition of the shoot sequence is
+                // one "shoot". recordEvent discards >20s gaps (idle stretches) as non-cycles.
+                AutoCycleShootStates shootState = OuttakeStates.getAutoCycleShootState();
+                if (prevShootState == AutoCycleShootStates.idle && shootState != AutoCycleShootStates.idle) {
+                    long cyc = cycleTimer.recordEvent(System.currentTimeMillis());
+                    if (cyc >= 0) {
+                        RobotLog.ii("CycleTimer", "shoot cycle %.2fs (avg %.2fs, n=%d)",
+                                cyc / 1000.0, cycleTimer.getAvgSec(), cycleTimer.getCount());
+                    }
+                }
+                prevShootState = shootState;
+
                 if (gamepad1.triangle) break;
 
                 // Throttle telemetry so it never caps the fast drive loop.
@@ -99,6 +114,7 @@ public class GeneralRedTeleOp extends LinearOpMode {
                         telemetry.addData("Control lastErr", controlThread.getErrorCount() + "x " + controlThread.getLastError());
                     if (driveErrors > 0)
                         telemetry.addData("Drive errors", driveErrors);
+                    telemetry.addLine(cycleTimer.toTable());
                     telemetry.update();
                     lastTelemetryMs = nowMs;
                 }

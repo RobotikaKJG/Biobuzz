@@ -179,23 +179,6 @@ connect_hub() {
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
-MODE="${1:-deploy}"
-
-# `./deploy.sh logs` — connect to the hub and pull the logcat ring buffer, which
-# holds the RobotLog output (TurretThread / ControlThread / DriveLoop). Run it
-# right after a match/test (before redeploying) so the buffer still has the run.
-if [[ "$MODE" == "logs" ]]; then
-    connect_hub
-    mkdir -p "$SCRIPT_DIR/logs"
-    LOG_FILE="$SCRIPT_DIR/logs/robot-$(date +%Y%m%d-%H%M%S).log"
-    log "Pulling logcat -> $LOG_FILE"
-    adb -s "$HUB" logcat -d > "$LOG_FILE" 2>&1
-    log "Pulled $(wc -l < "$LOG_FILE" | tr -d ' ') lines"
-    log "── Recent TurretThread / ControlThread / DriveLoop lines ──"
-    grep -E "TurretThread|ControlThread|DriveLoop" "$LOG_FILE" | tail -40 || log "  (none found in buffer)"
-    exit 0
-fi
-
 log "Building APK..."
 ./gradlew assembleDebug -q
 log "Build complete"
@@ -207,9 +190,24 @@ install_output=$(adb -s "$HUB" install -r -g "$APK" 2>&1)
 install_exit=$?
 echo "$install_output" | while IFS= read -r line; do log "  $line"; done
 
-if [[ $install_exit -eq 0 && "$install_output" == *"Success"* ]]; then
-    log "Deploy complete!"
-else
+if [[ $install_exit -ne 0 || "$install_output" != *"Success"* ]]; then
     log "Install failed (exit $install_exit)"
     exit 1
 fi
+log "Deploy complete!"
+
+# Still connected here (the EXIT trap restores WiFi afterwards). Pull the logcat
+# ring buffer — RobotLog output: TurretThread / ControlThread / DriveLoop /
+# CycleTimer — from the run *before* this deploy, then clear it so the next run
+# logs cleanly. No arguments needed; this happens every deploy.
+mkdir -p "$SCRIPT_DIR/logs"
+LOG_FILE="$SCRIPT_DIR/logs/robot-$(date +%Y%m%d-%H%M%S).log"
+log "Pulling logcat -> logs/$(basename "$LOG_FILE")"
+adb -s "$HUB" logcat -d > "$LOG_FILE" 2>&1 || true
+log "Pulled $(wc -l < "$LOG_FILE" 2>/dev/null | tr -d ' ') lines"
+recent=$(grep -E "TurretThread|ControlThread|DriveLoop|CycleTimer" "$LOG_FILE" 2>/dev/null | tail -30)
+if [[ -n "$recent" ]]; then
+    log "── Recent robot-loop log lines ──"
+    echo "$recent"
+fi
+adb -s "$HUB" logcat -c 2>/dev/null || true   # clear buffer so the next run starts clean

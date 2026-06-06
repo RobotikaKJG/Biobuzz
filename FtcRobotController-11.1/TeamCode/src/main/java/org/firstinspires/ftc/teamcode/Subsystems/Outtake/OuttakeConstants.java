@@ -23,6 +23,12 @@ public class OuttakeConstants {
     public static double servoOpenWait = 0.1;
     public static double deactivateAfter = 0.3;
 
+    // TeleOp auto-finish for a shot: keep feeding until both ball sensors read empty
+    // (with a short min so a stale reading can't end it instantly), or until the max
+    // feed time elapses as a safety fallback — then stop and close the gate.
+    public static double shootFeedMinSec = 0.15;
+    public static double shootFeedMaxSec = 2.0;
+
     public static double resetWait = 100.0;
 
     public static double outtakeSpeedCloseClose = 0.62;

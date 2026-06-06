@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class AutoCycleShootLogic {
     private double currentWait = 0;
+    private double feedStartSec = 0;
     private boolean wasIfCalled = false;
     private SensorControl sensorControl;
     private MotorControl motorControl;
@@ -55,15 +56,32 @@ public class AutoCycleShootLogic {
         }
         if(currentWait > getSeconds()) return;
         wasIfCalled = false;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
+        startFeed();
     }
 
     private void turnBack() {
         if(currentWait > getSeconds()) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
+        startFeed();
     }
 
     private void turnTransfer() {
+        // TeleOp auto-finish: feed until the balls are gone (both sensors empty —
+        // including the mid/back one that fills first when intaking), or until the
+        // max feed time, then stop -> which closes the gate. Autonomous scripts its
+        // own stop, so leave that path unchanged.
+        // (To be less strict, relax to: boolean ballsGone = !sensorControl.isMidBall();)
+        if (GlobalVariables.isAutonomous) return;
+        double elapsed = getSeconds() - feedStartSec;
+        boolean ballsGone = !sensorControl.isMidBall() && !sensorControl.isFrontBall();
+        if ((elapsed >= OuttakeConstants.shootFeedMinSec && ballsGone)
+                || elapsed >= OuttakeConstants.shootFeedMaxSec) {
+            OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
+        }
+    }
+
+    private void startFeed() {
+        feedStartSec = getSeconds();
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
     }
 
     private void stopTransfer() {

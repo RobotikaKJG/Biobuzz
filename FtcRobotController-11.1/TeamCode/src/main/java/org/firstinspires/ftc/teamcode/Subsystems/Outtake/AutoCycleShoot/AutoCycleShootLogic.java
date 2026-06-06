@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
@@ -12,13 +11,6 @@ public class AutoCycleShootLogic {
     private boolean wasIfCalled = false;
     private SensorControl sensorControl;
     private MotorControl motorControl;
-
-    // Throttle the color-sensor reads: each getDistance is a ~2.7ms I2C round-trip.
-    // Cache both at 20Hz instead of reading on every isNoBallSeen() call.
-    private double cachedFrontDistance = Double.POSITIVE_INFINITY;
-    private double cachedMidDistance = Double.POSITIVE_INFINITY;
-    private long lastBallCheckMs = 0;
-    private static final long BALL_CHECK_INTERVAL_MS = 50;
 
     public AutoCycleShootLogic(SensorControl sensorControl, MotorControl motorControl) {
         this.sensorControl = sensorControl;
@@ -91,13 +83,9 @@ public class AutoCycleShootLogic {
     }
 
     private boolean isNoBallSeen() {
-        long now = System.currentTimeMillis();
-        if (now - lastBallCheckMs >= BALL_CHECK_INTERVAL_MS) {
-            cachedFrontDistance = sensorControl.getFrontColorSensorDistance(DistanceUnit.INCH);
-            cachedMidDistance = sensorControl.getMidColorSensorDistance(DistanceUnit.INCH);
-            lastBallCheckMs = now;
-        }
-        return cachedFrontDistance < sensorControl.ballDistanceIn && cachedMidDistance < sensorControl.ballDistanceIn;
+        // Shared, centrally-throttled reads (see SensorControl). Preserves the exact
+        // original semantics: true only when BOTH front and mid currently see a ball.
+        return sensorControl.isFrontBall() && sensorControl.isMidBall();
     }
 
     private void addWaitTime(double waitTime) {

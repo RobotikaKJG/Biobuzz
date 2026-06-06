@@ -16,6 +16,11 @@ import java.util.List;
  * servos. The three loops touch disjoint hardware, so no locks are needed.
  */
 public class ControlThread extends Thread {
+    // Idle-rate cap (ms). The control loop is I/O-bound when busy; this only kicks
+    // in when idle, to stop it busy-spinning a core (~10kHz) — a busy-spin starves
+    // the turret/drive loops' sleep wakeups and makes their measured periods spike.
+    private static final long TARGET_PERIOD_MS = 3;
+
     private final LinearOpMode opMode;
     private final List<LynxModule> allHubs;
     private final IterativeController iterativeController;
@@ -40,8 +45,11 @@ public class ControlThread extends Thread {
 
     @Override
     public void run() {
+        long prevLoopNs = System.nanoTime();
         while (running && !opMode.isStopRequested()) {
             long startNs = System.nanoTime();
+            loopTimer.record(startNs - prevLoopNs); // full loop PERIOD (incl. sleep) -> true rate
+            prevLoopNs = startNs;
             try {
                 // Clear bulk cache once per loop — all hub reads this iteration use one snapshot.
                 for (LynxModule hub : allHubs) {
@@ -52,7 +60,20 @@ public class ControlThread extends Thread {
                 // OpMode tearing down mid-call — exit cleanly.
                 break;
             }
-            loopTimer.record(System.nanoTime() - startNs);
+
+            // Cap the idle rate so the loop doesn't busy-spin a core when there's no
+            // hardware I/O this iteration (reads throttled/cached, writes gated). When
+            // actually busy it's I/O-bound and work exceeds the cap, so this won't fire.
+            long workMs = (System.nanoTime() - startNs) / 1_000_000L;
+            long sleepMs = TARGET_PERIOD_MS - workMs;
+            if (sleepMs > 0) {
+                try {
+                    Thread.sleep(sleepMs);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
         }
     }
 }

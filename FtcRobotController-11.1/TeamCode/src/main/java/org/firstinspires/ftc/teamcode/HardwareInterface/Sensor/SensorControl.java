@@ -34,6 +34,17 @@ public class SensorControl {
     public final LynxI2cColorRangeSensor rangeSensorFront;
 
     public double ballDistanceIn = 4.0;
+
+    // Cached color/range-sensor reads. Each getDistance() is a ~2.7ms I2C round-trip,
+    // so refresh each sensor at most every BALL_SENSOR_REFRESH_MS and let every caller
+    // (intake-transfer logic + auto-cycle-shoot logic) share the one read. Default
+    // POSITIVE_INFINITY = "no ball" until the first real read. Read only on the control
+    // loop, so no cross-thread synchronization is needed.
+    private static final long BALL_SENSOR_REFRESH_MS = 50;
+    private long lastFrontBallReadMs = -1;
+    private long lastMidBallReadMs = -1;
+    private double cachedFrontBallDistanceIn = Double.POSITIVE_INFINITY;
+    private double cachedMidBallDistanceIn = Double.POSITIVE_INFINITY;
     private double flywheelOffset = 0.0;
 
     // Goal coordinates in INCHES
@@ -483,6 +494,36 @@ public class SensorControl {
     public double getMidColorSensorDistance(DistanceUnit unit) {
         double distance = rangeSensorMid.getDistance(unit);
         return distance;
+    }
+
+    /** Front color sensor distance (inches), refreshed at most every 50ms; shared by all callers. */
+    public double getFrontBallDistanceInCached() {
+        long now = System.currentTimeMillis();
+        if (lastFrontBallReadMs < 0 || now - lastFrontBallReadMs >= BALL_SENSOR_REFRESH_MS) {
+            cachedFrontBallDistanceIn = rangeSensorFront.getDistance(DistanceUnit.INCH);
+            lastFrontBallReadMs = now;
+        }
+        return cachedFrontBallDistanceIn;
+    }
+
+    /** Mid (back) color sensor distance (inches), refreshed at most every 50ms; shared by all callers. */
+    public double getMidBallDistanceInCached() {
+        long now = System.currentTimeMillis();
+        if (lastMidBallReadMs < 0 || now - lastMidBallReadMs >= BALL_SENSOR_REFRESH_MS) {
+            cachedMidBallDistanceIn = rangeSensorMid.getDistance(DistanceUnit.INCH);
+            lastMidBallReadMs = now;
+        }
+        return cachedMidBallDistanceIn;
+    }
+
+    /** True when a ball is within range of the front sensor (uses the shared cached read). */
+    public boolean isFrontBall() {
+        return getFrontBallDistanceInCached() < ballDistanceIn;
+    }
+
+    /** True when a ball is within range of the mid (back) sensor (uses the shared cached read). */
+    public boolean isMidBall() {
+        return getMidBallDistanceInCached() < ballDistanceIn;
     }
 
     private double getTrimmedAverage(List<Double> data) {

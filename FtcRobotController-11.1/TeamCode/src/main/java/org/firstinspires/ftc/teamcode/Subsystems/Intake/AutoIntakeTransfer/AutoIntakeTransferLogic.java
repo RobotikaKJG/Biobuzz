@@ -1,25 +1,22 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer;
 
-import com.acmerobotics.dashboard.message.redux.ReceiveGamepadState;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
-import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
+/**
+ * Ball-loading state machine. Reads ONLY the mid (back) sensor until a ball is
+ * confirmed there, then ONLY the front sensor until a ball is confirmed there
+ * (= 3 balls loaded) and stops. The sensor reads are centralized, throttled and
+ * shared in {@link SensorControl}, so this never does a redundant I2C round-trip
+ * (and "no ball" defaults to infinity, not 0, before the first real read).
+ */
 public class AutoIntakeTransferLogic {
     private double currentWait = 0;
-    private boolean wasIfCalled = false;
-    private SensorControl sensorControl;
-    private Gamepad gamepad1;
-
-    private double currentDistanceInchesMid;
-    private double currentDistanceInchesFront;
-    private long lastDistanceUpdateMs = 0;
-    private static final long DISTANCE_UPDATE_INTERVAL_MS = 50; // Update every 50ms
+    private final SensorControl sensorControl;
+    private final Gamepad gamepad1;
 
     public AutoIntakeTransferLogic(SensorControl sensorControl, Gamepad gamepad1) {
         this.sensorControl = sensorControl;
@@ -49,39 +46,33 @@ public class AutoIntakeTransferLogic {
     }
 
     private void activate() {
-        updateMid();
-        if (isMidBall()) {
+        if (sensorControl.isMidBall()) {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainMid);
             addWaitTime(IntakeConstants.checkAgainAfter);
         }
     }
 
     private void checkAgainMid() {
-        updateMid();
         if (currentWait > getSeconds()) return;
-        if (isMidBall()) {
+        if (sensorControl.isMidBall()) {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stopTransfer);
-        }
-        else {
+        } else {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
         }
     }
 
     private void stopTransfer() {
-        updateFront();
-        if (isFrontBall()) {
+        if (sensorControl.isFrontBall()) {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainFront);
             addWaitTime(IntakeConstants.checkAgainAfter);
         }
     }
 
     private void checkAgainFront() {
-        updateFront();
         if (currentWait > getSeconds()) return;
-        if (isFrontBall()) {
+        if (sensorControl.isFrontBall()) {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
-        }
-        else {
+        } else {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stopTransfer);
         }
     }
@@ -89,29 +80,6 @@ public class AutoIntakeTransferLogic {
     private void stop() {
         gamepad1.rumble(300);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
-    }
-
-    private boolean isMidBall() {
-        return currentDistanceInchesMid < sensorControl.ballDistanceIn;
-    }
-
-    private boolean isFrontBall() {
-        return currentDistanceInchesFront < sensorControl.ballDistanceIn;
-    }
-
-    private boolean isNoBallSeen() {
-        return !isMidBall() && !isFrontBall();
-    }
-
-    private void updateFront() {
-        if (System.currentTimeMillis() - lastDistanceUpdateMs < DISTANCE_UPDATE_INTERVAL_MS) return;
-        currentDistanceInchesFront = sensorControl.getFrontColorSensorDistance(DistanceUnit.INCH);
-        lastDistanceUpdateMs = System.currentTimeMillis();
-    }
-    private void updateMid() {
-        if (System.currentTimeMillis() - lastDistanceUpdateMs < DISTANCE_UPDATE_INTERVAL_MS) return;
-        currentDistanceInchesMid = sensorControl.getMidColorSensorDistance(DistanceUnit.INCH);
-        lastDistanceUpdateMs = System.currentTimeMillis();
     }
 
     private void addWaitTime(double waitTime) {

@@ -5,21 +5,20 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycl
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetPosControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
 public class OuttakeControl {
     private final OuttakeMotorControl outtakeMotorControl;
     private final AutoCycleShootControl autoCycleShootControl;
     private final AutoCycleShootLogic autoCycleShootLogic;
-    private final TurretServoControl turretServoControl;
     private final AutoOuttakeFarCloseControl autoOuttakeFarCloseControl;
     private final AutoResetPosControl autoResetPosControl;
 
-    public OuttakeControl(OuttakeMotorControl outtakeMotorControl, AutoCycleShootLogic autoCycleShootLogic, TurretServoControl turretServoControl, AutoOuttakeFarCloseControl autoOuttakeFarCloseControl, AutoResetPosControl autoResetPosControl, MotorControl motorControl) {
+    // NOTE: the turret is intentionally NOT updated here. In TeleOp it runs on the
+    // dedicated TurretThread; in Autonomous it is updated by AutonomousControl.
+    public OuttakeControl(OuttakeMotorControl outtakeMotorControl, AutoCycleShootLogic autoCycleShootLogic, AutoOuttakeFarCloseControl autoOuttakeFarCloseControl, AutoResetPosControl autoResetPosControl, MotorControl motorControl) {
         this.outtakeMotorControl = outtakeMotorControl;
         this.autoCycleShootLogic = autoCycleShootLogic;
-        this.turretServoControl = turretServoControl;
         this.autoOuttakeFarCloseControl = autoOuttakeFarCloseControl;
         this.autoResetPosControl = autoResetPosControl;
         this.autoCycleShootControl = new AutoCycleShootControl(motorControl);
@@ -29,7 +28,6 @@ public class OuttakeControl {
         outtakeMotorControl.update();
         autoCycleShootControl.update();
         autoCycleShootLogic.update();
-        turretServoControl.update();
         autoOuttakeFarCloseControl.update();
         autoResetPosControl.update();
 

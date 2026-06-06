@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.Main.LoopTimeLogger;
 
 public class MotorControl {
 
@@ -26,8 +25,6 @@ public class MotorControl {
     private final HardwareMap hardwareMap;
     private DcMotorEx[] motors;
     private final Utilities utilities = new Utilities();
-    private LoopTimeLogger loopTimeLogger;
-
 
     private final double[] motorSpeeds = new double[8];
     private final double[] lastWrittenSpeeds = new double[8];
@@ -40,15 +37,16 @@ public class MotorControl {
     private final PIDFCoefficients[] lastPidf = new PIDFCoefficients[8];
     private final double[] lastWrittenVelocity = new double[8];
 
+    // True while a motor is velocity-controlled (setMotorRPM). setMotors() skips
+    // these so a redundant setPower can't clobber the velocity target and force
+    // setVelocity to be re-issued every loop (the outtake power/velocity ping-pong).
+    private final boolean[] velocityControlled = new boolean[8];
+
     public MotorControl(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
         java.util.Arrays.fill(lastWrittenSpeeds, Double.POSITIVE_INFINITY);
         java.util.Arrays.fill(lastWrittenVelocity, Double.POSITIVE_INFINITY);
         getMotors();
-    }
-
-    public void setLoopTimeLogger(LoopTimeLogger loopTimeLogger) {
-        this.loopTimeLogger = loopTimeLogger;
     }
 
     private void getMotors() {
@@ -88,15 +86,14 @@ public class MotorControl {
     public void setMotorSpeed(int index, double speed) {
         for (int i = 0; i < Utilities.configLength(index); i++) {
             int mi = Utilities.motorIndex(index, i);
-            recordHardwareEvent("motor.command.setSpeed." + motorName(mi));
             motorSpeeds[mi] = speed;
+            velocityControlled[mi] = false;
         }
     }
 
     public void addMotorSpeed(int index, double speed) {
         for (int i = 0; i < Utilities.configLength(index); i++) {
             int mi = Utilities.motorIndex(index, i);
-            recordHardwareEvent("motor.command.addSpeed." + motorName(mi));
             motorSpeeds[mi] += speed;
         }
     }
@@ -104,7 +101,6 @@ public class MotorControl {
     public void multiplyMotorSpeed(int index, double multiplier) {
         for (int i = 0; i < Utilities.configLength(index); i++) {
             int mi = Utilities.motorIndex(index, i);
-            recordHardwareEvent("motor.command.multiplySpeed." + motorName(mi));
             motorSpeeds[mi] *= multiplier;
         }
     }
@@ -112,7 +108,6 @@ public class MotorControl {
     public void divideMotorSpeed(int index, double divisor) {
         for (int i = 0; i < Utilities.configLength(index); i++) {
             int mi = Utilities.motorIndex(index, i);
-            recordHardwareEvent("motor.command.divideSpeed." + motorName(mi));
             motorSpeeds[mi] /= divisor;
         }
     }
@@ -120,11 +115,12 @@ public class MotorControl {
     public void setMotors(int index) {
         for (int i = 0; i < Utilities.configLength(index); i++) {
             int mi = Utilities.motorIndex(index, i);
+            if (velocityControlled[mi]) {
+                continue;
+            }
             double speed = motorSpeeds[mi];
             if (Math.abs(speed - lastWrittenSpeeds[mi]) > POWER_EPSILON) {
-                long startNs = System.nanoTime();
                 motors[mi].setPower(speed);
-                recordHardwareDuration("motor.setPower." + motorName(mi), startNs);
                 lastWrittenSpeeds[mi] = speed;
                 // A power write overrides any velocity target; force the next
                 // setMotorRPM to re-issue setVelocity for this motor.
@@ -137,9 +133,7 @@ public class MotorControl {
     {
         for (int i = 0; i < Utilities.configLength(index); i++) {
             int mi = Utilities.motorIndex(index, i);
-            long startNs = System.nanoTime();
             motors[mi].setMode(mode);
-            recordHardwareDuration("motor.setMode." + motorName(mi), startNs);
             lastMode[mi] = mode;
         }
     }
@@ -147,9 +141,7 @@ public class MotorControl {
     public void setMotorPos(int index, int position){
         for (int i = 0; i < Utilities.configLength(index); i++) {
             int mi = Utilities.motorIndex(index, i);
-            long startNs = System.nanoTime();
             motors[mi].setTargetPosition(position);
-            recordHardwareDuration("motor.setTargetPosition." + motorName(mi), startNs);
         }
     }
 
@@ -165,9 +157,7 @@ public class MotorControl {
         int mi = Utilities.motorIndex(index, 0);
         long now = System.currentTimeMillis();
         if (now - lastCurrentReadMs[mi] >= CURRENT_REFRESH_MS) {
-            long startNs = System.nanoTime();
             cachedCurrent[mi] = motors[mi].getCurrent(CurrentUnit.AMPS);
-            recordHardwareDuration("motor.getCurrent." + motorName(mi), startNs);
             lastCurrentReadMs[mi] = now;
         }
         return cachedCurrent[mi];
@@ -184,9 +174,7 @@ public class MotorControl {
         boolean overCurrent = false;
         for (int i = 0; i < Utilities.configLength(index); i++) {
             int mi = Utilities.motorIndex(index, i);
-            long startNs = System.nanoTime();
             boolean motorOverCurrent = motors[mi].isOverCurrent();
-            recordHardwareDuration("motor.isOverCurrent." + motorName(mi), startNs);
             if(motorOverCurrent)
                 overCurrent = true;
         }
@@ -202,17 +190,13 @@ public class MotorControl {
     }
 
     public int getMotorPosition(int index) {
-        long startNs = System.nanoTime();
         int position = Utilities.getMotorPosition(motors, index);
-        recordHardwareDuration("motor.getPosition." + motorName(Utilities.motorIndex(index, 0)), startNs);
         return position;
     }
 
     public double getMotorVelocity(int index) {
         int mi = Utilities.motorIndex(index, 0);
-        long startNs = System.nanoTime();
         double velocity = motors[mi].getVelocity();
-        recordHardwareDuration("motor.getVelocity." + motorName(mi), startNs);
         return velocity;
     }
 
@@ -239,25 +223,20 @@ public class MotorControl {
         for (int i = 0; i < Utilities.configLength(index); i++) {
             int mi = Utilities.motorIndex(index, i);
             DcMotorEx motor = motors[mi];
+            velocityControlled[mi] = true;
 
             // setMode and setPIDFCoefficients are blocking config writes; only
             // issue them when they actually change instead of every loop.
             if (lastMode[mi] != DcMotor.RunMode.RUN_USING_ENCODER) {
-                long startNs = System.nanoTime();
                 motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                recordHardwareDuration("motor.setMode." + motorName(mi), startNs);
                 lastMode[mi] = DcMotor.RunMode.RUN_USING_ENCODER;
             }
             if (!pidfEquals(lastPidf[mi], pidf)) {
-                long startNs = System.nanoTime();
                 motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf);
-                recordHardwareDuration("motor.setPIDF." + motorName(mi), startNs);
                 lastPidf[mi] = pidf;
             }
             if (lastWrittenVelocity[mi] != velocityTicksPerSecond) {
-                long startNs = System.nanoTime();
                 motor.setVelocity(velocityTicksPerSecond);
-                recordHardwareDuration("motor.setVelocity." + motorName(mi), startNs);
                 lastWrittenVelocity[mi] = velocityTicksPerSecond;
                 // A velocity write overrides any power; force the next setMotors
                 // to re-issue setPower for this motor.
@@ -269,18 +248,6 @@ public class MotorControl {
     private static boolean pidfEquals(PIDFCoefficients a, PIDFCoefficients b) {
         if (a == null || b == null) return false;
         return a.p == b.p && a.i == b.i && a.d == b.d && a.f == b.f;
-    }
-
-    private void recordHardwareDuration(String name, long startNs) {
-        if (loopTimeLogger != null) {
-            loopTimeLogger.recordDurationNs(name, System.nanoTime() - startNs);
-        }
-    }
-
-    private void recordHardwareEvent(String name) {
-        if (loopTimeLogger != null) {
-            loopTimeLogger.recordDurationNs(name, 0);
-        }
     }
 
     private String motorName(int motorIndex) {

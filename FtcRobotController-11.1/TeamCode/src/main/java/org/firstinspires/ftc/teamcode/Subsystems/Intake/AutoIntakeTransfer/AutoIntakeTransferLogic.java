@@ -92,12 +92,10 @@ public class AutoIntakeTransferLogic {
     }
 
     private boolean isMidBall() {
-        System.out.println("Mid: " + currentDistanceInchesMid);
         return currentDistanceInchesMid < sensorControl.ballDistanceIn;
     }
 
     private boolean isFrontBall() {
-        System.out.println("Front: " + currentDistanceInchesFront);
         return currentDistanceInchesFront < sensorControl.ballDistanceIn;
     }
 

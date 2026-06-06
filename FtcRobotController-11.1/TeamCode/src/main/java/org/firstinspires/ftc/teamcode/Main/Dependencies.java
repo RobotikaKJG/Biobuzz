@@ -71,18 +71,12 @@ public class Dependencies {
         turretServoControl = new TurretServoControl(servoControl, sensorControl);
     }
 
-    public void setLoopTimeLogger(LoopTimeLogger loopTimeLogger) {
-        motorControl.setLoopTimeLogger(loopTimeLogger);
-        sensorControl.setLoopTimeLogger(loopTimeLogger);
-        servoControl.setLoopTimeLogger(loopTimeLogger);
-    }
-
     public Drivebase createDrivebase() {
         return new Drivebase(gamepad1,gamepad2, motorControl, sensorControl);
     }
 
     public DrivebaseController createDrivebaseController() {
-        return new DrivebaseController(createDrivebase(), edgeDetection);
+        return new DrivebaseController(createDrivebase(), gamepad1);
     }
 
     ButtonControl createSubsystemControl() {
@@ -94,7 +88,7 @@ public class Dependencies {
     }
 
     public OuttakeControl createOuttakeControl() {
-        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createTurretServoControl(), createAutoOuttakeFarCloseControl(), createAutoResetPosControl(), motorControl);
+        return new OuttakeControl(createOuttakeMotorControl(), createAutoCycleShootLogic(), createAutoOuttakeFarCloseControl(), createAutoResetPosControl(), motorControl);
     }
 
     private OuttakeMotorControl createOuttakeMotorControl() {

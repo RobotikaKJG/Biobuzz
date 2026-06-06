@@ -11,10 +11,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Main.Alliance;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Main.LoopTimeLogger;
 import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
 
 import java.util.ArrayList;
@@ -31,7 +29,6 @@ public class SensorControl {
     private final Limelight3A limelight;
     private final EdgeDetection edgeDetection;
     private final TwoWheelTrackingLocalizer localizer;
-    private LoopTimeLogger loopTimeLogger;
 
     public final LynxI2cColorRangeSensor rangeSensorMid;
     public final LynxI2cColorRangeSensor rangeSensorFront;
@@ -72,10 +69,12 @@ public class SensorControl {
     // Velocity Tracking variables
     private Pose2d lastPose = new Pose2d(0, 0, 0);
     private long lastVelocityUpdateTimeMs = System.currentTimeMillis();
-    public double robotVelocityXInPerSec = 0.0;
-    public double robotVelocityYInPerSec = 0.0;
-    private double robotLinearVelocityInPerSec = 0.0;
-    private double robotAngularVelocityRadPerSec = 0.0;
+    // volatile: written by the turret loop (calculateRobotVelocity), read by the
+    // control loop (isDrivingForward/Backward in AutoIntakeMovement).
+    public volatile double robotVelocityXInPerSec = 0.0;
+    public volatile double robotVelocityYInPerSec = 0.0;
+    private volatile double robotLinearVelocityInPerSec = 0.0;
+    private volatile double robotAngularVelocityRadPerSec = 0.0;
     private double forwardBackwardSeparationDegrees = 90.0;
     private static final double MIN_DRIVE_DIRECTION_VELOCITY_IN_PER_SEC = 6.9;
 
@@ -98,10 +97,6 @@ public class SensorControl {
         setInitialLocalisationAngle();
     }
 
-    public void setLoopTimeLogger(LoopTimeLogger loopTimeLogger) {
-        this.loopTimeLogger = loopTimeLogger;
-    }
-
     private void setInitialLocalisationAngle() {
         if (!GlobalVariables.wasAutonomous) {
             localizer.setPoseEstimate(new Pose2d(0, 0, 0));
@@ -117,13 +112,9 @@ public class SensorControl {
     //
 
     public void updateLocalizer() {
-        long startNs = System.nanoTime();
         localizer.update();
-        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.update", startNs);
 
-        startNs = System.nanoTime();
         calculateRobotVelocity();
-        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.calculateRobotVelocity", startNs);
     }
 
     /**
@@ -135,13 +126,9 @@ public class SensorControl {
         double dt = (currentTime - lastVelocityUpdateTimeMs) / 1000.0;
 
         if (dt > 0.005) { // Protect against divide-by-zero
-            long startNs = System.nanoTime();
             Pose2d currentPose = localizer.getPoseEstimate();
-            recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
 
-            startNs = System.nanoTime();
             Pose2d poseVelocity = localizer.getPoseVelocity();
-            recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseVelocity", startNs);
             double dx = currentPose.getX() - lastPose.getX();
             double dy = currentPose.getY() - lastPose.getY();
             double dHeading = normalizeRadians(currentPose.getHeading() - lastPose.getHeading());
@@ -175,9 +162,7 @@ public class SensorControl {
         }
 
         // GATE 2: Cache Result
-        long startNs = System.nanoTime();
         LLResult result = limelight.getLatestResult();
-        recordHardwareDuration("sensor." + LIMELIGHT_NAME + ".getLatestResult", startNs);
         if (result == null || !result.isValid()) {
             return;
         }
@@ -212,9 +197,7 @@ public class SensorControl {
         double visionRR_X = visionCalculatedY;
         double visionRR_Y = visionCalculatedX;
 
-        startNs = System.nanoTime();
         Pose2d currentPose = localizer.getPoseEstimate();
-        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
 
         rollingX.add(visionRR_X);
         rollingY.add(visionRR_Y);
@@ -262,9 +245,7 @@ public class SensorControl {
     }
 
     public double getLocalizerAngle() {
-        long startNs = System.nanoTime();
         double heading = localizer.getPoseEstimate().getHeading();
-        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getAngle", startNs);
         return heading;
     }
 
@@ -295,9 +276,7 @@ public class SensorControl {
     }
 
     public double getDistanceFromLocalizer() {
-        long startNs = System.nanoTime();
         Pose2d currentPose = localizer.getPoseEstimate();
-        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
         double robotX = currentPose.getY();
         double robotY = currentPose.getX();
 
@@ -310,21 +289,21 @@ public class SensorControl {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    public void resetLocalizerAngle() {
-        if (edgeDetection.rising(GamepadIndexValues.options)) {
-            Pose2d current = localizer.getPoseEstimate();
-            Pose2d newPose = new Pose2d(current.getX(), current.getY(), 0);
-            localizer.setPoseEstimate(newPose);
-            if (roadRunnerPoseUpdater != null) {
-                roadRunnerPoseUpdater.accept(newPose);
-            }
+    /**
+     * Reset heading to 0 (keeping X/Y). Called by the turret loop, which owns the
+     * localizer, gated by its own options-button edge detection.
+     */
+    public void resetLocalizerAngleNow() {
+        Pose2d current = localizer.getPoseEstimate();
+        Pose2d newPose = new Pose2d(current.getX(), current.getY(), 0);
+        localizer.setPoseEstimate(newPose);
+        if (roadRunnerPoseUpdater != null) {
+            roadRunnerPoseUpdater.accept(newPose);
         }
     }
 
     public Pose2d getLocalizerPose() {
-        long startNs = System.nanoTime();
         Pose2d pose = localizer.getPoseEstimate();
-        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
         return pose;
     }
 
@@ -338,9 +317,7 @@ public class SensorControl {
     }
 
     public LLResult limelightResult() {
-        long startNs = System.nanoTime();
         LLResult result = limelight.getLatestResult();
-        recordHardwareDuration("sensor." + LIMELIGHT_NAME + ".getLatestResult", startNs);
         return result;
     }
 
@@ -352,9 +329,7 @@ public class SensorControl {
             return true;
         }
 
-        long startNs = System.nanoTime();
         LLResult result = limelight.getLatestResult();
-        recordHardwareDuration("sensor." + LIMELIGHT_NAME + ".getLatestResult", startNs);
         if (result != null && result.isValid()) {
             Pose3D botpose = result.getBotpose();
             if (botpose != null) {
@@ -400,9 +375,7 @@ public class SensorControl {
     }
 
     public double getTagDistance() {
-        long startNs = System.nanoTime();
         LLResult result = limelight.getLatestResult();
-        recordHardwareDuration("sensor." + LIMELIGHT_NAME + ".getLatestResult", startNs);
         return getTagDistance(result);
     }
 
@@ -459,9 +432,7 @@ public class SensorControl {
     //
 
     public double getTurretTargetAngleDegrees() {
-        long startNs = System.nanoTime();
         Pose2d currentPose = localizer.getPoseEstimate();
-        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseEstimate", startNs);
         double robotX = currentPose.getY();
         double robotY = currentPose.getX();
         double robotHeading = currentPose.getHeading();
@@ -489,14 +460,11 @@ public class SensorControl {
         double turretAngleRad = angleToTargetRad - robotHeading + getTurretTargetAngleVelocityModifier(); // this does correct angle
 
         double targetAngle = normalizeDegrees(Math.toDegrees(turretAngleRad));
-        recordInstantSection("sensor.calculateTurretTargetAngle");
         return targetAngle;
     }
 
     public double getTurretTargetAngleVelocityModifier(){
-        long startNs = System.nanoTime();
         Pose2d currentVelocity = localizer.getPoseVelocity();
-        recordHardwareDuration("sensor." + PINPOINT_NAME + ".localizer.getPoseVelocity", startNs);
         double velocityX = currentVelocity.getX();
         double velocityY = currentVelocity.getY();
 
@@ -508,17 +476,13 @@ public class SensorControl {
     }
 
     public double getFrontColorSensorDistance(DistanceUnit unit) {
-        long startNs = System.nanoTime();
-//        double distance = rangeSensorFront.getDistance(unit);
-        recordHardwareDuration("sensor." + FRONT_COLOR_SENSOR_NAME + ".getDistance", startNs);
-        return 0;//distance;
+        double distance = rangeSensorFront.getDistance(unit);
+        return distance;
     }
 
     public double getMidColorSensorDistance(DistanceUnit unit) {
-        long startNs = System.nanoTime();
-//        double distance = rangeSensorMid.getDistance(unit);
-        recordHardwareDuration("sensor." + MID_COLOR_SENSOR_NAME + ".getDistance", startNs);
-        return 0;// distance;
+        double distance = rangeSensorMid.getDistance(unit);
+        return distance;
     }
 
     private double getTrimmedAverage(List<Double> data) {
@@ -549,15 +513,4 @@ public class SensorControl {
         return radians;
     }
 
-    private void recordHardwareDuration(String name, long startNs) {
-        if (loopTimeLogger != null) {
-            loopTimeLogger.recordDurationNs(name, System.nanoTime() - startNs);
-        }
-    }
-
-    private void recordInstantSection(String name) {
-        if (loopTimeLogger != null) {
-            loopTimeLogger.recordDurationNs(name, 0);
-        }
-    }
 }

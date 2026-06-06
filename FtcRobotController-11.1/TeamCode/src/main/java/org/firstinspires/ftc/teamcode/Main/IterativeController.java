@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Main;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -9,134 +8,83 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValu
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
-import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
-import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 
+/**
+ * Body of the CONTROL loop (runs on {@link ControlThread}). Handles every
+ * non-drive, non-turret subsystem: gamepad edge detection, LED, buttons, intake,
+ * outtake, and the single batched {@code setMotors(notDrive)} write (motors 4..7).
+ *
+ * The drivebase runs on the main OpMode thread (DrivebaseController, motors 0..3);
+ * the turret + localizer run on {@link TurretThread}. This class therefore no
+ * longer touches the drive motors, the turret servos, or the localizer.
+ */
 public class IterativeController {
     private final MotorControl motorControl;
     private final Gamepad gamepad1;
     private final Gamepad currentGamepad1 = new Gamepad();
     private final Gamepad prevGamepad1 = new Gamepad();
-    private final Gamepad gamepad2;
-    private final Gamepad currentGamepad2 = new Gamepad();
-    private final Gamepad prevGamepad2 = new Gamepad();
     private final EdgeDetection edgeDetection;
-    private final EdgeDetection gamepad2EdgeDetection;
-    private final DrivebaseController drivebaseController;
-    private final TwoWheelTrackingLocalizer localizer;
-    private final SampleMecanumDrive drive;
     private final ButtonControl buttonControl;
-    private final ButtonControl subsystemControl2;
     private final OuttakeControl outtakeControl;
     private final IntakeControl intakeControl;
     private final SensorControl sensorControl;
-    private final TurretServoControl turretServoControl;
     private final RevBlinkinLedDriver led;
-    private LoopTimeLogger loopTimeLogger;
+    private RevBlinkinLedDriver.BlinkinPattern lastLedPattern = null;
 
     public IterativeController(Dependencies dependencies) {
-        drivebaseController = dependencies.createDrivebaseController();
         gamepad1 = dependencies.gamepad1;
-        gamepad2 = dependencies.gamepad2;
         edgeDetection = dependencies.edgeDetection;
-        gamepad2EdgeDetection = dependencies.gamepad2EdgeDetection;
         motorControl = dependencies.motorControl;
         currentGamepad1.copy(this.gamepad1);
         prevGamepad1.copy(currentGamepad1);
-        localizer = dependencies.localizer;
-        drive = dependencies.drive;
         buttonControl = dependencies.createSubsystemControl();
-        subsystemControl2 = dependencies.createSubsystemControl2();
         outtakeControl = dependencies.createOuttakeControl();
         intakeControl = dependencies.createIntakeControl();
         sensorControl = dependencies.sensorControl;
-        turretServoControl = dependencies.turretServoControl;
 
         led = dependencies.hardwareMap.get(RevBlinkinLedDriver.class, "led");
 
         sensorControl.initLimelight(0);
         // Sync Pinpoint to Road Runner pose so turret angle uses same localization as autonomous
-        sensorControl.setPositionFromRoadRunner(drive.getPoseEstimate());
+        sensorControl.setPositionFromRoadRunner(dependencies.drive.getPoseEstimate());
 
         IntakeStates.setInitialStates();
         OuttakeStates.setInitialStates();
         ButtonStates.setInitialStates();
     }
 
-    public void setLoopTimeLogger(LoopTimeLogger loopTimeLogger) {
-        this.loopTimeLogger = loopTimeLogger;
-    }
-
     public void TeleOp() {
         updateCommonValues();
-        recordSection("iterative.updateCommonValues");
 
         if (edgeDetection.rising(GamepadIndexValues.rightStickButton))
             GlobalVariables.far = !GlobalVariables.far;
 
-        led.setPattern(GlobalVariables.far
+        RevBlinkinLedDriver.BlinkinPattern ledPattern = GlobalVariables.far
                 ? RevBlinkinLedDriver.BlinkinPattern.SKY_BLUE
-                : RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
-        recordSection("led.setPattern.led");
-
-        drivebaseController.updateState();
-        recordSection("drivebaseController.updateState");
+                : RevBlinkinLedDriver.BlinkinPattern.HOT_PINK;
+        if (ledPattern != lastLedPattern) {
+            led.setPattern(ledPattern);
+            lastLedPattern = ledPattern;
+        }
 
         buttonControl.update();
-        recordSection("buttonControl.update");
-
         intakeControl.update();
-        recordSection("intakeControl.update");
-
         outtakeControl.update();
-        recordSection("outtakeControl.update");
 
-        // Write all motor powers ONCE, after all subsystems have computed their values
-        motorControl.setMotors(MotorConstants.all);
-        recordSection("motorControl.setMotors.all");
+        // Drive motors (0..3) are written by the drive loop; write everything else here.
+        motorControl.setMotors(MotorConstants.notDrive);
     }
 
     private void updateCommonValues() {
         prevGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
         edgeDetection.refreshGamepadIndex(currentGamepad1, prevGamepad1);
-        recordSection("gamepad.edgeDetection.refresh");
-
-        sensorControl.updateLocalizer(); // shared drive/SensorControl localizer update
-        recordSection("sensorControl.updateLocalizer");
-
-        sensorControl.resetLocalizerAngle();
-        recordSection("sensorControl.resetLocalizerAngle");
-//        sensorControl.applyContinuousVisionFusion();
-    }
-
-    private void recordSection(String name) {
-        if (loopTimeLogger != null) {
-            loopTimeLogger.recordSection(name);
-        }
-    }
-
-    private boolean gamepad1Active(){
-        return currentGamepad1.square || currentGamepad1.triangle || currentGamepad1.dpad_up || currentGamepad1.dpad_down
-                || !currentGamepad1.atRest() || currentGamepad1.left_bumper || currentGamepad1.left_trigger != 0
-                || currentGamepad1.right_bumper || currentGamepad1.right_trigger != 0;
-//        return true;
-    }
-
-    private boolean gamepad2Active(){
-        return currentGamepad2.square || currentGamepad2.triangle || currentGamepad2.dpad_up || currentGamepad2.dpad_down
-                || !currentGamepad2.atRest() || currentGamepad2.left_bumper || currentGamepad2.left_trigger != 0
-                || currentGamepad2.right_bumper || currentGamepad2.right_trigger != 0;
-//        return false;
+        // localizer.update() + heading reset moved to TurretThread (owns the localizer).
     }
 }

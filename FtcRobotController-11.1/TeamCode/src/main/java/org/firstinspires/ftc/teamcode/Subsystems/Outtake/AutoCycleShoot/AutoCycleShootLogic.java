@@ -13,6 +13,13 @@ public class AutoCycleShootLogic {
     private SensorControl sensorControl;
     private MotorControl motorControl;
 
+    // Throttle the color-sensor reads: each getDistance is a ~2.7ms I2C round-trip.
+    // Cache both at 20Hz instead of reading on every isNoBallSeen() call.
+    private double cachedFrontDistance = Double.POSITIVE_INFINITY;
+    private double cachedMidDistance = Double.POSITIVE_INFINITY;
+    private long lastBallCheckMs = 0;
+    private static final long BALL_CHECK_INTERVAL_MS = 50;
+
     public AutoCycleShootLogic(SensorControl sensorControl, MotorControl motorControl) {
         this.sensorControl = sensorControl;
         this.motorControl = motorControl;
@@ -84,10 +91,13 @@ public class AutoCycleShootLogic {
     }
 
     private boolean isNoBallSeen() {
-        if (sensorControl.getFrontColorSensorDistance(DistanceUnit.INCH) < sensorControl.ballDistanceIn && sensorControl.getMidColorSensorDistance(DistanceUnit.INCH) < sensorControl.ballDistanceIn) {
-            return true;
+        long now = System.currentTimeMillis();
+        if (now - lastBallCheckMs >= BALL_CHECK_INTERVAL_MS) {
+            cachedFrontDistance = sensorControl.getFrontColorSensorDistance(DistanceUnit.INCH);
+            cachedMidDistance = sensorControl.getMidColorSensorDistance(DistanceUnit.INCH);
+            lastBallCheckMs = now;
         }
-        return false;
+        return cachedFrontDistance < sensorControl.ballDistanceIn && cachedMidDistance < sensorControl.ballDistanceIn;
     }
 
     private void addWaitTime(double waitTime) {

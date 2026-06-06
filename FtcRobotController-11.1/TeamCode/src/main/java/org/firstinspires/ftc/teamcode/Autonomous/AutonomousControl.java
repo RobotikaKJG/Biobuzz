@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 //import org.firstinspires.ftc.teamcode.Subsystems.Intake.Slides.IntakeSlideControl;
 
@@ -26,16 +27,18 @@ public class AutonomousControl {
     private final AudienceAuton audienceAuton;
     private final IntakeControl intakeControl;
     private final OuttakeControl outtakeControl;
+    private final TurretServoControl turretServoControl;
     private final SensorControl sensorControl;
 
 
-    public AutonomousControl(MotorControl motorControl, GoalAuton goalAuton, GoalAutonSolo goalAutonSolo, AudienceAuton audienceAuton, IntakeControl intakeControl, OuttakeControl outtakeControl, SensorControl sensorControl) {
+    public AutonomousControl(MotorControl motorControl, GoalAuton goalAuton, GoalAutonSolo goalAutonSolo, AudienceAuton audienceAuton, IntakeControl intakeControl, OuttakeControl outtakeControl, TurretServoControl turretServoControl, SensorControl sensorControl) {
         this.motorControl = motorControl;
         this.goalAuton = goalAuton;
         this.goalAutonSolo = goalAutonSolo;
         this.audienceAuton = audienceAuton;
         this.intakeControl = intakeControl;
         this.outtakeControl = outtakeControl;
+        this.turretServoControl = turretServoControl;
         this.sensorControl = sensorControl;
         IntakeStates.setInitialStates();
         OuttakeStates.setInitialStates();
@@ -77,6 +80,7 @@ public class AutonomousControl {
     public void updateSubsystems(){
         intakeControl.update();
         outtakeControl.update();
+        turretServoControl.update(); // turret tracking (single-threaded in auto)
 //        sensorControl.updateDistance();
 //        sensorControl.updateColor();
 //        outtakeSlideControl.updateSlidePosition();

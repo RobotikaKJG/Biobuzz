@@ -37,6 +37,6 @@ public class AutonomousDependencies extends Dependencies {
     }
 
     public AutonomousControl createAutonomousControl() {
-        return new AutonomousControl(motorControl, createGoalAuton(), createGoalAutonSolo(), createAudienceAuton(),createIntakeControl(),createOuttakeControl(), sensorControl);
+        return new AutonomousControl(motorControl, createGoalAuton(), createGoalAutonSolo(), createAudienceAuton(),createIntakeControl(),createOuttakeControl(), turretServoControl, sensorControl);
     }
 }

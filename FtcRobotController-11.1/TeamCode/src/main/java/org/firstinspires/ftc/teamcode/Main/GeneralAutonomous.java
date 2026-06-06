@@ -35,35 +35,22 @@ public class GeneralAutonomous extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        LoopTimeLogger loopTimeLogger = new LoopTimeLogger(hardwareMap.appContext, "GeneralAutonomous");
-        dependencies.setLoopTimeLogger(loopTimeLogger);
-        loopTimeLogger.start();
+        LoopTimer loopTimer = new LoopTimer(10);
 
-        try {
-            while (opModeIsActive()) {
-                loopTimeLogger.startLoop();
-                //Emergency stop.
+        while (opModeIsActive()) {
+            long startNs = System.nanoTime();
 
-//                telemetry.addData("Webcam px", dependencies.sensorControl.getBallOffsetPx());
-                autonomousControl.runAutonomous();
-                loopTimeLogger.recordSection("autonomousControl.runAutonomous");
+            autonomousControl.runAutonomous();
+            drive.update();
 
-                drive.update();
-                loopTimeLogger.recordSection("drive.update");
+            loopTimer.record(System.nanoTime() - startNs);
 
-                telemetry.addData("outtake vel", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
-                loopTimeLogger.recordSection("telemetryData");
+            telemetry.addData("outtake vel", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+            telemetry.addData("Auto loop avg (ms, last 10)", "%.2f", loopTimer.getAvgMs());
+            telemetry.update();
 
-                telemetry.addData("Loop time ms", loopTimeLogger.getCurrentLoopMs());
-                telemetry.update();
-                loopTimeLogger.recordSection("telemetry.update");
-                loopTimeLogger.finishLoop();
-
-                if (gamepad1.triangle)
-                    break;
-            }
-        } finally {
-            loopTimeLogger.saveToTelemetry(telemetry);
+            if (gamepad1.triangle)
+                break;
         }
     }
 

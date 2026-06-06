@@ -210,4 +210,10 @@ if [[ -n "$recent" ]]; then
     log "── Recent robot-loop log lines ──"
     echo "$recent"
 fi
+
+# Also pull the FTC per-OpMode match logs — complete per-run logcat dumps the SDK
+# writes on opmode stop (not subject to ring-buffer rollover like `logcat -d`).
+adb -s "$HUB" pull /storage/emulated/0/FIRST/matchlogs "$SCRIPT_DIR/logs/" >/dev/null 2>&1 \
+    && log "Pulled match logs -> logs/matchlogs/" || log "No match logs found"
+
 adb -s "$HUB" logcat -c 2>/dev/null || true   # clear buffer so the next run starts clean

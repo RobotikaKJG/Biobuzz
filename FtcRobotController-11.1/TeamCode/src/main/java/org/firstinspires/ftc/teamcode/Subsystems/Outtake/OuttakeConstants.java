@@ -23,11 +23,15 @@ public class OuttakeConstants {
     public static double servoOpenWait = 0.1;
     public static double deactivateAfter = 0.3;
 
-    // TeleOp auto-finish for a shot: keep feeding until both ball sensors read empty
-    // (with a short min so a stale reading can't end it instantly), or until the max
-    // feed time elapses as a safety fallback — then stop and close the gate.
-    public static double shootFeedMinSec = 0.15;
-    public static double shootFeedMaxSec = 2.0;
+    // TeleOp auto-finish for a shot: feed until both ball sensors have read empty
+    // CONTINUOUSLY for shootClearHoldSec (so the brief gaps while a ball is in transit
+    // between the sensors don't end the shot early — that cut the 3rd ball — and the
+    // last ball has time to launch), or until the max feed time as a safety fallback,
+    // then stop and close the gate. Biased toward firing all 3 (over-feed a hair rather
+    // than cut a ball): raise shootClearHoldSec if a ball is ever left unfired.
+    public static double shootFeedMinSec = 0.15;    // ignore "empty" in the first moments
+    public static double shootClearHoldSec = 0.5;   // queue must stay empty this long to stop
+    public static double shootFeedMaxSec = 3.5;     // hard cap (jam / sensor failure)
 
     public static double resetWait = 100.0;
 

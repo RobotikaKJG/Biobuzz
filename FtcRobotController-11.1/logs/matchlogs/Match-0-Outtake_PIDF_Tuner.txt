@@ -1,0 +1,49 @@
+--------- beginning of main
+06-02 16:49:12.633  5554  5633 V Robocol : received command: CMD_SET_MATCH_NUMBER(18470) 0
+06-02 16:49:12.637  5554  5633 V Robocol : received command: CMD_INIT_OP_MODE(18471) Outtake PIDF Tuner
+06-02 16:49:12.666  5554  5766 V RobotCore: thread: ...terminating 'OpModeThread'
+06-02 16:49:12.670  5554  5664 I RobotCore: Attempting to switch to OpMode Outtake PIDF Tuner
+06-02 16:49:12.677  5554  5664 I RobotCore: ******************** START - OPMODE Outtake PIDF Tuner ********************
+06-02 16:49:13.916  5554  5664 D HardwareMap: Clearing which device instances have been retrieved
+06-02 16:49:13.918  5554  5770 V RobotCore: thread: 'OpModeThread' starting...
+06-02 16:49:13.926  5554  5644 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(8591), attempt: 0
+06-02 16:49:14.049  5554  5770 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 1; addr7=0x39)
+06-02 16:49:14.049  5554  5770 V AMSColorSensorImpl: internalInitialize()...
+06-02 16:49:14.058  5554  5770 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-02 16:49:14.059  5554  5770 V AMSColorSensorImpl: state| 00 01 60 33 62 00 22 00 27 
+06-02 16:49:14.063  5554  5770 V AMSColorSensorImpl: disable() enabled=0x07...
+06-02 16:49:14.075  5554  5770 V AMSColorSensorImpl: ...disable() enabled=0x00
+06-02 16:49:14.075  5554  5770 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+06-02 16:49:14.078  5554  5770 V AMSColorSensorImpl: setGain(GAIN_4)
+06-02 16:49:14.084  5554  5770 V AMSColorSensorImpl: setPDrive(Percent12_5)
+06-02 16:49:14.091  5554  5770 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+06-02 16:49:14.097  5554  5770 V AMSColorSensorImpl: enable() enabled=0x00...
+06-02 16:49:14.114  5554  5770 V AMSColorSensorImpl: ...enable() enabled=0x07
+06-02 16:49:14.121  5554  5770 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-02 16:49:14.121  5554  5770 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+06-02 16:49:14.121  5554  5770 V AMSColorSensorImpl: ...internalInitialize()
+06-02 16:49:14.122  5554  5770 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 0; addr7=0x39)
+06-02 16:49:14.123  5554  5770 V AMSColorSensorImpl: internalInitialize()...
+06-02 16:49:14.134  5554  5770 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-02 16:49:14.135  5554  5770 V AMSColorSensorImpl: state| 00 01 60 33 5b 00 1e 00 24 
+06-02 16:49:14.138  5554  5770 V AMSColorSensorImpl: disable() enabled=0x07...
+06-02 16:49:14.149  5554  5770 V AMSColorSensorImpl: ...disable() enabled=0x00
+06-02 16:49:14.150  5554  5770 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+06-02 16:49:14.153  5554  5770 V AMSColorSensorImpl: setGain(GAIN_4)
+06-02 16:49:14.159  5554  5770 V AMSColorSensorImpl: setPDrive(Percent12_5)
+06-02 16:49:14.165  5554  5770 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+06-02 16:49:14.172  5554  5770 V AMSColorSensorImpl: enable() enabled=0x00...
+06-02 16:49:14.192  5554  5770 V AMSColorSensorImpl: ...enable() enabled=0x07
+06-02 16:49:14.200  5554  5770 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-02 16:49:14.200  5554  5770 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+06-02 16:49:14.201  5554  5770 V AMSColorSensorImpl: ...internalInitialize()
+06-02 16:49:14.471  5554  5633 V Robocol : received command: CMD_RUN_OP_MODE(18501) Outtake PIDF Tuner
+06-02 16:49:14.487  5554  5644 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(8604), attempt: 0
+06-02 16:49:17.630  5554  5633 V Robocol : received command: CMD_INIT_OP_MODE(18549) $Stop$Robot$
+06-02 16:49:17.651  5554  5770 V RobotCore: nack rec'd mod=173 msg#=0 ref#=0 reason=CANCELLED_FOR_SAFETY:259
+06-02 16:49:17.656  5554  5770 D RobotCore: User runOpModeMethod exited
+06-02 16:49:17.658  5554  5770 V RobotCore: thread: ...terminating 'OpModeThread'
+06-02 16:49:17.689  5554  5664 I RobotCore: Attempting to switch to OpMode $Stop$Robot$
+06-02 16:49:17.691  5554  5664 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-Outtake_PIDF_Tuner.txt ********************
+06-02 16:49:17.699  5554  5773 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-Outtake_PIDF_Tuner.txt
+06-02 16:49:17.699  5554  5773 I RobotCore: logging command line: exec logcat -d -T '6-2 16:49:12.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-Outtake_PIDF_Tuner.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V

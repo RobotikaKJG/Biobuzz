@@ -1,0 +1,67 @@
+--------- beginning of main
+06-06 15:17:23.584  1568  1639 V Robocol : received command: CMD_SET_MATCH_NUMBER(10426) 0
+06-06 15:17:23.585  1568  1639 V Robocol : received command: CMD_INIT_OP_MODE(10427) GeneralRedTeleOp
+06-06 15:17:23.622  1568  1685 V RobotCore: thread: ...terminating 'OpModeThread'
+06-06 15:17:23.627  1568  1664 I RobotCore: Attempting to switch to OpMode GeneralRedTeleOp
+06-06 15:17:23.631  1568  1664 I RobotCore: ******************** START - OPMODE GeneralRedTeleOp ********************
+06-06 15:17:24.207  1568  1664 D HardwareMap: Clearing which device instances have been retrieved
+06-06 15:17:24.209  1568  1687 V RobotCore: thread: 'OpModeThread' starting...
+06-06 15:17:24.232  1568  1643 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(497), attempt: 0
+06-06 15:17:24.238  1568  1687 I I2C     : Automatically initializing I2C device GoBildaPinpointDriver (USB (embedded); module 173; bus 2; addr7=0x31)
+06-06 15:17:24.389  1568  1687 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 1; addr7=0x39)
+06-06 15:17:24.389  1568  1687 V AMSColorSensorImpl: internalInitialize()...
+06-06 15:17:24.402  1568  1687 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-06 15:17:24.404  1568  1687 V AMSColorSensorImpl: state| 00 01 60 33 7b 00 2d 00 2c 
+06-06 15:17:24.408  1568  1687 V AMSColorSensorImpl: disable() enabled=0x07...
+06-06 15:17:24.421  1568  1687 V AMSColorSensorImpl: ...disable() enabled=0x00
+06-06 15:17:24.422  1568  1687 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+06-06 15:17:24.426  1568  1687 V AMSColorSensorImpl: setGain(GAIN_4)
+06-06 15:17:24.433  1568  1687 V AMSColorSensorImpl: setPDrive(Percent12_5)
+06-06 15:17:24.441  1568  1687 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+06-06 15:17:24.448  1568  1687 V AMSColorSensorImpl: enable() enabled=0x00...
+06-06 15:17:24.468  1568  1687 V AMSColorSensorImpl: ...enable() enabled=0x07
+06-06 15:17:24.476  1568  1687 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-06 15:17:24.479  1568  1687 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+06-06 15:17:24.479  1568  1687 V AMSColorSensorImpl: ...internalInitialize()
+06-06 15:17:24.481  1568  1687 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 0; addr7=0x39)
+06-06 15:17:24.481  1568  1687 V AMSColorSensorImpl: internalInitialize()...
+06-06 15:17:24.495  1568  1687 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-06 15:17:24.496  1568  1687 V AMSColorSensorImpl: state| 00 01 60 33 3f 01 70 00 61 
+06-06 15:17:24.501  1568  1687 V AMSColorSensorImpl: disable() enabled=0x07...
+06-06 15:17:24.514  1568  1687 V AMSColorSensorImpl: ...disable() enabled=0x00
+06-06 15:17:24.514  1568  1687 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+06-06 15:17:24.518  1568  1687 V AMSColorSensorImpl: setGain(GAIN_4)
+06-06 15:17:24.525  1568  1687 V AMSColorSensorImpl: setPDrive(Percent12_5)
+06-06 15:17:24.533  1568  1687 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+06-06 15:17:24.540  1568  1687 V AMSColorSensorImpl: enable() enabled=0x00...
+06-06 15:17:24.559  1568  1687 V AMSColorSensorImpl: ...enable() enabled=0x07
+06-06 15:17:24.567  1568  1687 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-06 15:17:24.569  1568  1687 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+06-06 15:17:24.569  1568  1687 V AMSColorSensorImpl: ...internalInitialize()
+06-06 15:17:24.578  1568  1688 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+06-06 15:17:25.266  1568  1639 V Robocol : received command: CMD_RUN_OP_MODE(10453) GeneralRedTeleOp
+06-06 15:17:25.281  1568  1690 I TurretThread: turret loop started
+06-06 15:17:25.282  1568  1689 I ControlThread: control loop started
+06-06 15:17:25.285  1568  1689 V RevBlinkinLedDriver: Pattern: HOT_PINK, 78, 0.642500
+06-06 15:17:25.312  1568  1643 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(517), attempt: 0
+06-06 15:17:32.752  1568  1643 V Robocol : sending CMD_RUMBLE_EFFECT(762), attempt: 0
+06-06 15:17:50.872  1568  1643 V Robocol : sending CMD_RUMBLE_EFFECT(1463), attempt: 0
+06-06 15:17:55.672  1568  1643 V Robocol : sending CMD_RUMBLE_EFFECT(1647), attempt: 0
+06-06 15:18:07.269  1568  1687 I CycleTimer: shoot cycle 1.84s (avg 1.84s, n=1)
+06-06 15:18:15.712  1568  1643 V Robocol : sending CMD_RUMBLE_EFFECT(2391), attempt: 0
+06-06 15:18:18.469  1568  1687 I CycleTimer: shoot cycle 11.20s (avg 6.52s, n=2)
+06-06 15:18:20.469  1568  1687 I CycleTimer: shoot cycle 2.00s (avg 5.01s, n=3)
+06-06 15:18:29.152  1568  1643 V Robocol : sending CMD_RUMBLE_EFFECT(2820), attempt: 0
+06-06 15:18:31.043  1568  1687 I CycleTimer: shoot cycle 10.57s (avg 6.40s, n=4)
+06-06 15:18:32.790  1568  1687 I CycleTimer: shoot cycle 1.75s (avg 5.47s, n=5)
+06-06 15:18:34.550  1568  1687 I CycleTimer: shoot cycle 1.76s (avg 4.85s, n=6)
+06-06 15:19:06.666  1568  1639 V Robocol : received command: CMD_INIT_OP_MODE(14113) $Stop$Robot$
+06-06 15:19:06.687  1568  1689 W ControlThread: control loop EXITED after 29182 iters, 0 errors (running=false, stopRequested=true)
+06-06 15:19:06.688  1568  1690 E LynxI2cDeviceSynch: placeholder: readStatusQuery
+06-06 15:19:06.690  1568  1690 W TurretThread: turret loop EXITED after 12952 iters, 0 errors (running=false, stopRequested=true)
+06-06 15:19:06.700  1568  1687 D RobotCore: User runOpModeMethod exited
+06-06 15:19:06.702  1568  1687 V RobotCore: thread: ...terminating 'OpModeThread'
+06-06 15:19:06.834  1568  1664 I RobotCore: Attempting to switch to OpMode $Stop$Robot$
+06-06 15:19:06.836  1568  1664 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-GeneralRedTeleOp.txt ********************
+06-06 15:19:06.842  1568  1703 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-GeneralRedTeleOp.txt
+06-06 15:19:06.842  1568  1703 I RobotCore: logging command line: exec logcat -d -T '6-6 15:17:23.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-GeneralRedTeleOp.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V

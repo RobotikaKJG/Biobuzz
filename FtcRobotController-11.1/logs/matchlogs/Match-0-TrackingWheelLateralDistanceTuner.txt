@@ -1,0 +1,64 @@
+--------- beginning of main
+05-29 16:23:38.229  1452  1605 I FtcEventLoop: auto-stopping OpMode 'TrackingWheelLateralDistanceTuner'
+05-29 16:23:38.244  1452  9017 D RobotCore: User runOpModeMethod exited
+05-29 16:23:38.245  1452  9017 V RobotCore: thread: ...terminating 'OpModeThread'
+05-29 16:23:38.248  1452  1605 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-TrackingWheelLateralDistanceTuner.txt ********************
+05-29 16:23:38.253  1452  9144 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-TrackingWheelLateralDistanceTuner.txt
+05-29 16:23:38.253  1452  9144 I RobotCore: logging command line: exec logcat -d -T '5-29 16:23:16.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-TrackingWheelLateralDistanceTuner.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V
+05-29 16:23:38.260  1452  1605 I RobotCore: Attempting to switch to OpMode $Stop$Robot$
+05-29 16:23:38.261  1452  1605 D HardwareMap: Clearing which device instances have been retrieved
+05-29 16:23:38.263  1452  9147 V RobotCore: thread: 'OpModeThread' starting...
+05-29 16:23:38.265  1452  1576 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(32436), attempt: 0
+05-29 16:23:38.265  1452  1576 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(32437), attempt: 0
+05-29 16:23:38.299  1452  9147 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 0; addr7=0x39)
+05-29 16:23:38.299  1452  9147 V AMSColorSensorImpl: internalInitialize()...
+05-29 16:23:38.303  1452  9144 I RobotCore: Done running exec logcat -d -T '5-29 16:23:16.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-TrackingWheelLateralDistanceTuner.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V
+05-29 16:23:38.303  1452  9144 I RobotCore: exiting match logcat for /storage/emulated/0/FIRST/matchlogs/Match-0-TrackingWheelLateralDistanceTuner.txt
+05-29 16:23:38.312  1452  9147 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+05-29 16:23:38.312  1452  9147 V AMSColorSensorImpl: state| 00 01 60 33 57 00 1e 00 22 
+05-29 16:23:38.315  1452  9147 V AMSColorSensorImpl: disable() enabled=0x07...
+05-29 16:23:38.325  1452  9147 V AMSColorSensorImpl: ...disable() enabled=0x00
+05-29 16:23:38.325  1452  9147 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+05-29 16:23:38.328  1452  9147 V AMSColorSensorImpl: setGain(GAIN_4)
+05-29 16:23:38.333  1452  9147 V AMSColorSensorImpl: setPDrive(Percent12_5)
+05-29 16:23:38.337  1452  9147 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+05-29 16:23:38.343  1452  9147 V AMSColorSensorImpl: enable() enabled=0x00...
+05-29 16:23:38.359  1452  9147 V AMSColorSensorImpl: ...enable() enabled=0x07
+05-29 16:23:38.366  1452  9147 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+05-29 16:23:38.366  1452  9147 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+05-29 16:23:38.366  1452  9147 V AMSColorSensorImpl: ...internalInitialize()
+05-29 16:23:38.367  1452  9147 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 1; addr7=0x39)
+05-29 16:23:38.367  1452  9147 V AMSColorSensorImpl: internalInitialize()...
+05-29 16:23:38.375  1452  9147 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+05-29 16:23:38.376  1452  9147 V AMSColorSensorImpl: state| 00 01 60 33 5a 00 1f 00 24 
+05-29 16:23:38.378  1452  9147 V AMSColorSensorImpl: disable() enabled=0x07...
+05-29 16:23:38.388  1452  9147 V AMSColorSensorImpl: ...disable() enabled=0x00
+05-29 16:23:38.388  1452  9147 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+05-29 16:23:38.391  1452  9147 V AMSColorSensorImpl: setGain(GAIN_4)
+05-29 16:23:38.396  1452  9147 V AMSColorSensorImpl: setPDrive(Percent12_5)
+05-29 16:23:38.401  1452  9147 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+05-29 16:23:38.405  1452  9147 V AMSColorSensorImpl: enable() enabled=0x00...
+05-29 16:23:38.422  1452  9147 V AMSColorSensorImpl: ...enable() enabled=0x07
+05-29 16:23:38.428  1452  9147 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+05-29 16:23:38.429  1452  9147 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+05-29 16:23:38.429  1452  9147 V AMSColorSensorImpl: ...internalInitialize()
+05-29 16:23:38.971  1452  9147 V RobotCore: thread: ...terminating 'OpModeThread'
+05-29 16:23:38.977  1452  1605 I RobotCore: Attempting to switch to OpMode TrackingWheelLateralDistanceTuner
+05-29 16:23:38.979  1452  1605 I RobotCore: ******************** START - OPMODE TrackingWheelLateralDistanceTuner ********************
+05-29 16:23:39.122  1452  1605 D HardwareMap: Clearing which device instances have been retrieved
+05-29 16:23:39.125  1452  9158 V RobotCore: thread: 'OpModeThread' starting...
+05-29 16:23:39.145  1452  1576 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(32458), attempt: 0
+05-29 16:23:39.785  1452  1576 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(32469), attempt: 0
+05-29 16:23:46.110  1452  1565 V Robocol : received command: CMD_INIT_OP_MODE(42381) $Stop$Robot$
+05-29 16:23:46.123  1452  9158 D RobotCore: User runOpModeMethod exited
+05-29 16:23:46.123  1452  9158 V RobotCore: thread: ...terminating 'OpModeThread'
+05-29 16:23:46.129  1452  1605 I RobotCore: Attempting to switch to OpMode $Stop$Robot$
+05-29 16:23:46.130  1452  1605 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-TrackingWheelLateralDistanceTuner.txt ********************
+05-29 16:23:46.134  1452  9209 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-TrackingWheelLateralDistanceTuner.txt
+05-29 16:23:46.134  1452  1605 D HardwareMap: Clearing which device instances have been retrieved
+05-29 16:23:46.134  1452  9209 I RobotCore: logging command line: exec logcat -d -T '5-29 16:23:38.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-TrackingWheelLateralDistanceTuner.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V
+05-29 16:23:46.136  1452  9211 V RobotCore: thread: 'OpModeThread' starting...
+05-29 16:23:46.145  1452  1576 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(32691), attempt: 0
+05-29 16:23:46.146  1452  1576 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(32692), attempt: 0
+05-29 16:23:46.172  1452  9211 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 0; addr7=0x39)
+05-29 16:23:46.172  1452  9211 V AMSColorSensorImpl: internalInitialize()...

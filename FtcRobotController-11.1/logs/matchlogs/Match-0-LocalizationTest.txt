@@ -1,0 +1,72 @@
+--------- beginning of main
+06-04 18:08:41.450   966  1162 V Robocol : received command: CMD_SET_MATCH_NUMBER(30026) 0
+06-04 18:08:41.451   966  1162 V Robocol : received command: CMD_INIT_OP_MODE(30027) LocalizationTest
+06-04 18:08:41.478   966  1397 V RobotCore: thread: ...terminating 'OpModeThread'
+06-04 18:08:41.479   966  1188 I RobotCore: Attempting to switch to OpMode LocalizationTest
+06-04 18:08:41.483   966  1188 I RobotCore: ******************** START - OPMODE LocalizationTest ********************
+06-04 18:08:41.637   966  1188 D HardwareMap: Clearing which device instances have been retrieved
+06-04 18:08:42.890   966  1492 V RobotCore: thread: 'OpModeThread' starting...
+06-04 18:08:42.898   966  1492 I I2C     : Automatically initializing I2C device GoBildaPinpointDriver (USB (embedded); module 173; bus 2; addr7=0x31)
+06-04 18:08:42.904   966  1167 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(20219), attempt: 0
+06-04 18:08:43.410   966  1162 V Robocol : received command: CMD_RUN_OP_MODE(30055) LocalizationTest
+06-04 18:08:43.425   966  1167 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(20228), attempt: 0
+06-04 18:08:47.227   966  1114 E RobotCore: java.net.SocketException: Socket closed
+06-04 18:08:47.231   966  1114 E RobotCore: 	at java.net.SocketOutputStream.socketWrite(SocketOutputStream.java:120)
+06-04 18:08:47.233   966  1114 E RobotCore: 	at java.net.SocketOutputStream.write(SocketOutputStream.java:136)
+06-04 18:08:47.236   966  1114 E RobotCore: 	at fi.iki.elonen.NanoWSD$WebSocketFrame.write(NanoWSD.java:702)
+06-04 18:08:47.238   966  1114 E RobotCore: 	at fi.iki.elonen.NanoWSD$WebSocket.sendFrame(NanoWSD.java:273)
+06-04 18:08:47.240   966  1114 E RobotCore: 	at fi.iki.elonen.NanoWSD$WebSocket.send(NanoWSD.java:268)
+06-04 18:08:47.243   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.FtcDashboard$DashWebSocket.send(FtcDashboard.java:565)
+06-04 18:08:47.247   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore.lambda$sendAll$4(DashboardCore.java:273)
+06-04 18:08:47.250   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore$$ExternalSyntheticLambda6.apply(D8$$SyntheticClass:0)
+06-04 18:08:47.252   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.Mutex.with(Mutex.java:25)
+06-04 18:08:47.255   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore.sendAll(DashboardCore.java:271)
+06-04 18:08:47.258   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore$TelemetryUpdateRunnable.run(DashboardCore.java:85)
+06-04 18:08:47.260   966  1114 E RobotCore: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:428)
+06-04 18:08:47.261   966  1114 E RobotCore: 	at java.util.concurrent.FutureTask.run(FutureTask.java:237)
+06-04 18:08:47.263   966  1114 E RobotCore: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1133)
+06-04 18:08:47.264   966  1114 E RobotCore: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:607)
+06-04 18:08:47.265   966  1114 E RobotCore: 	at java.lang.Thread.run(Thread.java:761)
+06-04 18:10:47.221   966  1114 E RobotCore: java.net.SocketException: Socket closed
+06-04 18:10:47.223   966  1114 E RobotCore: 	at java.net.SocketOutputStream.socketWrite(SocketOutputStream.java:120)
+06-04 18:10:47.224   966  1114 E RobotCore: 	at java.net.SocketOutputStream.write(SocketOutputStream.java:136)
+06-04 18:10:47.225   966  1114 E RobotCore: 	at fi.iki.elonen.NanoWSD$WebSocketFrame.write(NanoWSD.java:702)
+06-04 18:10:47.230   966  1114 E RobotCore: 	at fi.iki.elonen.NanoWSD$WebSocket.sendFrame(NanoWSD.java:273)
+06-04 18:10:47.230   966  1114 E RobotCore: 	at fi.iki.elonen.NanoWSD$WebSocket.send(NanoWSD.java:268)
+06-04 18:10:47.231   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.FtcDashboard$DashWebSocket.send(FtcDashboard.java:565)
+06-04 18:10:47.231   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore.lambda$sendAll$4(DashboardCore.java:273)
+06-04 18:10:47.232   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore$$ExternalSyntheticLambda6.apply(D8$$SyntheticClass:0)
+06-04 18:10:47.233   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.Mutex.with(Mutex.java:25)
+06-04 18:10:47.233   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore.sendAll(DashboardCore.java:271)
+06-04 18:10:47.234   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore$TelemetryUpdateRunnable.run(DashboardCore.java:85)
+06-04 18:10:47.234   966  1114 E RobotCore: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:428)
+06-04 18:10:47.235   966  1114 E RobotCore: 	at java.util.concurrent.FutureTask.run(FutureTask.java:237)
+06-04 18:10:47.238   966  1114 E RobotCore: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1133)
+06-04 18:10:47.239   966  1114 E RobotCore: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:607)
+06-04 18:10:47.239   966  1114 E RobotCore: 	at java.lang.Thread.run(Thread.java:761)
+06-04 18:12:47.233   966  1114 E RobotCore: java.net.SocketException: Socket closed
+06-04 18:12:47.234   966  1114 E RobotCore: 	at java.net.SocketOutputStream.socketWrite(SocketOutputStream.java:120)
+06-04 18:12:47.235   966  1114 E RobotCore: 	at java.net.SocketOutputStream.write(SocketOutputStream.java:136)
+06-04 18:12:47.236   966  1114 E RobotCore: 	at fi.iki.elonen.NanoWSD$WebSocketFrame.write(NanoWSD.java:702)
+06-04 18:12:47.236   966  1114 E RobotCore: 	at fi.iki.elonen.NanoWSD$WebSocket.sendFrame(NanoWSD.java:273)
+06-04 18:12:47.237   966  1114 E RobotCore: 	at fi.iki.elonen.NanoWSD$WebSocket.send(NanoWSD.java:268)
+06-04 18:12:47.237   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.FtcDashboard$DashWebSocket.send(FtcDashboard.java:565)
+06-04 18:12:47.238   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore.lambda$sendAll$4(DashboardCore.java:273)
+06-04 18:12:47.239   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore$$ExternalSyntheticLambda6.apply(D8$$SyntheticClass:0)
+06-04 18:12:47.239   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.Mutex.with(Mutex.java:25)
+06-04 18:12:47.240   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore.sendAll(DashboardCore.java:271)
+06-04 18:12:47.241   966  1114 E RobotCore: 	at com.acmerobotics.dashboard.DashboardCore$TelemetryUpdateRunnable.run(DashboardCore.java:85)
+06-04 18:12:47.241   966  1114 E RobotCore: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:428)
+06-04 18:12:47.241   966  1114 E RobotCore: 	at java.util.concurrent.FutureTask.run(FutureTask.java:237)
+06-04 18:12:47.242   966  1114 E RobotCore: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1133)
+06-04 18:12:47.243   966  1114 E RobotCore: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:607)
+06-04 18:12:47.243   966  1114 E RobotCore: 	at java.lang.Thread.run(Thread.java:761)
+06-04 18:12:48.656   966  1162 V Robocol : received command: CMD_INIT_OP_MODE(35995) $Stop$Robot$
+06-04 18:12:48.680   966  1492 E LynxI2cDeviceSynch: placeholder: readTimestamped
+06-04 18:12:48.681   966  1492 D RobotCore: User runOpModeMethod exited
+06-04 18:12:48.683   966  1492 V RobotCore: thread: ...terminating 'OpModeThread'
+06-04 18:12:48.704   966  1188 I RobotCore: Attempting to switch to OpMode $Stop$Robot$
+06-04 18:12:48.706   966  1188 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-LocalizationTest.txt ********************
+06-04 18:12:48.713   966  1188 D HardwareMap: Clearing which device instances have been retrieved
+06-04 18:12:48.713   966  3105 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-LocalizationTest.txt
+06-04 18:12:48.714   966  3105 I RobotCore: logging command line: exec logcat -d -T '6-4 18:8:41.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-LocalizationTest.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V

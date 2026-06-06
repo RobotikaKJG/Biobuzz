@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 public class AutoCycleShootLogic {
     private double currentWait = 0;
     private double feedStartSec = 0;
+    private double clearSinceSec = -1; // when the ball queue first went (and stayed) empty
     private boolean wasIfCalled = false;
     private SensorControl sensorControl;
     private MotorControl motorControl;
@@ -65,22 +66,32 @@ public class AutoCycleShootLogic {
     }
 
     private void turnTransfer() {
-        // TeleOp auto-finish: feed until the balls are gone (both sensors empty —
-        // including the mid/back one that fills first when intaking), or until the
-        // max feed time, then stop -> which closes the gate. Autonomous scripts its
-        // own stop, so leave that path unchanged.
-        // (To be less strict, relax to: boolean ballsGone = !sensorControl.isMidBall();)
+        // TeleOp auto-finish: feed until the ball queue (both sensors — including the
+        // mid/back one that fills first when intaking) has been empty CONTINUOUSLY for
+        // shootClearHoldSec. The "held" requirement is critical: while feeding, a ball
+        // is briefly in transit BETWEEN the two sensors and both momentarily read empty;
+        // without the hold that ended the shot early and only 2 of 3 balls fired. The
+        // hold also gives the last ball time to launch before the gate closes.
+        // Autonomous scripts its own stop, so leave that path unchanged.
         if (GlobalVariables.isAutonomous) return;
-        double elapsed = getSeconds() - feedStartSec;
-        boolean ballsGone = !sensorControl.isMidBall() && !sensorControl.isFrontBall();
-        if ((elapsed >= OuttakeConstants.shootFeedMinSec && ballsGone)
-                || elapsed >= OuttakeConstants.shootFeedMaxSec) {
+        double now = getSeconds();
+        double elapsed = now - feedStartSec;
+        boolean queueEmpty = !sensorControl.isMidBall() && !sensorControl.isFrontBall();
+        if (queueEmpty && elapsed >= OuttakeConstants.shootFeedMinSec) {
+            if (clearSinceSec < 0) clearSinceSec = now;   // queue just went empty
+        } else {
+            clearSinceSec = -1;                            // ball present / in transit -> reset
+        }
+        boolean queueEmptyHeld = clearSinceSec >= 0
+                && (now - clearSinceSec) >= OuttakeConstants.shootClearHoldSec;
+        if (queueEmptyHeld || elapsed >= OuttakeConstants.shootFeedMaxSec) {
             OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
         }
     }
 
     private void startFeed() {
         feedStartSec = getSeconds();
+        clearSinceSec = -1;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
     }
 

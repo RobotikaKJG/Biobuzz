@@ -1,0 +1,54 @@
+--------- beginning of main
+06-05 21:10:46.727  4073  4207 V Robocol : received command: CMD_SET_MATCH_NUMBER(10255) 0
+06-05 21:10:46.729  4073  4207 V Robocol : received command: CMD_INIT_OP_MODE(10256) Color Sensor Benchmark
+06-05 21:10:46.776  4073  4257 V RobotCore: thread: ...terminating 'OpModeThread'
+06-05 21:10:46.781  4073  4233 I RobotCore: Attempting to switch to OpMode Color Sensor Benchmark
+06-05 21:10:46.788  4073  4233 I RobotCore: ******************** START - OPMODE Color Sensor Benchmark ********************
+06-05 21:10:47.006  4073  4233 D HardwareMap: Clearing which device instances have been retrieved
+06-05 21:10:48.447  4073  4270 V RobotCore: thread: 'OpModeThread' starting...
+06-05 21:10:48.467  4073  4218 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(334), attempt: 0
+06-05 21:10:48.471  4073  4270 I I2C     : Automatically initializing I2C device GoBildaPinpointDriver (USB (embedded); module 173; bus 2; addr7=0x31)
+06-05 21:10:48.626  4073  4270 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 1; addr7=0x39)
+06-05 21:10:48.626  4073  4270 V AMSColorSensorImpl: internalInitialize()...
+06-05 21:10:48.637  4073  4270 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-05 21:10:48.637  4073  4270 V AMSColorSensorImpl: state| 00 01 60 33 7f 00 41 00 48 
+06-05 21:10:48.641  4073  4270 V AMSColorSensorImpl: disable() enabled=0x07...
+06-05 21:10:48.652  4073  4270 V AMSColorSensorImpl: ...disable() enabled=0x00
+06-05 21:10:48.652  4073  4270 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+06-05 21:10:48.655  4073  4270 V AMSColorSensorImpl: setGain(GAIN_4)
+06-05 21:10:48.661  4073  4270 V AMSColorSensorImpl: setPDrive(Percent12_5)
+06-05 21:10:48.667  4073  4270 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+06-05 21:10:48.673  4073  4270 V AMSColorSensorImpl: enable() enabled=0x00...
+06-05 21:10:48.690  4073  4270 V AMSColorSensorImpl: ...enable() enabled=0x07
+06-05 21:10:48.697  4073  4270 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-05 21:10:48.698  4073  4270 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+06-05 21:10:48.698  4073  4270 V AMSColorSensorImpl: ...internalInitialize()
+06-05 21:10:48.699  4073  4270 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 0; addr7=0x39)
+06-05 21:10:48.699  4073  4270 V AMSColorSensorImpl: internalInitialize()...
+06-05 21:10:48.710  4073  4270 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-05 21:10:48.711  4073  4270 V AMSColorSensorImpl: state| 00 01 60 33 4f 00 1b 00 1f 
+06-05 21:10:48.715  4073  4270 V AMSColorSensorImpl: disable() enabled=0x07...
+06-05 21:10:48.729  4073  4270 V AMSColorSensorImpl: ...disable() enabled=0x00
+06-05 21:10:48.729  4073  4270 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+06-05 21:10:48.733  4073  4270 V AMSColorSensorImpl: setGain(GAIN_4)
+06-05 21:10:48.741  4073  4270 V AMSColorSensorImpl: setPDrive(Percent12_5)
+06-05 21:10:48.747  4073  4270 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+06-05 21:10:48.753  4073  4270 V AMSColorSensorImpl: enable() enabled=0x00...
+06-05 21:10:48.773  4073  4270 V AMSColorSensorImpl: ...enable() enabled=0x07
+06-05 21:10:48.781  4073  4270 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+06-05 21:10:48.781  4073  4270 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+06-05 21:10:48.782  4073  4270 V AMSColorSensorImpl: ...internalInitialize()
+06-05 21:10:52.407  4073  4207 V Robocol : received command: CMD_RUN_OP_MODE(10321) Color Sensor Benchmark
+06-05 21:10:52.428  4073  4218 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(380), attempt: 0
+06-05 21:16:11.372  4073  4207 V Robocol : received command: CMD_INIT_OP_MODE(14732) $Stop$Robot$
+06-05 21:16:11.392  4073  4270 E LynxI2cDeviceSynch: placeholder: readTimestamped
+06-05 21:16:11.393  4073  4270 E LynxI2cDeviceSynch: placeholder: readTimestamped
+06-05 21:16:11.393  4073  4270 D RobotCore: User runOpModeMethod exited
+06-05 21:16:11.395  4073  4270 V RobotCore: thread: ...terminating 'OpModeThread'
+06-05 21:16:11.524  4073  4233 I RobotCore: Attempting to switch to OpMode $Stop$Robot$
+06-05 21:16:11.526  4073  4233 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-Color_Sensor_Benchmark.txt ********************
+06-05 21:16:11.533  4073  4233 D HardwareMap: Clearing which device instances have been retrieved
+06-05 21:16:11.533  4073  4661 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-Color_Sensor_Benchmark.txt
+06-05 21:16:11.533  4073  4661 I RobotCore: logging command line: exec logcat -d -T '6-5 21:10:46.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-Color_Sensor_Benchmark.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V
+06-05 21:16:11.543  4662  4662 I sh      : type=1400 audit(0.0:508): avc: denied { read } for name="/" dev="rootfs" ino=1 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:rootfs:s0 tclass=dir permissive=1
+06-05 21:16:11.543  4662  4662 I sh      : type=1400 audit(0.0:509): avc: denied { open } for path="/" dev="rootfs" ino=1 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:rootfs:s0 tclass=dir permissive=1

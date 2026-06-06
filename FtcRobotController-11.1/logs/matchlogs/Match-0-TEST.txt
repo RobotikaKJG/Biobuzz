@@ -1,0 +1,19 @@
+--------- beginning of main
+06-04 16:25:04.745  1558  1629 V Robocol : received command: CMD_SET_MATCH_NUMBER(10318) 0
+06-04 16:25:04.746  1558  1629 V Robocol : received command: CMD_INIT_OP_MODE(10319) TEST
+06-04 16:25:04.777  1558  1669 V RobotCore: thread: ...terminating 'OpModeThread'
+06-04 16:25:04.784  1558  1654 I RobotCore: Attempting to switch to OpMode TEST
+06-04 16:25:04.789  1558  1654 I RobotCore: ******************** START - OPMODE TEST ********************
+06-04 16:25:04.995  1558  1654 D HardwareMap: Clearing which device instances have been retrieved
+06-04 16:25:06.256  1558  1673 V RobotCore: thread: 'OpModeThread' starting...
+06-04 16:25:06.285  1558  1633 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(396), attempt: 0
+06-04 16:25:07.184  1558  1629 V Robocol : received command: CMD_RUN_OP_MODE(10353) TEST
+06-04 16:25:07.206  1558  1633 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(411), attempt: 0
+06-04 16:25:09.063  1558  1629 V Robocol : received command: CMD_INIT_OP_MODE(10384) $Stop$Robot$
+06-04 16:25:09.087  1558  1673 D RobotCore: User runOpModeMethod exited
+06-04 16:25:09.089  1558  1673 V RobotCore: thread: ...terminating 'OpModeThread'
+06-04 16:25:09.234  1558  1654 I RobotCore: Attempting to switch to OpMode $Stop$Robot$
+06-04 16:25:09.235  1558  1654 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-TEST.txt ********************
+06-04 16:25:09.240  1558  1654 D HardwareMap: Clearing which device instances have been retrieved
+06-04 16:25:09.240  1558  1676 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-TEST.txt
+06-04 16:25:09.240  1558  1676 I RobotCore: logging command line: exec logcat -d -T '6-4 16:25:4.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-TEST.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V

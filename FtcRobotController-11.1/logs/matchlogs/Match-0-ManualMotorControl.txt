@@ -1,0 +1,55 @@
+--------- beginning of main
+05-29 15:50:14.453  1829  1927 V Robocol : received command: CMD_SET_MATCH_NUMBER(12792) 0
+05-29 15:50:14.454  1829  1927 V Robocol : received command: CMD_INIT_OP_MODE(12793) ManualMotorControl
+05-29 15:50:14.487  1829  2017 V RobotCore: thread: ...terminating 'OpModeThread'
+05-29 15:50:14.493  1829  2016 I RobotCore: Attempting to switch to OpMode ManualMotorControl
+05-29 15:50:14.497  1829  2016 I RobotCore: ******************** START - OPMODE ManualMotorControl ********************
+05-29 15:50:14.660  1829  2016 D HardwareMap: Clearing which device instances have been retrieved
+05-29 15:50:14.664  1829  2020 V RobotCore: thread: 'OpModeThread' starting...
+05-29 15:50:14.676  1829  1940 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(2902), attempt: 0
+05-29 15:50:14.817  1829  2020 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 1; addr7=0x39)
+05-29 15:50:14.817  1829  2020 V AMSColorSensorImpl: internalInitialize()...
+05-29 15:50:14.829  1829  2020 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+05-29 15:50:14.829  1829  2020 V AMSColorSensorImpl: state| 00 01 60 33 5d 00 20 00 25 
+05-29 15:50:14.832  1829  2020 V AMSColorSensorImpl: disable() enabled=0x07...
+05-29 15:50:14.843  1829  2020 V AMSColorSensorImpl: ...disable() enabled=0x00
+05-29 15:50:14.843  1829  2020 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+05-29 15:50:14.847  1829  2020 V AMSColorSensorImpl: setGain(GAIN_4)
+05-29 15:50:14.854  1829  2020 V AMSColorSensorImpl: setPDrive(Percent12_5)
+05-29 15:50:14.860  1829  2020 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+05-29 15:50:14.866  1829  2020 V AMSColorSensorImpl: enable() enabled=0x00...
+05-29 15:50:14.885  1829  2020 V AMSColorSensorImpl: ...enable() enabled=0x07
+05-29 15:50:14.894  1829  2020 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+05-29 15:50:14.894  1829  2020 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+05-29 15:50:14.894  1829  2020 V AMSColorSensorImpl: ...internalInitialize()
+05-29 15:50:14.895  1829  2020 I I2C     : Automatically initializing I2C device LynxI2cColorRangeSensor (USB (embedded); module 173; bus 0; addr7=0x39)
+05-29 15:50:14.895  1829  2020 V AMSColorSensorImpl: internalInitialize()...
+05-29 15:50:14.907  1829  2020 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+05-29 15:50:14.907  1829  2020 V AMSColorSensorImpl: state| 00 01 60 33 5b 00 1f 00 24 
+05-29 15:50:14.911  1829  2020 V AMSColorSensorImpl: disable() enabled=0x07...
+05-29 15:50:14.922  1829  2020 V AMSColorSensorImpl: ...disable() enabled=0x00
+05-29 15:50:14.922  1829  2020 V AMSColorSensorImpl: setIntegrationTime(0xf6)
+05-29 15:50:14.925  1829  2020 V AMSColorSensorImpl: setGain(GAIN_4)
+05-29 15:50:14.932  1829  2020 V AMSColorSensorImpl: setPDrive(Percent12_5)
+05-29 15:50:14.938  1829  2020 V AMSColorSensorImpl: setProximityPulseCount(0x08)
+05-29 15:50:14.944  1829  2020 V AMSColorSensorImpl: enable() enabled=0x00...
+05-29 15:50:14.965  1829  2020 V AMSColorSensorImpl: ...enable() enabled=0x07
+05-29 15:50:14.972  1829  2020 V AMSColorSensorImpl: state: 07 f6 ff ff 00 00 00 00 00 00 00 00 00 00 08 61 
+05-29 15:50:14.973  1829  2020 V AMSColorSensorImpl: state| 00 01 60 22 00 00 00 00 00 
+05-29 15:50:14.973  1829  2020 V AMSColorSensorImpl: ...internalInitialize()
+05-29 15:50:15.175  1829  1927 V Robocol : received command: CMD_RUN_OP_MODE(12810) ManualMotorControl
+05-29 15:50:15.197  1829  1940 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(2913), attempt: 0
+05-29 15:50:58.936  1829  1927 V Robocol : received command: CMD_REQUEST_CONFIGURATIONS(13993) 
+05-29 15:50:58.996  1829  1940 V Robocol : sending CMD_REQUEST_CONFIGURATIONS_RESP(4096), attempt: 0
+05-29 15:50:59.496  1829  1927 V Robocol : received command: CMD_INIT_OP_MODE(14005) $Stop$Robot$
+05-29 15:50:59.535  1829  2020 D RobotCore: User runOpModeMethod exited
+05-29 15:50:59.538  1829  2020 V RobotCore: thread: ...terminating 'OpModeThread'
+05-29 15:50:59.541  1829  2016 I RobotCore: Attempting to switch to OpMode $Stop$Robot$
+05-29 15:50:59.543  1829  2016 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-ManualMotorControl.txt ********************
+05-29 15:50:59.548  1829  2016 I RobotCore: Pruning old match logs: deleting Match-0-TrackingWheelForwardOffsetTuner.txt
+05-29 15:50:59.551  1829  2016 D HardwareMap: Clearing which device instances have been retrieved
+05-29 15:50:59.551  1829  2023 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-ManualMotorControl.txt
+05-29 15:50:59.551  1829  2023 I RobotCore: logging command line: exec logcat -d -T '5-29 15:50:14.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-ManualMotorControl.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V
+05-29 15:50:59.553  1829  2025 V RobotCore: thread: 'OpModeThread' starting...
+05-29 15:50:59.556  1829  1940 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(4116), attempt: 0
+05-29 15:50:59.557  1829  1940 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(4117), attempt: 0

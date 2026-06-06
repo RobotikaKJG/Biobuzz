@@ -179,6 +179,23 @@ connect_hub() {
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+MODE="${1:-deploy}"
+
+# `./deploy.sh logs` — connect to the hub and pull the logcat ring buffer, which
+# holds the RobotLog output (TurretThread / ControlThread / DriveLoop). Run it
+# right after a match/test (before redeploying) so the buffer still has the run.
+if [[ "$MODE" == "logs" ]]; then
+    connect_hub
+    mkdir -p "$SCRIPT_DIR/logs"
+    LOG_FILE="$SCRIPT_DIR/logs/robot-$(date +%Y%m%d-%H%M%S).log"
+    log "Pulling logcat -> $LOG_FILE"
+    adb -s "$HUB" logcat -d > "$LOG_FILE" 2>&1
+    log "Pulled $(wc -l < "$LOG_FILE" | tr -d ' ') lines"
+    log "── Recent TurretThread / ControlThread / DriveLoop lines ──"
+    grep -E "TurretThread|ControlThread|DriveLoop" "$LOG_FILE" | tail -40 || log "  (none found in buffer)"
+    exit 0
+fi
+
 log "Building APK..."
 ./gradlew assembleDebug -q
 log "Build complete"

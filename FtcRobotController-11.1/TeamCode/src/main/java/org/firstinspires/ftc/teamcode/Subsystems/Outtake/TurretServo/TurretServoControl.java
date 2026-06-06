@@ -18,8 +18,8 @@ public class TurretServoControl {
     private static final double gearRatio = 1;
     private static final double servoTravel = 323;
 
-    private double turretAngleDeg = 0.0;
-    private double targetAngleDeg = 0.0;
+    private volatile double turretAngleDeg = 0.0;   // volatile: read by main thread for telemetry
+    private volatile double targetAngleDeg = 0.0;   // volatile: read by main thread for telemetry
     private double targetServoPos = 0.0;
 
     public TurretServoControl(ServoControl servoControl, SensorControl sensorControl) {

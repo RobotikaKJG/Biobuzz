@@ -476,6 +476,7 @@ public class SensorControl {
 
     public double getTurretTargetAngleVelocityModifier(){
         Pose2d currentVelocity = localizer.getPoseVelocity();
+        if (currentVelocity == null) return 0.0; // no velocity estimate yet -> no lead modifier (avoids NPE)
         double velocityX = currentVelocity.getX();
         double velocityY = currentVelocity.getY();
 

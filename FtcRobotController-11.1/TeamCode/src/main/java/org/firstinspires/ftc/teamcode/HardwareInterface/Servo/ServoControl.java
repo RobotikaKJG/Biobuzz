@@ -52,8 +52,8 @@ public class ServoControl {
     }
 
     public void setServoStartPos() {
-        servos[ServoConstants.lockServo].setPosition(IntakeConstants.lockServoMinPos);
-        lastWrittenPos[ServoConstants.lockServo] = IntakeConstants.lockServoMinPos;
+        servos[ServoConstants.lockServo].setPosition(IntakeConstants.lockServoLockedPos);
+        lastWrittenPos[ServoConstants.lockServo] = IntakeConstants.lockServoLockedPos;
     }
 
     public void setServoPos(int index, double position) {

@@ -48,8 +48,10 @@ public class AutoCycleShootLogic {
     }
 
     private void recalibrate() {
-        sensorControl.resetLocalizerWithLimelight();
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+
+        if (sensorControl.resetLocalizerWithLimelight()) {
+            OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+        }
     }
 
     private void activate() {

@@ -21,6 +21,9 @@ public class AutoCycleShootLogic {
 
     public void update() {
         switch (OuttakeStates.getAutoCycleShootState()) {
+            case recalibrate:
+                recalibrate();
+                break;
             case activate:
                 activate();
                 break;
@@ -41,6 +44,12 @@ public class AutoCycleShootLogic {
                 break;
             case idle:
                 break;
+        }
+    }
+
+    private void recalibrate() {
+        if (sensorControl.resetLocalizerWithLimelight()) {
+            OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         }
     }
 

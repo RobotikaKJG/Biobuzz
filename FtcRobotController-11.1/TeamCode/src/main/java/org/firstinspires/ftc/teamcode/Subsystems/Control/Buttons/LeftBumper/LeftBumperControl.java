@@ -8,7 +8,7 @@ public class LeftBumperControl {
     public void update() {
         switch (ButtonStates.getLeftBumperState()) {
             case shoot:
-                OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+                OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.recalibrate);
                 break;
             case stop:
                 OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);

@@ -36,6 +36,7 @@ public class IterativeController {
     private final SensorControl sensorControl;
     private final RevBlinkinLedDriver led;
     private RevBlinkinLedDriver.BlinkinPattern lastLedPattern = null;
+    private boolean isLimelightRecalibrating = false;
 
     public IterativeController(Dependencies dependencies) {
         gamepad1 = dependencies.gamepad1;
@@ -65,9 +66,22 @@ public class IterativeController {
         if (edgeDetection.rising(GamepadIndexValues.rightStickButton))
             GlobalVariables.far = !GlobalVariables.far;
 
-        RevBlinkinLedDriver.BlinkinPattern ledPattern = GlobalVariables.far
+        if (edgeDetection.rising(GamepadIndexValues.dpadLeft)) {
+            isLimelightRecalibrating = true;
+        }
+
+        if (isLimelightRecalibrating) {
+            if (sensorControl.resetLocalizerWithLimelight()) {
+                isLimelightRecalibrating = false;
+            }
+        }
+
+        RevBlinkinLedDriver.BlinkinPattern ledPattern = isLimelightRecalibrating
+                ? RevBlinkinLedDriver.BlinkinPattern.VIOLET
+                : (GlobalVariables.far
                 ? RevBlinkinLedDriver.BlinkinPattern.SKY_BLUE
-                : RevBlinkinLedDriver.BlinkinPattern.HOT_PINK;
+                : RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+
         if (ledPattern != lastLedPattern) {
             led.setPattern(ledPattern);
             lastLedPattern = ledPattern;

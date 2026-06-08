@@ -32,6 +32,8 @@ public class AutoCycleShootControl {
 
     public void updateStates() {
         switch (OuttakeStates.getAutoCycleShootState()) {
+            case recalibrate:
+                break;
             case activate:
                 IntakeStates.setLockServoState(LockServoStates.unlock);
                 break;

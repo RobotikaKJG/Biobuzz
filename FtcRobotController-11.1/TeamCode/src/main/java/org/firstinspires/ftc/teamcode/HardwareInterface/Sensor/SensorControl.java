@@ -75,7 +75,7 @@ public class SensorControl {
     private static final double MIN_ALLOWED_DISTANCE_IN = 10.0;  // Don't trust if too close to lens
     private static final double LINEAR_VELOCITY_THRESHOLD = 6.0; // Inches per second max
     private static final double ANGULAR_VELOCITY_THRESHOLD = Math.toRadians(10); // Max rad/s rotation
-    private static final double CONTINUOUS_FUSION_ALPHA = 0.1;
+    private static final double CONTINUOUS_FUSION_ALPHA = 0.02;
 
     // Velocity Tracking variables
     private Pose2d lastPose = new Pose2d(0, 0, 0);
@@ -126,6 +126,7 @@ public class SensorControl {
         localizer.update();
 
         calculateRobotVelocity();
+        applyContinuousVisionFusion();
     }
 
     /**
@@ -457,8 +458,7 @@ public class SensorControl {
         double angleToTargetRad;
 
         if (!GlobalVariables.isAutonomous) {
-            angleToTargetRad = (!GlobalVariables.far) ? Math.atan2(dx, dy) :
-                    Math.toRadians(GlobalVariables.alliance == Alliance.Red ? 61.67 : -61.67);
+            angleToTargetRad = Math.atan2(dx, dy);
         } else {
             if (!GlobalVariables.far) {
                 angleToTargetRad = Math.toRadians(GlobalVariables.alliance == Alliance.Red ? 45.0 : -45.0);

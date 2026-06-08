@@ -222,9 +222,9 @@ at the goal whenever `OuttakeStates.isTurretTrackingEnabled()` is true (toggled
 by Right Bumper).
 
 Geometry / constraints:
-- Angle limits: `turretLimitRight = -135.0°`, `turretLimitLeft = 100.0°`.
-- `gearRatio = 1`, `servoTravel = 323°`.
-- Mapping: `servoPos = (targetAngleDeg * gearRatio) / servoTravel + 0.5`, then
+- Angle limits: `turretLimitRight = -120.0°`, `turretLimitLeft = 100.0°` (defined in `OuttakeConstants.java`).
+- `turretGearRatio = 1.0`, `turretServoTravel = 323.0°`.
+- Mapping: `servoPos = (targetAngleDeg * turretGearRatio) / turretServoTravel + 0.5`, then
   clamped to `[0.01, 0.99]`.
 - Per-servo multipliers (`OuttakeConstants`): `turretServo1Mult = 1.0`,
   `turretServo2Mult = 0.998`, `turretServo3Mult = 1.0`.
@@ -339,8 +339,8 @@ gamepad2 drive), `isAutonomous`, `wasAutonomous`, `alliance`,
 `IntakeConstants`: `stopFeederAfter 0.1`, `lockServoMinPos 0.044`,
 `lockServoMaxPos 0.3`, `checkAgainAfter 0.2`.
 
-`TurretServoControl`: `turretLimitRight −135.0`, `turretLimitLeft 100.0`,
-`gearRatio 1`, `servoTravel 323`.
+`TurretServoControl`: (uses `OuttakeConstants`: `turretLimitRight −120.0`, `turretLimitLeft 100.0`,
+`turretGearRatio 1`, `turretServoTravel 323`).
 
 `SensorControl`: `ballDistanceIn 4.0`, goal Red `(62,62)` / Blue `(−62,62)`,
 `FieldHalfInches 66.93`, `LimelightFrames 7`,

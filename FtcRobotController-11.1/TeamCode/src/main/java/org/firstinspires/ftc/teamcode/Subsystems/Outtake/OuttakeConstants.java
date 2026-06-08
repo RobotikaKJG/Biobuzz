@@ -8,6 +8,11 @@ public class OuttakeConstants {
     public static double turretServoMax = 0.78;
     public static double turretServoMin = 0.0;
 
+    public static double turretLimitRight = -120.0;
+    public static double turretLimitLeft = 100.0;
+    public static double turretGearRatio = 1.0;
+    public static double turretServoTravel = 323.0;
+
     public static double turretServo1Max = turretServoMax * turretServo1Mult;
     public static double turretServo2Max = turretServoMax * turretServo2Mult;
     public static double turretServo3Max = turretServoMax * turretServo3Mult;

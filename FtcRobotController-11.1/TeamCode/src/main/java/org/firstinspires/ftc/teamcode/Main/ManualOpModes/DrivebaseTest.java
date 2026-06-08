@@ -28,7 +28,7 @@ public class DrivebaseTest extends LinearOpMode {
         while (opModeIsActive()) {
             drivebaseController.updateState();
             dependencies.motorControl.setMotors(MotorConstants.allDrive);
-            dependencies.localizer.update();
+            dependencies.pedroLocalizer.update();
             telemetry.addData("Rotation",dependencies.sensorControl.getLocalizerAngle());
             telemetry.update();
             if(gamepad1.triangle)

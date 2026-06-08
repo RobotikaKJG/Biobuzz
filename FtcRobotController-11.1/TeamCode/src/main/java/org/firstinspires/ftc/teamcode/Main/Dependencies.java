@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Main;
 
+import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -8,16 +11,10 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
-import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
-
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-
-import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
+import org.firstinspires.ftc.teamcode.PedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeMovement.AutoIntakeMovementControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
@@ -36,10 +33,8 @@ public class Dependencies {
     public final Gamepad gamepad1;
     public final Gamepad gamepad2;
     public final Telemetry telemetry;
-//    public final StandardTrackingWheelLocalizer localizer;
-    public final GoBildaPinpointDriver imu;
-    public final TwoWheelTrackingLocalizer localizer;
-    public final SampleMecanumDrive drive;
+    public Follower follower;
+    public PinpointLocalizer pedroLocalizer;
     public MotorControl motorControl;
     public SensorControl sensorControl;
     public ServoControl servoControl;
@@ -55,18 +50,16 @@ public class Dependencies {
         this.telemetry = telemetry;
 //        localizer = new StandardTrackingWheelLocalizer(hardwareMap);
 //        imu = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointIMU");
-        drive = new SampleMecanumDrive(hardwareMap);
-        imu = drive.getImu();
-        localizer = drive.getTwoWheelLocalizer();
+        follower = Constants.createFollower(hardwareMap);
+        pedroLocalizer = (PinpointLocalizer) follower.getPoseTracker().getLocalizer();
 
         if (GlobalVariables.wasAutonomous) {
-            drive.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(-45)));
+            pedroLocalizer.setPose(new Pose(0, 0, Math.toRadians(-45)));
         } else {
-            drive.setPoseEstimate(new Pose2d(0, 0, 0));
+            pedroLocalizer.setPose(new Pose(0, 0, 0));
         }
         motorControl = new MotorControl(hardwareMap);
-        sensorControl = new SensorControl(hardwareMap, edgeDetection, localizer);
-        sensorControl.setRoadRunnerPoseUpdater(pose -> drive.setPoseEstimate(pose));
+        sensorControl = new SensorControl(hardwareMap, edgeDetection, pedroLocalizer);
         servoControl = new ServoControl(hardwareMap);
         turretServoControl = new TurretServoControl(servoControl, sensorControl);
     }
@@ -96,15 +89,11 @@ public class Dependencies {
     }
 
     public IntakeControl createIntakeControl() {
-        return new IntakeControl(createAutoIntakeMovementControl(), createAutoIntakeTransferControl(), createAutoIntakeTransferLogic(), createIntakeMotorControl(), createTransferMotorControl(), createLockServoControl());
+        return new IntakeControl(createAutoIntakeTransferControl(), createAutoIntakeTransferLogic(), createIntakeMotorControl(), createTransferMotorControl(), createLockServoControl());
     }
 
     private AutoIntakeTransferControl createAutoIntakeTransferControl() {
         return new AutoIntakeTransferControl();
-    }
-
-    public AutoIntakeMovementControl createAutoIntakeMovementControl() {
-        return new AutoIntakeMovementControl(sensorControl);
     }
 
     public AutoIntakeTransferLogic createAutoIntakeTransferLogic() {

@@ -1,24 +1,21 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAutonSolo;
 
 public enum GoalAutonSoloState {
-    moveToShootFirst,
-    shootBallsFirst,
+    drive_startPos_shootPos,
+    shoot_preload,
+    drive_shootPos_takeFirstPos,
+    drive_takeFirstPos_shootPos,
+    shoot_first,
 
-    goToTakeSecondBalls,
-    moveToShootSecond,
-    shootBallsSecond,
+    // Loop
+    drive_shootPos_openGatePos,
+    drive_openGatePos_takeGatePos,
+    drive_takeGatePos_shootPos,
+    shoot_gate,
 
-    goToTakeThirdBalls,
-    moveToShootThird,
-    shootBallsThird,
-
-    goToTakeFourthBalls,
-    moveToShootFourth,
-    shootBallsFourth,
-
-    goToTakeFifthBalls,
-    moveToShootFifth,
-    shootBallsFifth,
+    // End Loop
+    drive_shootPos_takeSecondPos_shootPos,
+    shoot_second,
 
     stop,
     idle

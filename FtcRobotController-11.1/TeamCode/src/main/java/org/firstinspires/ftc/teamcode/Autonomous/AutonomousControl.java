@@ -11,35 +11,33 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-//import org.firstinspires.ftc.teamcode.Subsystems.Intake.Slides.IntakeSlideControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 
 
 /**
  * This class runs the loop of the autonomous period
  */
 public class AutonomousControl {
-
+    private final TurretServoControl turretServoControl;
     private final MotorControl motorControl;
     private final GoalAuton goalAuton;
     private final GoalAutonSolo goalAutonSolo;
     private final AudienceAuton audienceAuton;
     private final IntakeControl intakeControl;
     private final OuttakeControl outtakeControl;
-    private final TurretServoControl turretServoControl;
     private final SensorControl sensorControl;
 
 
-    public AutonomousControl(MotorControl motorControl, GoalAuton goalAuton, GoalAutonSolo goalAutonSolo, AudienceAuton audienceAuton, IntakeControl intakeControl, OuttakeControl outtakeControl, TurretServoControl turretServoControl, SensorControl sensorControl) {
+    public AutonomousControl(MotorControl motorControl, GoalAuton goalAuton, GoalAutonSolo goalAutonSolo, AudienceAuton audienceAuton, IntakeControl intakeControl, OuttakeControl outtakeControl,  TurretServoControl turretServoControl, SensorControl sensorControl) {
         this.motorControl = motorControl;
         this.goalAuton = goalAuton;
         this.goalAutonSolo = goalAutonSolo;
         this.audienceAuton = audienceAuton;
         this.intakeControl = intakeControl;
         this.outtakeControl = outtakeControl;
-        this.turretServoControl = turretServoControl;
         this.sensorControl = sensorControl;
+        this.turretServoControl = turretServoControl;
         IntakeStates.setInitialStates();
         OuttakeStates.setInitialStates();
         ButtonStates.setInitialStates();

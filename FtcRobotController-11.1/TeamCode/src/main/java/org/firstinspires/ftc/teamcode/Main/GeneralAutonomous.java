@@ -1,20 +1,19 @@
 package org.firstinspires.ftc.teamcode.Main;
 
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-//import org.firstinspires.ftc.teamcode.Autonomous.AutonomousControl;
 import org.firstinspires.ftc.teamcode.Autonomous.AutonomousControl;
 import org.firstinspires.ftc.teamcode.Autonomous.SelectStartVariables;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
-import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
 
 
 @Autonomous
 public class GeneralAutonomous extends LinearOpMode {
 
     AutonomousDependencies dependencies;
-    private SampleMecanumDrive drive;
+    private Follower follower;
     private AutonomousControl autonomousControl;
 
     @Override
@@ -41,7 +40,7 @@ public class GeneralAutonomous extends LinearOpMode {
             long startNs = System.nanoTime();
 
             autonomousControl.runAutonomous();
-            drive.update();
+            follower.update();
 
             loopTimer.record(System.nanoTime() - startNs);
 
@@ -65,7 +64,7 @@ public class GeneralAutonomous extends LinearOpMode {
 
         dependencies = new AutonomousDependencies(hardwareMap, gamepad1,gamepad2, telemetry);
 
-        drive = dependencies.drive;
+        follower = dependencies.follower;
         autonomousControl = dependencies.autonomousControl;
 
         dependencies.servoControl.setServoStartPos();

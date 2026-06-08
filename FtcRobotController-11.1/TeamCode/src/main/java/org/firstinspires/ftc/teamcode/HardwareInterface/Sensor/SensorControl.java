@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.HardwareInterface.Sensor;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -11,9 +12,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Main.Alliance;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Roadrunner.TwoWheelTrackingLocalizer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +29,7 @@ public class SensorControl {
 
     private final Limelight3A limelight;
     private final EdgeDetection edgeDetection;
-    private final TwoWheelTrackingLocalizer localizer;
+    private final PinpointLocalizer pedroLocalizer;
 
     public final LynxI2cColorRangeSensor rangeSensorMid;
     public final LynxI2cColorRangeSensor rangeSensorFront;
@@ -53,15 +54,7 @@ public class SensorControl {
     public static final double BlueXInches = -62.0;
     public static final double BlueYInches = 62.0;
 
-    public static Pose2d RedGoalPos = new Pose2d(RedXInches, RedYInches, 0);
-    public static Pose2d BlueGoalPos = new Pose2d(BlueXInches, BlueYInches, 0);
-    private static double scoreHeight = 26.0;
-    private static double scoreAngle = Math.toRadians(-30);
-    private static double passThroughtPointRadius = 5;
-
     private static final double FieldHalfInches = 66.93;
-
-    private Consumer<Pose2d> roadRunnerPoseUpdater = null;
 
     // --- CONTINUOUS INJECTION STORAGE & CONFIG ---
     private static final int LimelightFrames = 7;
@@ -78,16 +71,12 @@ public class SensorControl {
     private static final double CONTINUOUS_FUSION_ALPHA = 0.02;
 
     // Velocity Tracking variables
-    private Pose2d lastPose = new Pose2d(0, 0, 0);
+    private Pose lastPose = new Pose(0, 0, 0);
     private long lastVelocityUpdateTimeMs = System.currentTimeMillis();
-    // volatile: written by the turret loop (calculateRobotVelocity), read by the
-    // control loop (isDrivingForward/Backward in AutoIntakeMovement).
     public volatile double robotVelocityXInPerSec = 0.0;
     public volatile double robotVelocityYInPerSec = 0.0;
     private volatile double robotLinearVelocityInPerSec = 0.0;
     private volatile double robotAngularVelocityRadPerSec = 0.0;
-    private double forwardBackwardSeparationDegrees = 90.0;
-    private static final double MIN_DRIVE_DIRECTION_VELOCITY_IN_PER_SEC = 6.9;
 
     private static final long LIMELIGHT_RESET_TIMEOUT_MS = 3000;
     private long resetStartTimeMs = -1;
@@ -97,8 +86,8 @@ public class SensorControl {
 
     // Fusion tuning: how much we nudge towards vision per frame (0.02 = 2% vision, 98% odometry)
 
-    public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection, TwoWheelTrackingLocalizer localizer) {
-        this.localizer = localizer;
+    public SensorControl(HardwareMap hardwareMap, EdgeDetection edgeDetection, PinpointLocalizer pedroLocalizer) {
+        this.pedroLocalizer = pedroLocalizer;
         this.edgeDetection = edgeDetection;
 
         rangeSensorMid = hardwareMap.get(LynxI2cColorRangeSensor.class, MID_COLOR_SENSOR_NAME);
@@ -110,27 +99,27 @@ public class SensorControl {
 
     private void setInitialLocalisationAngle() {
         if (!GlobalVariables.wasAutonomous) {
-            localizer.setPoseEstimate(new Pose2d(0, 0, 0));
+            pedroLocalizer.setPose(new Pose(0, 0, 0));
         } else {
             GlobalVariables.wasAutonomous = false;
-            localizer.setPoseEstimate(new Pose2d(0, 0, Math.toRadians(-45)));
+            pedroLocalizer.setPose(new Pose(0, 0, Math.toRadians(-45)));
         }
-        lastPose = localizer.getPoseEstimate();
+        lastPose = pedroLocalizer.getPose();
     }
 
     //
-    //  Localizer Loop Updates
+    //  pedroLocalizer Loop Updates
     //
 
     public void updateLocalizer() {
-        localizer.update();
+        pedroLocalizer.update();
 
         calculateRobotVelocity();
         applyContinuousVisionFusion();
     }
 
     /**
-     * Calculates current velocities from the odometry localizer to ensure
+     * Calculates current velocities from the odometry pedroLocalizer to ensure
      * we are stationary before injecting vision data.
      */
     public void calculateRobotVelocity() {
@@ -138,9 +127,9 @@ public class SensorControl {
         double dt = (currentTime - lastVelocityUpdateTimeMs) / 1000.0;
 
         if (dt > 0.005) { // Protect against divide-by-zero
-            Pose2d currentPose = localizer.getPoseEstimate();
+            Pose currentPose = pedroLocalizer.getPose();
 
-            Pose2d poseVelocity = localizer.getPoseVelocity();
+            Pose poseVelocity = pedroLocalizer.getVelocity();
             double dx = currentPose.getX() - lastPose.getX();
             double dy = currentPose.getY() - lastPose.getY();
             double dHeading = normalizeRadians(currentPose.getHeading() - lastPose.getHeading());
@@ -209,7 +198,7 @@ public class SensorControl {
         double visionRR_X = visionCalculatedY;
         double visionRR_Y = visionCalculatedX;
 
-        Pose2d currentPose = localizer.getPoseEstimate();
+        Pose currentPose = pedroLocalizer.getPose();
 
         rollingX.add(visionRR_X);
         rollingY.add(visionRR_Y);
@@ -232,63 +221,24 @@ public class SensorControl {
         double angleDiff = normalizeRadians(filteredVisionHeading - currentPose.getHeading());
         double fusedHeading = normalizeRadians(currentPose.getHeading() + CONTINUOUS_FUSION_ALPHA * angleDiff);
 
-        Pose2d fusedPose = new Pose2d(fusedX, fusedY, fusedHeading);
+        Pose fusedPose = new Pose(fusedX, fusedY, fusedHeading);
         
-        localizer.setPoseEstimate(fusedPose);
+        pedroLocalizer.setPose(fusedPose);
         lastPose = fusedPose; // SYNC: Prevent velocity spike
-
-        if (roadRunnerPoseUpdater != null) {
-            roadRunnerPoseUpdater.accept(fusedPose);
-        }
     }
 
     public void initLocalizerPose() {
-        localizer.setPoseEstimate(new Pose2d(0, 0, 0));
-        lastPose = new Pose2d(0, 0, 0);
-    }
-
-    public void setPositionFromRoadRunner(Pose2d poseInches) {
-        localizer.setPoseEstimate(poseInches);
-        lastPose = poseInches;
-    }
-
-    public void setRoadRunnerPoseUpdater(Consumer<Pose2d> updater) {
-        this.roadRunnerPoseUpdater = updater;
+        pedroLocalizer.setPose(new Pose(0, 0, 0));
+        lastPose = new Pose(0, 0, 0);
     }
 
     public double getLocalizerAngle() {
-        double heading = localizer.getPoseEstimate().getHeading();
+        double heading = pedroLocalizer.getPose().getHeading();
         return heading;
     }
 
-    public boolean isDrivingForward() {
-        return isDrivingForward(forwardBackwardSeparationDegrees);
-    }
-
-    public boolean isDrivingForward(double separationDegrees) {
-        if (robotLinearVelocityInPerSec < MIN_DRIVE_DIRECTION_VELOCITY_IN_PER_SEC / 2) {
-            return false;
-        }
-
-        double clampedSeparationDegrees = Math.max(0.0, Math.min(180.0, separationDegrees));
-        double drivingAngleDegrees = Math.toDegrees(Math.atan2(robotVelocityYInPerSec, robotVelocityXInPerSec));
-        return Math.abs(normalizeDegrees(drivingAngleDegrees)) <= clampedSeparationDegrees;
-    }
-
-    public boolean isDrivingBackward() {
-        return isDrivingBackward(forwardBackwardSeparationDegrees);
-    }
-
-    public boolean isDrivingBackward(double separationDegrees) {
-        if (robotLinearVelocityInPerSec < MIN_DRIVE_DIRECTION_VELOCITY_IN_PER_SEC) {
-            return false;
-        }
-
-        return !isDrivingForward(separationDegrees);
-    }
-
     public double getDistanceFromLocalizer() {
-        Pose2d currentPose = localizer.getPoseEstimate();
+        Pose currentPose = pedroLocalizer.getPose();
         double robotX = currentPose.getY();
         double robotY = currentPose.getX();
 
@@ -303,19 +253,16 @@ public class SensorControl {
 
     /**
      * Reset heading to 0 (keeping X/Y). Called by the turret loop, which owns the
-     * localizer, gated by its own options-button edge detection.
+     * pedroLocalizer, gated by its own options-button edge detection.
      */
     public void resetLocalizerAngleNow() {
-        Pose2d current = localizer.getPoseEstimate();
-        Pose2d newPose = new Pose2d(current.getX(), current.getY(), 0);
-        localizer.setPoseEstimate(newPose);
-        if (roadRunnerPoseUpdater != null) {
-            roadRunnerPoseUpdater.accept(newPose);
-        }
+        Pose current = pedroLocalizer.getPose();
+        Pose newPose = new Pose(current.getX(), current.getY(), 0);
+        pedroLocalizer.setPose(newPose);
     }
 
-    public Pose2d getLocalizerPose() {
-        Pose2d pose = localizer.getPoseEstimate();
+    public Pose getLocalizerPose() {
+        Pose pose = pedroLocalizer.getPose();
         return pose;
     }
 
@@ -369,12 +316,8 @@ public class SensorControl {
 
         clearLimelightBuffers();
 
-        Pose2d newPose = new Pose2d(avgY, avgX, avgHeading);
-        localizer.setPoseEstimate(newPose);
-
-        if (roadRunnerPoseUpdater != null) {
-            roadRunnerPoseUpdater.accept(newPose);
-        }
+        Pose newPose = new Pose(avgY, avgX, avgHeading);
+        pedroLocalizer.setPose(newPose);
 
         return true;
     }
@@ -444,7 +387,7 @@ public class SensorControl {
     //
 
     public double getTurretTargetAngleDegrees() {
-        Pose2d currentPose = localizer.getPoseEstimate();
+        Pose currentPose = pedroLocalizer.getPose();
         double robotX = currentPose.getY();
         double robotY = currentPose.getX();
         double robotHeading = currentPose.getHeading();
@@ -475,7 +418,7 @@ public class SensorControl {
     }
 
     public double getTurretTargetAngleVelocityModifier(){
-        Pose2d currentVelocity = localizer.getPoseVelocity();
+        Pose currentVelocity = pedroLocalizer.getPose();
         if (currentVelocity == null) return 0.0; // no velocity estimate yet -> no lead modifier (avoids NPE)
         double velocityX = currentVelocity.getX();
         double velocityY = currentVelocity.getY();

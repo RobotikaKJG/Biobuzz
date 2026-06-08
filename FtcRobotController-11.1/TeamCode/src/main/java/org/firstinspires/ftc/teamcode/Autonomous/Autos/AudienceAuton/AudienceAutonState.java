@@ -1,19 +1,10 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton;
 
 public enum AudienceAutonState {
-    moveToShootFirst,
-    shootFirst,
-    goToTakeFirst,
-    takeFirst,
-    moveToShootSecond,
-    shootSecond,
-
-    goToTake,
-    takeBalls,
-    moveToShoot,
-    shoot,
+    drive_startPos_shootPos,
+    shoot_preload,
 
     park,
-
+    stop,
     idle
 }

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Main;
 
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -9,11 +10,11 @@ import org.firstinspires.ftc.teamcode.Autonomous.AutonomousControl;
 import org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton.AudienceAuton;
 import org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAuton.GoalAuton;
 import org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAutonSolo.GoalAutonSolo;
-import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.PedroPathing.Constants;
 
 public class AutonomousDependencies extends Dependencies {
 
-    public SampleMecanumDrive drive;
+    public Follower follower;
     public final AutonomousControl autonomousControl;
 
     public AutonomousDependencies(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry) {
@@ -22,18 +23,18 @@ public class AutonomousDependencies extends Dependencies {
 //        {
 //
 //        }
-        drive = new SampleMecanumDrive(hardwareMap);
+        follower = Constants.createFollower(hardwareMap);
         autonomousControl = createAutonomousControl();
     }
 
     public GoalAuton createGoalAuton() {
-        return new GoalAuton(drive);
+        return new GoalAuton(follower);
     }
     public GoalAutonSolo createGoalAutonSolo() {
-        return new GoalAutonSolo(drive);
+        return new GoalAutonSolo(follower);
     }
     public AudienceAuton createAudienceAuton() {
-        return new AudienceAuton(drive, sensorControl);
+        return new AudienceAuton(follower, sensorControl);
     }
 
     public AutonomousControl createAutonomousControl() {

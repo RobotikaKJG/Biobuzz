@@ -27,6 +27,7 @@ public class GoalAuton implements Auton {
     public void start() {
         GlobalVariables.far = false;
         setTrajectorySide();
+        follower.setStartingPose(paths.getStartPose());
         follower.followPath(paths.drive_startPos_shootPos(), true);
         OuttakeStates.setMotorState(OuttakeMotorStates.autonomous);
         goalAutonState = GoalAutonState.drive_startPos_shootPos;

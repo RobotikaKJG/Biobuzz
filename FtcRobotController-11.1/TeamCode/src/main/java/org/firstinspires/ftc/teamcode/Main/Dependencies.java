@@ -53,10 +53,13 @@ public class Dependencies {
         follower = Constants.createFollower(hardwareMap);
         pedroLocalizer = (PinpointLocalizer) follower.getPoseTracker().getLocalizer();
 
-        if (GlobalVariables.wasAutonomous) {
-            pedroLocalizer.setPose(new Pose(0, 0, Math.toRadians(-45)));
-        } else {
-            pedroLocalizer.setPose(new Pose(0, 0, 0));
+        // Ensure we don't accidentally reset the pose here if we're in Autonomous
+        if (!GlobalVariables.isAutonomous) {
+            if (GlobalVariables.wasAutonomous) {
+                pedroLocalizer.setPose(GlobalVariables.lastPose);
+            } else {
+                pedroLocalizer.setPose(new Pose(0, 0, 0));
+            }
         }
         motorControl = new MotorControl(hardwareMap);
         sensorControl = new SensorControl(hardwareMap, edgeDetection, pedroLocalizer);

@@ -60,6 +60,7 @@ public class AutonomousControl {
     }
 
     public void runAutonomous() {
+        sensorControl.updateLocalizer();
         switch (GlobalVariables.autonomousMode) {
             case audienceSide:
                 audienceAuton.run();

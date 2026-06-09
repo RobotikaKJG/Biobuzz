@@ -11,8 +11,8 @@ public class RedGoalPaths implements GoalPaths {
 
     private PathChain drive_startPos_shootPos;
 
-    private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
-    private final Pose shootPose = new Pose(0, 0, Math.toRadians(0));
+    private final Pose pt_startPose = new Pose(0, 0, Math.toRadians(0));
+    private final Pose pt_shootPose = new Pose(0, 0, Math.toRadians(0));
 
     public RedGoalPaths(Follower follower) {
         this.follower = follower;
@@ -21,9 +21,14 @@ public class RedGoalPaths implements GoalPaths {
 
     private void buildPaths() {
         drive_startPos_shootPos = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, shootPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(pt_startPose, pt_shootPose))
+                .setLinearHeadingInterpolation(pt_startPose.getHeading(), pt_shootPose.getHeading())
                 .build();
+    }
+
+    @Override
+    public Pose getStartPose() {
+        return pt_startPose;
     }
 
     public PathChain drive_startPos_shootPos() {

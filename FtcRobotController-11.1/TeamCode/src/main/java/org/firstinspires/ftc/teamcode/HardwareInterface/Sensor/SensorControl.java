@@ -101,8 +101,8 @@ public class SensorControl {
         if (!GlobalVariables.wasAutonomous) {
             pedroLocalizer.setPose(new Pose(0, 0, 0));
         } else {
-            GlobalVariables.wasAutonomous = false;
-            pedroLocalizer.setPose(new Pose(0, 0, Math.toRadians(-45)));
+            // GlobalVariables.wasAutonomous = false; // MOVED: Handled in GeneralAutonomous begin()
+            pedroLocalizer.setPose(GlobalVariables.lastPose);
         }
         lastPose = pedroLocalizer.getPose();
     }
@@ -113,6 +113,7 @@ public class SensorControl {
 
     public void updateLocalizer() {
         pedroLocalizer.update();
+        GlobalVariables.lastPose = pedroLocalizer.getPose();
 
         calculateRobotVelocity();
         applyContinuousVisionFusion();
@@ -392,25 +393,23 @@ public class SensorControl {
         double robotY = currentPose.getX();
         double robotHeading = currentPose.getHeading();
 
-        double targetX = (GlobalVariables.alliance == Alliance.Red) ? RedXInches : BlueXInches;
-        double targetY = (GlobalVariables.alliance == Alliance.Red) ? RedYInches : BlueYInches;
+        double targetX;
+        double targetY;
+
+        if (!GlobalVariables.isAutonomous) {
+            targetX = (GlobalVariables.alliance == Alliance.Red) ? RedXInches : BlueXInches;
+            targetY = (GlobalVariables.alliance == Alliance.Red) ? RedYInches : BlueYInches;
+        }
+        else {
+            targetX = (GlobalVariables.alliance == Alliance.Red) ? RedXInches+71 : BlueXInches+71;
+            targetY = (GlobalVariables.alliance == Alliance.Red) ? RedYInches+71 : BlueYInches+71;
+        }
 
         double dx = targetX - robotX;
         double dy = targetY - robotY;
 
-        double angleToTargetRad;
+        double angleToTargetRad = Math.atan2(dx, dy);
 
-        if (!GlobalVariables.isAutonomous) {
-            angleToTargetRad = Math.atan2(dx, dy);
-        } else {
-            if (!GlobalVariables.far) {
-                angleToTargetRad = Math.toRadians(GlobalVariables.alliance == Alliance.Red ? 45.0 : -45.0);
-            } else {
-                angleToTargetRad = Math.toRadians(GlobalVariables.alliance == Alliance.Red ? 70.67 : -66.67);
-            }
-        }
-
-//        double turretAngleRad = Math.toRadians(45) - robotHeading + getTurretTargetAngleVelocityModifier(); // this does always 45
         double turretAngleRad = angleToTargetRad - robotHeading + getTurretTargetAngleVelocityModifier(); // this does correct angle
 
         double targetAngle = normalizeDegrees(Math.toDegrees(turretAngleRad));
@@ -418,7 +417,7 @@ public class SensorControl {
     }
 
     public double getTurretTargetAngleVelocityModifier(){
-        Pose currentVelocity = pedroLocalizer.getPose();
+        Pose currentVelocity = pedroLocalizer.getVelocity();
         if (currentVelocity == null) return 0.0; // no velocity estimate yet -> no lead modifier (avoids NPE)
         double velocityX = currentVelocity.getX();
         double velocityY = currentVelocity.getY();

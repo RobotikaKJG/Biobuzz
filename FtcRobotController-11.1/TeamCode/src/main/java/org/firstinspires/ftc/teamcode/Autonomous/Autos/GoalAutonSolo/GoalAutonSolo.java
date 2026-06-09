@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAutonSolo;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Auton;
@@ -32,9 +34,11 @@ public class GoalAutonSolo implements Auton {
     public void start() {
         GlobalVariables.far = false;
         setTrajectorySide();
+        follower.setStartingPose(paths.getStartPose());
         follower.followPath(paths.startPos_shootPos(), true);
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
         goalAutonSoloState = GoalAutonSoloState.drive_startPos_shootPos;
+        addWaitTime(AutonomousConstants.shooterToMaxSpeed);
     }
 
     @Override
@@ -51,6 +55,7 @@ public class GoalAutonSolo implements Auton {
 
     @Override
     public void run() {
+        System.out.println("State:" + goalAutonSoloState);
         switch (goalAutonSoloState)
         {
             case drive_startPos_shootPos:
@@ -85,6 +90,15 @@ public class GoalAutonSolo implements Auton {
                 break;
             case shoot_second:
                 shoot_second();
+                break;
+            case drive_shootPos_takeThirdPos:
+                drive_shootPos_takeThirdPos();
+                break;
+            case drive_takeThirdPos_shootPosPark:
+                drive_takeThirdPos_shootPosPark();
+                break;
+            case shoot_third:
+                shoot_third();
                 break;
             case stop:
                 stop();
@@ -130,7 +144,7 @@ public class GoalAutonSolo implements Auton {
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
-        follower.followPath(paths.shootPos_openGatePos(), true);
+        follower.followPath(paths.shootPos_openGatePosBreak(), true);
         goalAutonSoloState = GoalAutonSoloState.drive_shootPos_openGatePos;
         gateCount = 0;
     }
@@ -139,13 +153,14 @@ public class GoalAutonSolo implements Auton {
         if (follower.isBusy()) return;
         if (!wasIfCalled) {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
-            gateCount += 1;
-            addWaitTime(1);
+            gateCount = gateCount + 1;
+            addWaitTime(0.1);
+            follower.followPath(paths.openGatePosBreak_openGatePos(), 0.7, true);
             wasIfCalled = true;
         }
         if (getSeconds() < currentWait) return;
         follower.followPath(paths.openGatePos_takeGatePos(), true);
-        addWaitTime(2);
+        addWaitTime(1.8);
         wasIfCalled = false;
         goalAutonSoloState = GoalAutonSoloState.drive_openGatePos_takeGatePos;
     }
@@ -153,32 +168,37 @@ public class GoalAutonSolo implements Auton {
     private void drive_openGatePos_takeGatePos() {
         if (follower.isBusy() || getSeconds() < currentWait) return;
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
-
-        if (gateCount >= gateTotal) follower.followPath(paths.takeGatePos_shootPos_last());
-        else follower.followPath(paths.takeGatePos_shootPos());
-
+        follower.followPath(paths.takeGatePos_shootPos());
         goalAutonSoloState = GoalAutonSoloState.drive_takeGatePos_shootPos;
+        addWaitTime(0.5);
     }
 
     private void drive_takeGatePos_shootPos() {
+        if (getSeconds() < currentWait) return;
+        if (!wasIfCalled) {
+            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
+            wasIfCalled = true;
+        }
         if(follower.isBusy()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonSoloState = GoalAutonSoloState.shoot_gate;
         addWaitTime(AutonomousConstants.shootTime);
+        wasIfCalled = false;
     }
 
     private void shoot_gate() {
         if (getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
-        IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
         if (gateCount >= gateTotal) {
-            follower.followPath(paths.shootPos_openGatePos(), true);
-            goalAutonSoloState = GoalAutonSoloState.drive_shootPos_openGatePos;
+            follower.followPath(paths.shootPos_takeSecondPos_shootPos(), true);
+            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
+            goalAutonSoloState = GoalAutonSoloState.drive_shootPos_takeSecondPos_shootPos;
         }
         else {
-            follower.followPath(paths.shootPos_takeSecondPos_shootPos(), true);
-            goalAutonSoloState = GoalAutonSoloState.drive_shootPos_takeSecondPos_shootPos;
+            follower.followPath(paths.shootPos_openGatePosBreak(), true);
+            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
+            goalAutonSoloState = GoalAutonSoloState.drive_shootPos_openGatePos;
         }
     }
 
@@ -193,12 +213,42 @@ public class GoalAutonSolo implements Auton {
         if (getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
-        IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
+        IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
+        follower.followPath(paths.shootPos_takeThirdPos(), false);
+        goalAutonSoloState = GoalAutonSoloState.drive_shootPos_takeThirdPos;
+        addWaitTime(0.5);
+    }
+
+    private void drive_shootPos_takeThirdPos() {
+        if (getSeconds() < currentWait) return;
+        if (!wasIfCalled) {
+            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
+            wasIfCalled = true;
+        }
+        if(follower.isBusy()) return;
+        IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
+        follower.followPath(paths.takeThirdPos_shootPosPark(), true);
+        addWaitTime(1.5);
+        wasIfCalled = false;
+        goalAutonSoloState = GoalAutonSoloState.drive_takeThirdPos_shootPosPark;
+    }
+
+    private void drive_takeThirdPos_shootPosPark() {
+        if (getSeconds() < currentWait) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+        goalAutonSoloState = GoalAutonSoloState.shoot_third;
+        addWaitTime(AutonomousConstants.shootTime);
+    }
+
+    private void shoot_third() {
+        if(getSeconds() < currentWait) return;
         goalAutonSoloState = GoalAutonSoloState.stop;
     }
 
     private void stop() {
         if(follower.isBusy()) return;
+        OuttakeStates.setMotorState(OuttakeMotorStates.idle);
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
         goalAutonSoloState = GoalAutonSoloState.idle;
     }
 

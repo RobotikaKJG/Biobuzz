@@ -1,29 +1,20 @@
 package org.firstinspires.ftc.teamcode.Main;
 
-import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Autonomous.AutonomousControl;
-//import org.firstinspires.ftc.teamcode.Autonomous.NewSampleAuton;
 import org.firstinspires.ftc.teamcode.Autonomous.Autos.AudienceAuton.AudienceAuton;
 import org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAuton.GoalAuton;
 import org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAutonSolo.GoalAutonSolo;
-import org.firstinspires.ftc.teamcode.PedroPathing.Constants;
 
 public class AutonomousDependencies extends Dependencies {
 
-    public Follower follower;
     public final AutonomousControl autonomousControl;
 
     public AutonomousDependencies(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry) {
         super(hardwareMap, gamepad1, gamepad2, telemetry);
-//        switch (GlobalVariables.autonomousMode)
-//        {
-//
-//        }
-        follower = Constants.createFollower(hardwareMap);
         autonomousControl = createAutonomousControl();
     }
 

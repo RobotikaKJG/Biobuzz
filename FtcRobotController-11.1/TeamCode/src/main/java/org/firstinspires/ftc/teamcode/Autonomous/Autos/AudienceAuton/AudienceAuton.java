@@ -29,6 +29,7 @@ public class AudienceAuton implements Auton {
     public void start() {
         GlobalVariables.far = true;
         setTrajectorySide();
+        follower.setStartingPose(paths.getPt_startPose());
         follower.followPath(paths.drive_startPos_shootPos(), true);
         OuttakeStates.setMotorState(OuttakeMotorStates.autonomous);
         audienceAutonState = AudienceAutonState.drive_startPos_shootPos;

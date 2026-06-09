@@ -17,6 +17,10 @@ public enum GoalAutonSoloState {
     drive_shootPos_takeSecondPos_shootPos,
     shoot_second,
 
+    drive_shootPos_takeThirdPos,
+    drive_takeThirdPos_shootPosPark,
+    shoot_third,
+
     stop,
     idle
 }

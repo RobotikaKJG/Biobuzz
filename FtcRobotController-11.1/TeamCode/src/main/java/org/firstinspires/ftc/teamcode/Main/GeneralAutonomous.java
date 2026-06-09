@@ -89,6 +89,7 @@ public class GeneralAutonomous extends LinearOpMode {
         autonomousControl.startAutonomous();
 
         //Update variable that autonomous happened for the driver oriented rotation after it
+        GlobalVariables.lastPose = follower.getPose();
         GlobalVariables.wasAutonomous = true;
     }
 }

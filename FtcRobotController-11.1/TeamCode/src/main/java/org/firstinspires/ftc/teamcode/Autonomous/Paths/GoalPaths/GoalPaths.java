@@ -6,5 +6,13 @@ import com.pedropathing.paths.PathChain;
 public interface GoalPaths {
 
     Pose getStartPose();
-    PathChain drive_startPos_shootPos();
+    PathChain startPos_shootPos();
+    PathChain shootPos_takeFirstPos();
+    PathChain takeFirstPos_shootPos();
+    PathChain shootPos_openGatePosBreak();
+    PathChain openGatePosBreak_openGatePos();
+    PathChain openGatePos_shootPos();
+    PathChain shootPos_takeSecondPos_shootPos();
+    PathChain shootPos_takeThirdPos();
+    PathChain takeThirdPos_shootPosPark();
 }

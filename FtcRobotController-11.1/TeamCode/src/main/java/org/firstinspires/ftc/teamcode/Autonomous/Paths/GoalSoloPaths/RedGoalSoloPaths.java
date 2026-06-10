@@ -26,16 +26,16 @@ public class RedGoalSoloPaths implements GoalSoloPaths {
     private final Pose cp_takeFirstPose = new Pose(114.8, 54.5);
     private final Pose cp_takeFirstPoseBack = new Pose(95.7, 81.27);
 
-    private final Pose pt_openGatePose = new Pose(122.825, 59.9);
-    private final Pose cp_openGatePoseBreak = new Pose(115, 59.9);
+    private final Pose pt_openGatePose = new Pose(122.85, 59.9);
+    private final Pose pt_openGatePoseBreak = new Pose(115, 59.9);
     private final Pose cp_openGatePose = new Pose(98.2, 58.9);
-    private final Pose pt_takeGatePose = new Pose(129.5, 54);
+    private final Pose pt_takeGatePose = new Pose(128.8, 54);
     private final Pose cp_takeGatePose = new Pose(123.8, 57.5);
 
-    private final Pose pt_takeSecondPose = new Pose(110, 81.9);
+    private final Pose pt_takeSecondPose = new Pose(115, 81.9);
     private final Pose pt_shootPoseSecond = new Pose(93.6, 85.9, Math.toRadians(0));
 
-    private final Pose pt_takeThirdPose = new Pose(120.1, 31.9);
+    private final Pose pt_takeThirdPose = new Pose(117.1, 34.9);
     private final Pose cp_takeThirdPose = new Pose(117.1, 49.8);
     private final Pose cp_takeThirdPoseBack = new Pose(98.9, 92.5);
 
@@ -67,12 +67,12 @@ public class RedGoalSoloPaths implements GoalSoloPaths {
                 .build();
 
         shootPos_openGatePosBreak = follower.pathBuilder()
-                .addPath(new BezierCurve(pt_shootPose, cp_openGatePose, cp_openGatePoseBreak))
+                .addPath(new BezierCurve(pt_shootPose, cp_openGatePose, pt_openGatePoseBreak))
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
 
         openGatePosBreak_openGatePos = follower.pathBuilder()
-                .addPath(new BezierLine(cp_openGatePoseBreak, pt_openGatePose))
+                .addPath(new BezierLine(pt_openGatePoseBreak, pt_openGatePose))
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
 

@@ -43,6 +43,8 @@ public class OuttakeMotorControl {
                     motorControl.setMotorSpeed(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar - 0.03);
                 }
                 break;
+            case forwardStart:
+                motorControl.setMotorRPM(MotorConstants.outtake, 1880);
             case forwardFar:
                 motorControl.setMotorSpeed(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar);
                 break;

@@ -25,8 +25,8 @@ public class RedGoalPaths implements GoalPaths {
     private final Pose cp_takeFirstPose = new Pose(114.8, 54.5);
     private final Pose cp_takeFirstPoseBack = new Pose(95.7, 81.27);
 
-    private final Pose pt_openGatePose = new Pose(128.3, 58.8, Math.toRadians(30));
-    private final Pose pt_openGatePoseBreak = new Pose(115, 58.8);
+    private final Pose pt_openGatePose = new Pose(128.3, 58.75, Math.toRadians(30));
+    private final Pose pt_openGatePoseBreak = new Pose(115, 58.75);
     private final Pose cp_openGatePose = new Pose(98.2, 58.9);
 
     private final Pose pt_takeSecondPose = new Pose(111.5, 81.9);
@@ -37,8 +37,6 @@ public class RedGoalPaths implements GoalPaths {
     private final Pose cp_takeThirdPoseBack = new Pose(93.9, 87.5);
 
     private final Pose pt_shootPosePark = new Pose(82.4, 96.5, Math.toRadians(0));
-
-    private int takeGateHeading = 27;
 
     public RedGoalPaths(Follower follower) {
         this.follower = follower;

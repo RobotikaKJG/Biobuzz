@@ -68,7 +68,7 @@ public class Dependencies {
     }
 
     public Drivebase createDrivebase() {
-        return new Drivebase(gamepad1,gamepad2, motorControl, sensorControl);
+        return new Drivebase(gamepad1, gamepad2, motorControl, sensorControl, follower);
     }
 
     public DrivebaseController createDrivebaseController() {

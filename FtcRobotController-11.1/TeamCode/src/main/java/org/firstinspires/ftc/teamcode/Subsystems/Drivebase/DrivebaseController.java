@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Drivebase;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 
 /**
  * Runs on the drive loop (the main OpMode thread). Self-contained: keeps its own
@@ -30,6 +31,9 @@ public class DrivebaseController {
 
         if (edgeDetection.rising(drivebaseTrigger.getTrigger()))
             drivebase.switchDrivingMode();
+        if (edgeDetection.rising(GamepadIndexValues.circle))
+            drivebase.togglePathFollowing();
+
         drivebase.drive(DrivebaseConstants.getDriveSpeed());
     }
 }

@@ -13,35 +13,30 @@ public class BlueGoalPaths implements GoalPaths {
     private PathChain takeFirstPos_shootPos;
     private PathChain shootPos_openGatePosBreak;
     private PathChain openGatePosBreak_openGatePos;
-    private PathChain openGatePos_takeGatePos;
-    private PathChain takeGatePos_shootPos;
+    private PathChain openGatePos_shootPos;
     private PathChain shootPos_takeSecondPos_shootPos;
     private PathChain shootPos_takeThirdPos;
     private PathChain takeThirdPos_shootPosPark;
 
-    private final Pose pt_startPose = new Pose(121, 119.3, Math.toRadians(36.2));
-    private final Pose pt_shootPose = new Pose(93.6, 81.9, Math.toRadians(0));
+    private final Pose pt_startPose = new Pose(21.0, 119.3, Math.toRadians(143.8));
+    private final Pose pt_shootPose = new Pose(48.4, 81.9, Math.toRadians(180));
 
-    private final Pose pt_takeFirstPose = new Pose(124.4, 54.65);
-    private final Pose cp_takeFirstPose = new Pose(114.8, 54.5);
-    private final Pose cp_takeFirstPoseBack = new Pose(95.7, 81.27);
+    private final Pose pt_takeFirstPose = new Pose(17.6, 54.65);
+    private final Pose cp_takeFirstPose = new Pose(27.2, 54.5);
+    private final Pose cp_takeFirstPoseBack = new Pose(46.3, 81.27);
 
-    private final Pose pt_openGatePose = new Pose(122.85, 59.9);
-    private final Pose pt_openGatePoseBreak = new Pose(115, 59.9);
-    private final Pose cp_openGatePose = new Pose(98.2, 58.9);
-    private final Pose pt_takeGatePose = new Pose(128.8, 54);
-    private final Pose cp_takeGatePose = new Pose(123.8, 57.5);
+    private final Pose pt_openGatePose = new Pose(13.7, 58.75, Math.toRadians(150));
+    private final Pose pt_openGatePoseBreak = new Pose(27.0, 58.75);
+    private final Pose cp_openGatePose = new Pose(43.8, 58.9);
 
-    private final Pose pt_takeSecondPose = new Pose(115, 81.9);
-    private final Pose pt_shootPoseSecond = new Pose(93.6, 85.9, Math.toRadians(0));
+    private final Pose pt_takeSecondPose = new Pose(30.5, 81.9);
+    private final Pose pt_shootPoseSecond = new Pose(48.4, 85.9, Math.toRadians(180));
 
-    private final Pose pt_takeThirdPose = new Pose(117.1, 34.9);
-    private final Pose cp_takeThirdPose = new Pose(117.1, 49.8);
-    private final Pose cp_takeThirdPoseBack = new Pose(98.9, 92.5);
+    private final Pose pt_takeThirdPose = new Pose(24.4, 34.9);
+    private final Pose cp_takeThirdPose = new Pose(24.9, 49.8);
+    private final Pose cp_takeThirdPoseBack = new Pose(48.1, 87.5);
 
-    private final Pose pt_shootPosePark = new Pose(88.4, 102.5, Math.toRadians(0));
-
-    private int takeGateHeading = 27;
+    private final Pose pt_shootPosePark = new Pose(59.6, 96.5, Math.toRadians(180));
 
     public BlueGoalPaths(Follower follower) {
         this.follower = follower;
@@ -68,21 +63,17 @@ public class BlueGoalPaths implements GoalPaths {
 
         shootPos_openGatePosBreak = follower.pathBuilder()
                 .addPath(new BezierCurve(pt_shootPose, cp_openGatePose, pt_openGatePoseBreak))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
         openGatePosBreak_openGatePos = follower.pathBuilder()
                 .addPath(new BezierLine(pt_openGatePoseBreak, pt_openGatePose))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .setLinearHeadingInterpolation(Math.toRadians(180), pt_openGatePose.getHeading())
                 .build();
 
-        openGatePos_takeGatePos = follower.pathBuilder()
-                .addPath(new BezierCurve(pt_openGatePose, cp_takeGatePose, pt_takeGatePose))
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(takeGateHeading))
-                .build();
 
-        takeGatePos_shootPos = follower.pathBuilder()
-                .addPath(new BezierLine(pt_takeGatePose, pt_shootPose))
+        openGatePos_shootPos = follower.pathBuilder()
+                .addPath(new BezierLine(pt_openGatePoseBreak, pt_shootPose))
                 .setTangentHeadingInterpolation()
                 .setReversed()
                 .build();
@@ -90,7 +81,7 @@ public class BlueGoalPaths implements GoalPaths {
         shootPos_takeSecondPos_shootPos = follower.pathBuilder()
                 .addPath(new BezierLine(pt_shootPose, pt_takeSecondPose))
                 .addPath(new BezierLine(pt_takeSecondPose, pt_shootPoseSecond))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
         shootPos_takeThirdPos = follower.pathBuilder()
@@ -131,7 +122,7 @@ public class BlueGoalPaths implements GoalPaths {
     }
 
     public PathChain openGatePos_shootPos() {
-        return takeGatePos_shootPos;
+        return openGatePos_shootPos;
     }
 
     public PathChain shootPos_takeSecondPos_shootPos() {

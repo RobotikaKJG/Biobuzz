@@ -37,8 +37,9 @@ public class GoalAuton implements Auton {
         GlobalVariables.far = false;
         setTrajectorySide();
         follower.setStartingPose(paths.getStartPose());
-        follower.followPath(paths.startPos_shootPos(), true);
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
+        follower.followPath(paths.startPos_shootPos(), 0.9, false);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
+        IntakeStates.setLockServoState(LockServoStates.unlock);
         goalAutonState = GoalAutonState.drive_startPos_shootPos;
         addWaitTime(AutonomousConstants.shooterToMaxSpeed);
     }
@@ -113,14 +114,16 @@ public class GoalAuton implements Auton {
 //AUTONOTE FILL IN THE LOGIC
 
     private void drive_StartPos_ShootPos() {
-        if(follower.isBusy() || getSeconds() < currentWait) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+        if(getSeconds() < currentWait) return;
+        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
+        if (follower.isBusy()) return;
         goalAutonState = GoalAutonState.shoot_preload;
-        addWaitTime(AutonomousConstants.shootTime);
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
+//        addWaitTime(AutonomousConstants.shootTime);
     }
 
     private void shoot_preload() {
-        if(getSeconds() < currentWait) return;
+//        if(getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);

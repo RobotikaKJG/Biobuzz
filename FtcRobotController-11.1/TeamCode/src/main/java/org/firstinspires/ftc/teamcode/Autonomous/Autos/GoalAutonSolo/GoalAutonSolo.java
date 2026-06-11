@@ -37,6 +37,7 @@ public class GoalAutonSolo implements Auton {
         follower.setStartingPose(paths.getStartPose());
         follower.followPath(paths.startPos_shootPos(), true);
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
+        System.out.println("Outtake speed fwd close");
         goalAutonSoloState = GoalAutonSoloState.drive_startPos_shootPos;
         addWaitTime(AutonomousConstants.shooterToMaxSpeed);
     }

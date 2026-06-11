@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
+import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 
 
@@ -61,15 +62,27 @@ public class Drivebase {
     }
 
     private void buildPaths() {
-        firstPath = follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), new Pose(48, -13.5)))
-                .setConstantHeadingInterpolation(Math.toRadians(30))
-                .build();
+        if (GlobalVariables.alliance == Alliance.Red) {
+            firstPath = follower.pathBuilder()
+                    .addPath(new BezierLine(follower.getPose(), new Pose(48, -13.5)))
+                    .setConstantHeadingInterpolation(Math.toRadians(30))
+                    .build();
 
-        secondPath = follower.pathBuilder()
-                .addPath(new BezierLine(new Pose(48, -13.5 ), new Pose(55.5, -13.5)))
-                .setConstantHeadingInterpolation(Math.toRadians(30))
-                .build();
+            secondPath = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(48, -13.5), new Pose(55.5, -13.5)))
+                    .setConstantHeadingInterpolation(Math.toRadians(30))
+                    .build();
+        }else {
+            firstPath = follower.pathBuilder()
+                    .addPath(new BezierLine(follower.getPose(), new Pose(-48, -13.5)))
+                    .setConstantHeadingInterpolation(Math.toRadians(150))
+                    .build();
+
+            secondPath = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(-48, -13.5), new Pose(-55.5, -13.5)))
+                    .setConstantHeadingInterpolation(Math.toRadians(150))
+                    .build();
+        }
     }
 
     public void goToGate() {

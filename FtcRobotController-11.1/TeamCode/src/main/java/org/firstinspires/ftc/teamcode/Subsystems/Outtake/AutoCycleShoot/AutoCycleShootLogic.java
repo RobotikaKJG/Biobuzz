@@ -122,7 +122,7 @@ public class AutoCycleShootLogic {
     private boolean isNoBallSeen() {
         // Shared, centrally-throttled reads (see SensorControl). Preserves the exact
         // original semantics: true only when BOTH front and mid currently see a ball.
-        return sensorControl.isFrontBall() && sensorControl.isMidBall();
+        return !sensorControl.isFrontBall() && !sensorControl.isMidBall();
     }
 
     private void addWaitTime(double waitTime) {

@@ -39,6 +39,7 @@ public class GoalAuton implements Auton {
         follower.setStartingPose(paths.getStartPose());
         follower.followPath(paths.startPos_shootPos(), 0.9, false);
         OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
+        System.out.println("Outtake state:" + OuttakeStates.getMotorState());
         IntakeStates.setLockServoState(LockServoStates.unlock);
         goalAutonState = GoalAutonState.drive_startPos_shootPos;
         addWaitTime(AutonomousConstants.shooterToMaxSpeed);
@@ -118,12 +119,12 @@ public class GoalAuton implements Auton {
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
         if (follower.isBusy()) return;
         goalAutonState = GoalAutonState.shoot_preload;
-        OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
 //        addWaitTime(AutonomousConstants.shootTime);
     }
 
     private void shoot_preload() {
 //        if(getSeconds() < currentWait) return;
+        OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
@@ -158,7 +159,8 @@ public class GoalAuton implements Auton {
         if (follower.isBusy()) return;
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
         gateCount = gateCount + 1;
-        addWaitTime(2);
+        if (gateCount == 1) addWaitTime(1.5);
+        else addWaitTime(2);
         follower.followPath(paths.openGatePosBreak_openGatePos(), 0.7, true);
         goalAutonState = GoalAutonState.intake_gate;
     }
@@ -224,7 +226,6 @@ public class GoalAuton implements Auton {
             wasIfCalled = true;
         }
         if(follower.isBusy()) return;
-        IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
         follower.followPath(paths.takeThirdPos_shootPosPark(), true);
         addWaitTime(1.5);
         wasIfCalled = false;
@@ -232,6 +233,9 @@ public class GoalAuton implements Auton {
     }
 
     private void drive_takeThirdPos_shootPosPark() {
+        if (getSeconds() > currentWait - 0.75) {
+            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
+        }
         if (getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shoot_third;

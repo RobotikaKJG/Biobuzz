@@ -27,7 +27,7 @@ public class OuttakeMotorControl {
         if(OuttakeStates.getMotorState() != prevMotorStates) {
             updateStates();
             prevMotorStates = OuttakeStates.getMotorState();
-        } else if (OuttakeStates.getMotorState() == OuttakeMotorStates.forwardClose) {
+        } else if (OuttakeStates.getMotorState() == OuttakeMotorStates.forwardClose || OuttakeStates.getMotorState() == OuttakeMotorStates.forwardStart || OuttakeStates.getMotorState() == OuttakeMotorStates.forwardFar) {
             updateStates();
         }
 
@@ -36,17 +36,12 @@ public class OuttakeMotorControl {
     public void updateStates() {
         switch (OuttakeStates.getMotorState()) {
             case autonomous:
-                if (!GlobalVariables.far) {
-                    motorControl.setMotorSpeed(MotorConstants.outtake, 0.64);
-                }
-                else {
-                    motorControl.setMotorSpeed(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar - 0.03);
-                }
                 break;
             case forwardStart:
-                motorControl.setMotorRPM(MotorConstants.outtake, 1880);
+                motorControl.setMotorRPM(MotorConstants.outtake, 100);
+                break;
             case forwardFar:
-                motorControl.setMotorSpeed(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar);
+                motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar);
                 break;
             case forwardClose:
                 calculateSpeed();
@@ -61,8 +56,8 @@ public class OuttakeMotorControl {
 //                    motorControl.setMotorSpeed(MotorConstants.outtake, 0.68);
 //                }
 
-                motorControl.setMotorRPM(MotorConstants.outtake, 1820);
-
+                motorControl.setMotorRPM(MotorConstants.outtake, 1800);
+                System.out.println("Outtake speed fwd close: outtakemotor");
                 break;
             case backward:
                 motorControl.setMotorSpeed(MotorConstants.outtake, -0.5);

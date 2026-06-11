@@ -18,15 +18,15 @@ public class RedGoalPaths implements GoalPaths {
     private PathChain shootPos_takeThirdPos;
     private PathChain takeThirdPos_shootPosPark;
 
-    private final Pose pt_startPose = new Pose(121, 119.3, Math.toRadians(36.2));
+    private final Pose pt_startPose = new Pose(120.9, 119.2, Math.toRadians(36.2));
     private final Pose pt_shootPose = new Pose(93.6, 81.9, Math.toRadians(0));
 
     private final Pose pt_takeFirstPose = new Pose(124.4, 54.65);
     private final Pose cp_takeFirstPose = new Pose(114.8, 54.5);
     private final Pose cp_takeFirstPoseBack = new Pose(95.7, 81.27);
 
-    private final Pose pt_openGatePose = new Pose(128.3, 58.75, Math.toRadians(30));
-    private final Pose pt_openGatePoseBreak = new Pose(115, 58.75);
+    private final Pose pt_openGatePose = new Pose(128.3, 58.5, Math.toRadians(30));
+    private final Pose pt_openGatePoseBreak = new Pose(115, 58.5);
     private final Pose cp_openGatePose = new Pose(98.2, 58.9);
 
     private final Pose pt_takeSecondPose = new Pose(111.5, 81.9);

@@ -41,7 +41,7 @@ public class OuttakeConstants {
     public static double resetWait = 100.0;
 
     public static double outtakeSpeedCloseClose = 0.62;
-    public static double outtakeSpeedFar = 0.89;
+    public static double outtakeSpeedFar = 2270;
     public static double outtakeSpeedCloseFar = 0.78;
 
     public static double farShootingThreshold = 2300;

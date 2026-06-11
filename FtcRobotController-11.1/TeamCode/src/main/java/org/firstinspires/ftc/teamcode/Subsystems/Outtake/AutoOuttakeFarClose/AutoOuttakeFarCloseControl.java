@@ -12,7 +12,10 @@ public class AutoOuttakeFarCloseControl {
                 if (GlobalVariables.far) {
                     OuttakeStates.setMotorState(OuttakeMotorStates.forwardFar);
                 } else {
-                    OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
+                    if (!GlobalVariables.isAutonomous) {
+                        OuttakeStates.setMotorState(OuttakeMotorStates.forwardClose);
+                        System.out.println("Outtake speed fwd close: autofarclose");
+                    }
                 }
                 break;
             case idle:

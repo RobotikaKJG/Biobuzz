@@ -49,9 +49,9 @@ public class SensorControl {
     private double flywheelOffset = 0.0;
 
     // Goal coordinates in INCHES
-    public static final double RedXInches = 62.0;
+    public static final double RedXInches = 60.5;
     public static final double RedYInches = 62.0;
-    public static final double BlueXInches = -62.0;
+    public static final double BlueXInches = -60.5;
     public static final double BlueYInches = 62.0;
 
     private static final double FieldHalfInches = 66.93;
@@ -166,6 +166,7 @@ public class SensorControl {
         // GATE 2: Cache Result
         LLResult result = limelight.getLatestResult();
         if (result == null || !result.isValid()) {
+            System.out.println("No limelighte");
             return;
         }
 
@@ -186,15 +187,15 @@ public class SensorControl {
         double visionCalculatedY;
         double visionCalculatedHeading;
 
-        if (GlobalVariables.alliance == Alliance.Red) {
-            visionCalculatedX = -xIn;
-            visionCalculatedY = yIn;
-            visionCalculatedHeading = normalizeRadians(headingRad - Math.toRadians(90));
-        } else {
-            visionCalculatedX = xIn;
-            visionCalculatedY = -yIn;
-            visionCalculatedHeading = normalizeRadians(headingRad + Math.toRadians(90));
-        }
+//        if (GlobalVariables.alliance == Alliance.Red) {
+        visionCalculatedX = -xIn;
+        visionCalculatedY = yIn;
+        visionCalculatedHeading = normalizeRadians(headingRad - Math.toRadians(90));
+//        } else {
+//            visionCalculatedX = xIn;
+//            visionCalculatedY = -yIn;
+//            visionCalculatedHeading = normalizeRadians(headingRad + Math.toRadians(90));
+//        }
 
         double visionRR_X = visionCalculatedY;
         double visionRR_Y = visionCalculatedX;
@@ -297,15 +298,15 @@ public class SensorControl {
                 double yIn = botpose.getPosition().y * 39.37;
                 double headingRad = botpose.getOrientation().getYaw(AngleUnit.RADIANS);
 
-                if (GlobalVariables.alliance == Alliance.Red) {
-                    limelightXReadingsIn.add(-xIn);
-                    limelightYReadingsIn.add(yIn);
-                    limelightYawReadingsRad.add(headingRad - Math.toRadians(90));
-                } else {
-                    limelightXReadingsIn.add(xIn);
-                    limelightYReadingsIn.add(-yIn);
-                    limelightYawReadingsRad.add(headingRad + Math.toRadians(90));
-                }
+//                if (GlobalVariables.alliance == Alliance.Red) {
+                limelightXReadingsIn.add(-xIn);
+                limelightYReadingsIn.add(yIn);
+                limelightYawReadingsRad.add(headingRad - Math.toRadians(90));
+//                } else {
+//                    limelightXReadingsIn.add(xIn);
+//                    limelightYReadingsIn.add(-yIn);
+//                    limelightYawReadingsRad.add(headingRad + Math.toRadians(90));
+//                }
             }
         }
 
@@ -389,31 +390,30 @@ public class SensorControl {
 
     public double getTurretTargetAngleDegrees() {
         Pose currentPose = pedroLocalizer.getPose();
-        double robotX = currentPose.getY();
-        double robotY = currentPose.getX();
+        double robotX = currentPose.getX();
+        double robotY = currentPose.getY();
         double robotHeading = currentPose.getHeading();
 
         double targetX;
         double targetY;
 
-        if (!GlobalVariables.isAutonomous) {
-            targetX = (GlobalVariables.alliance == Alliance.Red) ? RedXInches : BlueXInches;
-            targetY = (GlobalVariables.alliance == Alliance.Red) ? RedYInches : BlueYInches;
+        if (GlobalVariables.isAutonomous) {
+            targetX = (GlobalVariables.alliance == Alliance.Red) ? RedXInches + 72 : BlueXInches + 72;
+            targetY = (GlobalVariables.alliance == Alliance.Red) ? RedYInches + 72 : BlueYInches + 72;
         }
         else {
-            targetX = (GlobalVariables.alliance == Alliance.Red) ? RedXInches+71 : BlueXInches+71;
-            targetY = (GlobalVariables.alliance == Alliance.Red) ? RedYInches+71 : BlueYInches+71;
+            targetX = (GlobalVariables.alliance == Alliance.Red) ? RedXInches : BlueXInches;
+            targetY = (GlobalVariables.alliance == Alliance.Red) ? RedYInches : BlueYInches;
         }
 
         double dx = targetX - robotX;
         double dy = targetY - robotY;
 
-        double angleToTargetRad = Math.atan2(dx, dy);
+        double angleToTargetRad = Math.atan2(dy, dx);
 
-        double turretAngleRad = angleToTargetRad - robotHeading + getTurretTargetAngleVelocityModifier(); // this does correct angle
+        double turretAngleRad = angleToTargetRad - robotHeading + getTurretTargetAngleVelocityModifier();
 
-        double targetAngle = normalizeDegrees(Math.toDegrees(turretAngleRad));
-        return targetAngle;
+        return normalizeDegrees(Math.toDegrees(turretAngleRad));
     }
 
     public double getTurretTargetAngleVelocityModifier(){
@@ -430,7 +430,7 @@ public class SensorControl {
         double weightedY = velocityY * 0.005;
 
         if (GlobalVariables.alliance == Alliance.Red) return weightedX - weightedY;
-        return - weightedX - weightedY;
+        return weightedX + weightedY;
     }
 
     public double getFrontColorSensorDistance(DistanceUnit unit) {

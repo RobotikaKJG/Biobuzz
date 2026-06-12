@@ -36,27 +36,17 @@ public class OuttakeMotorControl {
     public void updateStates() {
         switch (OuttakeStates.getMotorState()) {
             case autonomous:
+                motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar - 100);
                 break;
             case forwardStart:
-                motorControl.setMotorRPM(MotorConstants.outtake, 100);
+                motorControl.setMotorRPM(MotorConstants.outtake, 1720 + GlobalVariables.rpmOffset);
                 break;
             case forwardFar:
-                motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar);
+                motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar + GlobalVariables.rpmOffset);
                 break;
             case forwardClose:
                 calculateSpeed();
-
-
-//                motorControl.setMotorSpeed(MotorConstants.outtake, speed);
-
-//                if (OuttakeStates.getAutoCycleShootState() == AutoCycleShootStates.turnTransfer) {
-//                    motorControl.setMotorSpeed(MotorConstants.outtake, 0.9);
-//                }
-//                else {
-//                    motorControl.setMotorSpeed(MotorConstants.outtake, 0.68);
-//                }
-
-                motorControl.setMotorRPM(MotorConstants.outtake, 1800);
+                motorControl.setMotorRPM(MotorConstants.outtake, 1800 + GlobalVariables.rpmOffset);
                 System.out.println("Outtake speed fwd close: outtakemotor");
                 break;
             case backward:

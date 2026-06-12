@@ -35,6 +35,7 @@ public class SensorControl {
     public final LynxI2cColorRangeSensor rangeSensorFront;
 
     public double ballDistanceIn = 4.0;
+    private boolean isResetting = false;
 
     // Cached color/range-sensor reads. Each getDistance() is a ~2.7ms I2C round-trip,
     // so refresh each sensor at most every BALL_SENSOR_REFRESH_MS and let every caller
@@ -49,10 +50,10 @@ public class SensorControl {
     private double flywheelOffset = 0.0;
 
     // Goal coordinates in INCHES
-    public static final double RedXInches = 60.5;
-    public static final double RedYInches = 62.0;
-    public static final double BlueXInches = -60.5;
-    public static final double BlueYInches = 62.0;
+    public static final double RedXInches = 62.0;
+    public static final double RedYInches = 61.0;
+    public static final double BlueXInches = -62.0;
+    public static final double BlueYInches = 61.0;
 
     private static final double FieldHalfInches = 66.93;
 
@@ -107,6 +108,10 @@ public class SensorControl {
         lastPose = pedroLocalizer.getPose();
     }
 
+    public void setResetting(boolean reset) {
+        isResetting = reset;
+    }
+
     //
     //  pedroLocalizer Loop Updates
     //
@@ -157,6 +162,8 @@ public class SensorControl {
      * Filters noise based on velocity, distance, orientation, and a rolling trimmed average.
      */
     public void applyContinuousVisionFusion() {
+        if (isResetting) return;
+
         // GATE 1: Speed check
         if (robotLinearVelocityInPerSec > LINEAR_VELOCITY_THRESHOLD ||
                 robotAngularVelocityRadPerSec > ANGULAR_VELOCITY_THRESHOLD) {

@@ -50,6 +50,7 @@ public class RedAudiencePaths implements AudiencePaths {
         takeThreePos_shootPos = follower.pathBuilder()
                 .addPath(new BezierLine(pt_takeThreePose, pt_shootPose))
                 .setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
 
         shootPos_takeBottomPos = follower.pathBuilder()
@@ -60,6 +61,7 @@ public class RedAudiencePaths implements AudiencePaths {
         takeBottomPos_shootPos = follower.pathBuilder()
                 .addPath(new BezierLine(pt_takeBottomPose, pt_shootPose))
                 .setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
 
         shootPos_takeUpPos = follower.pathBuilder()
@@ -70,6 +72,7 @@ public class RedAudiencePaths implements AudiencePaths {
         takeUpPos_shootPos = follower.pathBuilder()
                 .addPath(new BezierLine(pt_takeUpPose, pt_shootPose))
                 .setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
 
         shootPos_park = follower.pathBuilder()

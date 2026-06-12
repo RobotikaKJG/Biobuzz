@@ -15,6 +15,7 @@ public class GlobalVariables {
     public static boolean hang = false;
     public static double lastTurretAngle = 0;
     public static double outtakeTargetSpeed = 0;
+    public static double rpmOffset = 0;
     public static boolean secondRelease;
     public static Pose lastPose = new Pose(0,0,0);
 }

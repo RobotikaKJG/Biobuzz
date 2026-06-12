@@ -37,7 +37,7 @@ public class AudienceAuton implements Auton {
         follower.followPath(paths.startPos_shootPos(), true);
         OuttakeStates.setMotorState(OuttakeMotorStates.autonomous);
         audienceAutonState = AudienceAutonState.drive_startPos_shootPos;
-        addWaitTime(3.5);
+        addWaitTime(AutonomousConstants.shooterToMaxSpeed + 0.6);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class AudienceAuton implements Auton {
         if(follower.isBusy() || getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         audienceAutonState = AudienceAutonState.shoot_preload;
-        addWaitTime(AutonomousConstants.shootTime);
+        addWaitTime(AutonomousConstants.shootTime + 0.3);
     }
 
     private void shoot_preload() {
@@ -128,7 +128,7 @@ public class AudienceAuton implements Auton {
         if (follower.isBusy()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         audienceAutonState = AudienceAutonState.shoot_first;
-        addWaitTime(AutonomousConstants.shootTime);
+        addWaitTime(AutonomousConstants.shootTime + 0.3);
     }
 
     private void shoot_first() {
@@ -153,7 +153,7 @@ public class AudienceAuton implements Auton {
         if (follower.isBusy()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         audienceAutonState = AudienceAutonState.shoot_second;
-        addWaitTime(AutonomousConstants.shootTime);
+        addWaitTime(AutonomousConstants.shootTime + 0.3);
     }
 
     private void shoot_second() {
@@ -178,7 +178,7 @@ public class AudienceAuton implements Auton {
         if (follower.isBusy()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         audienceAutonState = AudienceAutonState.shoot_third;
-        addWaitTime(AutonomousConstants.shootTime);
+        addWaitTime(AutonomousConstants.shootTime + 0.3);
     }
 
     private void shoot_third() {

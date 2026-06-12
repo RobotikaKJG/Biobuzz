@@ -30,6 +30,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
         GlobalVariables.subCycles = false;
         GlobalVariables.hang = false;
         GlobalVariables.alliance = Alliance.Blue;
+        GlobalVariables.rpmOffset = 0;
 
         Dependencies dependencies = new Dependencies(hardwareMap, gamepad1, gamepad2, telemetry);
         IterativeController iterativeController = new IterativeController(dependencies);

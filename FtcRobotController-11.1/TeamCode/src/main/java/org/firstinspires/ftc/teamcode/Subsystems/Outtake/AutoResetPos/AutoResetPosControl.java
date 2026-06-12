@@ -37,11 +37,13 @@ public class AutoResetPosControl {
     }
 
     private void resetPos() {
+        sensorControl.setResetting(true);
         if (!sensorControl.resetLocalizerWithLimelight()) return;
         OuttakeStates.setAutoResetPosState(AutoResetPosStates.waitForReset);
     }
 
     private void waitForReset() {
+        sensorControl.setResetting(false);
     }
 
     private void addWaitTime(double waitTime) {

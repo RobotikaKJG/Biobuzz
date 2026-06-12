@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
+import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
@@ -24,7 +25,9 @@ public class TurretServoControl {
     }
 
     public void update() {
-        if (!OuttakeStates.isTurretTrackingEnabled()) {
+        if (!OuttakeStates.isTurretTrackingEnabled()) return;
+        if (sensorControl.getLocalizerPose().getY() < -10 && !GlobalVariables.far) {
+            System.out.println(sensorControl.getLocalizerPose().getY() + "   not Far: " + !GlobalVariables.far);
             return;
         }
 

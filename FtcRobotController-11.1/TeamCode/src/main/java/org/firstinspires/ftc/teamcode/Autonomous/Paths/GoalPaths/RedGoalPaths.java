@@ -17,6 +17,7 @@ public class RedGoalPaths implements GoalPaths {
     private PathChain shootPos_takeSecondPos_shootPos;
     private PathChain shootPos_takeThirdPos;
     private PathChain takeThirdPos_shootPosPark;
+    private PathChain shootPos_takeSecondPos_shootPosPark;
 
     private final Pose pt_startPose = new Pose(120.9, 119.2, Math.toRadians(36.2));
     private final Pose pt_shootPose = new Pose(93.6, 81.9, Math.toRadians(0));
@@ -25,15 +26,15 @@ public class RedGoalPaths implements GoalPaths {
     private final Pose cp_takeFirstPose = new Pose(114.8, 54.5);
     private final Pose cp_takeFirstPoseBack = new Pose(95.7, 81.27);
 
-    private final Pose pt_openGatePose = new Pose(128.3, 58.5, Math.toRadians(30));
+    private final Pose pt_openGatePose = new Pose(127.3, 58.5, Math.toRadians(26));
     private final Pose pt_openGatePoseBreak = new Pose(115, 58.5);
     private final Pose cp_openGatePose = new Pose(98.2, 58.9);
 
     private final Pose pt_takeSecondPose = new Pose(111.5, 81.9);
     private final Pose pt_shootPoseSecond = new Pose(93.6, 85.9, Math.toRadians(0));
 
-    private final Pose pt_takeThirdPose = new Pose(117.6, 34.9);
-    private final Pose cp_takeThirdPose = new Pose(117.1, 49.8);
+    private final Pose pt_takeThirdPose = new Pose(114.5, 34.9);
+    private final Pose cp_takeThirdPose = new Pose(114.5, 54.8);
     private final Pose cp_takeThirdPoseBack = new Pose(93.9, 87.5);
 
     private final Pose pt_shootPosePark = new Pose(82.4, 96.5, Math.toRadians(0));
@@ -94,6 +95,12 @@ public class RedGoalPaths implements GoalPaths {
                 .setTangentHeadingInterpolation()
                 .setReversed()
                 .build();
+
+        shootPos_takeSecondPos_shootPosPark = follower.pathBuilder()
+                .addPath(new BezierLine(pt_shootPose, pt_takeSecondPose))
+                .addPath(new BezierLine(pt_takeSecondPose, pt_shootPosePark))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
     }
 
     public PathChain startPos_shootPos() {
@@ -135,5 +142,9 @@ public class RedGoalPaths implements GoalPaths {
 
     public PathChain takeThirdPos_shootPosPark() {
         return takeThirdPos_shootPosPark;
+    }
+
+    public PathChain shootPos_takeSecondPos_shootPosPark() {
+        return shootPos_takeSecondPos_shootPosPark;
     }
 }

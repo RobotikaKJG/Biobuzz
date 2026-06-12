@@ -9,5 +9,5 @@ public class IntakeConstants {
     public static double lockServoMinPos = Math.min(lockServoLockedPos, lockServoUnlockedPos);
     public static double lockServoMaxPos = Math.max(lockServoLockedPos, lockServoUnlockedPos);
 
-    public static double checkAgainAfter = 0.2;
+    public static double checkAgainAfter = 0.1;
 }

@@ -39,15 +39,14 @@ public class OuttakeMotorControl {
                 motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar - 100);
                 break;
             case forwardStart:
-                motorControl.setMotorRPM(MotorConstants.outtake, 1720 + GlobalVariables.rpmOffset);
+                motorControl.setMotorRPM(MotorConstants.outtake, 1770 + GlobalVariables.rpmOffset);
                 break;
             case forwardFar:
                 motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar + GlobalVariables.rpmOffset);
                 break;
             case forwardClose:
                 calculateSpeed();
-                motorControl.setMotorRPM(MotorConstants.outtake, 1800 + GlobalVariables.rpmOffset);
-                System.out.println("Outtake speed fwd close: outtakemotor");
+                motorControl.setMotorRPM(MotorConstants.outtake, 1700 + GlobalVariables.rpmOffset);
                 break;
             case backward:
                 motorControl.setMotorSpeed(MotorConstants.outtake, -0.5);

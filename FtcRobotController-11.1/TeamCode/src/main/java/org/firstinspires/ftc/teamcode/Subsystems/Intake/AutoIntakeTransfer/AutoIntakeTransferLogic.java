@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.InfraRedSensors;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeConstants;
@@ -74,6 +75,10 @@ public class AutoIntakeTransferLogic {
 
     private void stopTransfer() {
         updateFront();
+        if (GlobalVariables.isAutonomous) {
+            IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainFront);
+            return;
+        }
         if (isFrontBall()) {
             RobotLog.ii(TAG, "stopTransfer: FRONT ball (front=%.1f) -> checkAgainFront", currentDistanceInchesFront);
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainFront);
@@ -101,11 +106,11 @@ public class AutoIntakeTransferLogic {
     }
 
     private boolean isMidBall() {
-        return currentDistanceInchesMid < sensorControl.ballDistanceIn;
+        return currentDistanceInchesMid < sensorControl.ballDistanceIn || sensorControl.isInfraRedObstructed(InfraRedSensors.infraMid);
     }
 
     private boolean isFrontBall() {
-        return currentDistanceInchesFront < sensorControl.ballDistanceIn;
+        return currentDistanceInchesFront < sensorControl.ballDistanceIn || sensorControl.isInfraRedObstructed(InfraRedSensors.infraFront);
     }
 
     private boolean isNoBallSeen() {

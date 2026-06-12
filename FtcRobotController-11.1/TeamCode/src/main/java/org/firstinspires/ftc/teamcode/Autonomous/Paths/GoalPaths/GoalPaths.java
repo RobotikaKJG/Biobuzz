@@ -15,4 +15,5 @@ public interface GoalPaths {
     PathChain shootPos_takeSecondPos_shootPos();
     PathChain shootPos_takeThirdPos();
     PathChain takeThirdPos_shootPosPark();
+    PathChain shootPos_takeSecondPos_shootPosPark();
 }

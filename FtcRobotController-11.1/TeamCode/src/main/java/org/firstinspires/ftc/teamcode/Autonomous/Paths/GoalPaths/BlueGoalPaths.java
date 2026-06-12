@@ -17,6 +17,7 @@ public class BlueGoalPaths implements GoalPaths {
     private PathChain shootPos_takeSecondPos_shootPos;
     private PathChain shootPos_takeThirdPos;
     private PathChain takeThirdPos_shootPosPark;
+    private PathChain shootPos_takeSecondPos_shootPosPark;
 
     private final Pose pt_startPose = new Pose(21.0, 119.3, Math.toRadians(143.8));
     private final Pose pt_shootPose = new Pose(48.4, 81.9, Math.toRadians(180));
@@ -94,6 +95,12 @@ public class BlueGoalPaths implements GoalPaths {
                 .setTangentHeadingInterpolation()
                 .setReversed()
                 .build();
+
+        shootPos_takeSecondPos_shootPosPark = follower.pathBuilder()
+                .addPath(new BezierLine(pt_shootPose, pt_takeSecondPose))
+                .addPath(new BezierLine(pt_takeSecondPose, pt_shootPosePark))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
     }
 
     public PathChain startPos_shootPos() {
@@ -135,5 +142,9 @@ public class BlueGoalPaths implements GoalPaths {
 
     public PathChain takeThirdPos_shootPosPark() {
         return takeThirdPos_shootPosPark;
+    }
+
+    public PathChain shootPos_takeSecondPos_shootPosPark() {
+        return shootPos_takeSecondPos_shootPosPark;
     }
 }

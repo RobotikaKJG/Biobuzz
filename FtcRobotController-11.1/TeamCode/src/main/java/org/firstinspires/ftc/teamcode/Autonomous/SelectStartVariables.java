@@ -27,7 +27,7 @@ public class SelectStartVariables {
         edgeDetection = new EdgeDetection();
         selectAuton();
         selectAlliance();
-        selectSecondRelease();
+        selectGateTotal();
     }
 
     private void selectAuton() {
@@ -62,18 +62,18 @@ public class SelectStartVariables {
         }
     }
 
-    private void selectSecondRelease() {
+    private void selectGateTotal() {
         risingTriangleEdge = false;
         risingSquareEdge = false;
         while (!risingTriangleEdge && !risingSquareEdge) {
             calculateGamepadValues();
 
-            telemetry.addLine("Press triangle for SECOND RELEASE, press square for NOT");
+            telemetry.addLine("Press triangle for 3 GATES, press square for 4 GATES");
             telemetry.update();
             if (risingTriangleEdge)
-                GlobalVariables.secondRelease = true;
+                GlobalVariables.gateTotal = 3;
             if (risingSquareEdge)
-                GlobalVariables.secondRelease = false;
+                GlobalVariables.gateTotal = 4;
         }
     }
 

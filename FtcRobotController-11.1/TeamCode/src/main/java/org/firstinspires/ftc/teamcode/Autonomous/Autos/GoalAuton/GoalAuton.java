@@ -26,7 +26,6 @@ public class GoalAuton implements Auton {
     private double currentWait = 0;
     private boolean wasIfCalled = false;
     private int gateCount = 0;
-    private int gateTotal = 3;
 
     public GoalAuton(Follower follower) {
         this.follower = follower;
@@ -140,13 +139,19 @@ public class GoalAuton implements Auton {
 
     private void drive_takeFirstPos_shootPos() {
         if (follower.isBusy()) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shoot_first;
-        addWaitTime(AutonomousConstants.shootTime);
+        addWaitTime(0.2);
     }
 
     private void shoot_first() {
         if(getSeconds() < currentWait) return;
+        if (!wasIfCalled) {
+            OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+            addWaitTime(AutonomousConstants.shootTime);
+            wasIfCalled = true;
+        }
+        if (getSeconds() < currentWait) return;
+        wasIfCalled = false;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
@@ -180,18 +185,26 @@ public class GoalAuton implements Auton {
             wasIfCalled = true;
         }
         if(follower.isBusy()) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+//        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shoot_gate;
-        addWaitTime(AutonomousConstants.shootTime);
+        addWaitTime(0.2);
         wasIfCalled = false;
     }
 
     private void shoot_gate() {
+        if(getSeconds() < currentWait) return;
+        if (!wasIfCalled) {
+            OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+            addWaitTime(AutonomousConstants.shootTime);
+            wasIfCalled = true;
+        }
         if (getSeconds() < currentWait) return;
+        wasIfCalled = false;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
-        if (gateCount >= gateTotal) {
-            follower.followPath(paths.shootPos_takeSecondPos_shootPos(), true);
+        if (gateCount >= GlobalVariables.gateTotal) {
+            if (GlobalVariables.gateTotal > 3) follower.followPath(paths.shootPos_takeSecondPos_shootPosPark(), true);
+            else follower.followPath(paths.shootPos_takeSecondPos_shootPos(), true);
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
             goalAutonState = GoalAutonState.drive_shootPos_takeSecondPos_shootPos;
         }
@@ -204,19 +217,30 @@ public class GoalAuton implements Auton {
 
     private void drive_shootPos_takeSecondPos_shootPos() {
         if(follower.isBusy()) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+//        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shoot_second;
-        addWaitTime(AutonomousConstants.shootTime);
+        addWaitTime(0.2);
     }
 
     private void shoot_second() {
+        if(getSeconds() < currentWait) return;
+        if (!wasIfCalled) {
+            OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+            addWaitTime(AutonomousConstants.shootTime);
+            wasIfCalled = true;
+        }
         if (getSeconds() < currentWait) return;
+        wasIfCalled = false;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
+        addWaitTime(0.5);
+        if (GlobalVariables.gateTotal > 3) {
+            goalAutonState = GoalAutonState.stop;
+            return;
+        }
         follower.followPath(paths.shootPos_takeThirdPos(), false);
         goalAutonState = GoalAutonState.drive_shootPos_takeThirdPos;
-        addWaitTime(0.5);
     }
 
     private void drive_shootPos_takeThirdPos() {
@@ -237,18 +261,25 @@ public class GoalAuton implements Auton {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
         }
         if (getSeconds() < currentWait) return;
-        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+//        OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         goalAutonState = GoalAutonState.shoot_third;
-        addWaitTime(AutonomousConstants.shootTime);
+        addWaitTime(0.2);
     }
 
     private void shoot_third() {
         if(getSeconds() < currentWait) return;
+        if (!wasIfCalled) {
+            OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
+            addWaitTime(AutonomousConstants.shootTime);
+            wasIfCalled = true;
+        }
+        if (getSeconds() < currentWait) return;
+        wasIfCalled = false;
         goalAutonState = GoalAutonState.stop;
     }
 
     private void stop() {
-        if(follower.isBusy()) return;
+        if(follower.isBusy() || getSeconds() < currentWait) return;
         OuttakeStates.setMotorState(OuttakeMotorStates.idle);
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.stop);
         goalAutonState = GoalAutonState.idle;

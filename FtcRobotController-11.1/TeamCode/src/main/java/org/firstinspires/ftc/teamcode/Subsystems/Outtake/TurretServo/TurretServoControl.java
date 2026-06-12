@@ -27,7 +27,6 @@ public class TurretServoControl {
     public void update() {
         if (!OuttakeStates.isTurretTrackingEnabled()) return;
         if (sensorControl.getLocalizerPose().getY() < -10 && !GlobalVariables.far) {
-            System.out.println(sensorControl.getLocalizerPose().getY() + "   not Far: " + !GlobalVariables.far);
             return;
         }
 

@@ -34,6 +34,8 @@ public class SensorControl {
     public final LynxI2cColorRangeSensor rangeSensorMid;
     public final LynxI2cColorRangeSensor rangeSensorFront;
 
+    private final InfraRedSensor[] infraRedSensors;
+
     public double ballDistanceIn = 4.0;
     private boolean isResetting = false;
 
@@ -51,7 +53,7 @@ public class SensorControl {
 
     // Goal coordinates in INCHES
     public static final double RedXInches = 62.0;
-    public static final double RedYInches = 61.0;
+    public static final double RedYInches = 61.5;
     public static final double BlueXInches = -62.0;
     public static final double BlueYInches = 61.0;
 
@@ -91,11 +93,25 @@ public class SensorControl {
         this.pedroLocalizer = pedroLocalizer;
         this.edgeDetection = edgeDetection;
 
+        infraRedSensors = getInfraRedSensors(hardwareMap);
+
         rangeSensorMid = hardwareMap.get(LynxI2cColorRangeSensor.class, MID_COLOR_SENSOR_NAME);
         rangeSensorFront = hardwareMap.get(LynxI2cColorRangeSensor.class, FRONT_COLOR_SENSOR_NAME);
         limelight = hardwareMap.get(Limelight3A.class, LIMELIGHT_NAME);
 
         setInitialLocalisationAngle();
+    }
+
+    private InfraRedSensor[] getInfraRedSensors(HardwareMap hardwareMap) {
+        final InfraRedSensor[] infraRedSensors;
+        infraRedSensors = new InfraRedSensor[]{
+                hardwareMap.get(InfraRedSensor.class, "infraMid"),
+                hardwareMap.get(InfraRedSensor.class, "infraFront")
+        };
+
+        infraRedSensors[0].setMode(InfraRedSensor.SwitchConfig.NC);
+        infraRedSensors[1].setMode(InfraRedSensor.SwitchConfig.NC);
+        return infraRedSensors;
     }
 
     private void setInitialLocalisationAngle() {
@@ -110,6 +126,17 @@ public class SensorControl {
 
     public void setResetting(boolean reset) {
         isResetting = reset;
+    }
+
+    public boolean isInfraRedObstructed(InfraRedSensors state) {
+        switch (state) {
+            case infraMid:
+                return infraRedSensors[0].isObstructed();
+            case infraFront:
+                return infraRedSensors[1].isObstructed();
+            default:
+                return false; // Or throw an exception
+        }
     }
 
     //
@@ -428,16 +455,18 @@ public class SensorControl {
         if (currentVelocity == null) return 0.0; // no velocity estimate yet -> no lead modifier (avoids NPE)
         double velocityX = currentVelocity.getX();
         double velocityY = currentVelocity.getY();
-        if (Double.isNaN(velocityX) || Double.isNaN(velocityY)
-                || Double.isInfinite(velocityX) || Double.isInfinite(velocityY)) {
+        double velocityH = currentVelocity.getHeading();
+        if (Double.isNaN(velocityX) || Double.isNaN(velocityY) || Double.isNaN(velocityH)
+                || Double.isInfinite(velocityX) || Double.isInfinite(velocityY) || Double.isInfinite(velocityH)) {
             return 0.0; // bad velocity estimate -> no lead modifier
         }
 
         double weightedX = velocityX * 0.005;
         double weightedY = velocityY * 0.005;
+        double weightedH = velocityH * 0.1;
 
-        if (GlobalVariables.alliance == Alliance.Red) return weightedX - weightedY;
-        return weightedX + weightedY;
+        if (GlobalVariables.alliance == Alliance.Red) return weightedX - weightedY - weightedH;
+        return weightedX + weightedY - weightedH;
     }
 
     public double getFrontColorSensorDistance(DistanceUnit unit) {
@@ -472,12 +501,12 @@ public class SensorControl {
 
     /** True when a ball is within range of the front sensor (uses the shared cached read). */
     public boolean isFrontBall() {
-        return getFrontBallDistanceInCached() < ballDistanceIn;
+        return getFrontBallDistanceInCached() < ballDistanceIn || isInfraRedObstructed(InfraRedSensors.infraFront);
     }
 
     /** True when a ball is within range of the mid (back) sensor (uses the shared cached read). */
     public boolean isMidBall() {
-        return getMidBallDistanceInCached() < ballDistanceIn;
+        return getMidBallDistanceInCached() < ballDistanceIn || isInfraRedObstructed(InfraRedSensors.infraMid);
     }
 
     private double getTrimmedAverage(List<Double> data) {

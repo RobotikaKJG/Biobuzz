@@ -175,7 +175,7 @@ public class GoalAuton implements Auton {
     }
 
     private void intake_gate() {
-        if (getSeconds() > currentWait - 1 && !corrected && ((follower.getPose().getHeading() < Math.toRadians(27) && GlobalVariables.alliance == Alliance.Red) || (follower.getPose().getHeading() > Math.toRadians(153) && GlobalVariables.alliance == Alliance.Blue))) {
+        if (getSeconds() > currentWait - 1 && !corrected && ((follower.getPose().getHeading() < Math.toRadians(30) && GlobalVariables.alliance == Alliance.Red) || (follower.getPose().getHeading() > Math.toRadians(150) && GlobalVariables.alliance == Alliance.Blue))) {
             follower.followPath(paths.openGatePos_openGatePosBreak_openGatePosNew());
             addWaitTime(2);
             corrected = true;

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
@@ -14,7 +15,7 @@ public class AutoCycleShootControl {
     private final MotorControl motorControl;
     private AutoCycleShootStates prevAutoCycleShootState = AutoCycleShootStates.idle;
 
-    private static final double FAR_MIN_OUTTAKE_VELOCITY = 2080.0;
+    private static final double FAR_MIN_OUTTAKE_VELOCITY = 1900.0;
 
     public AutoCycleShootControl(MotorControl motorControl) {
         this.motorControl = motorControl;
@@ -36,6 +37,8 @@ public class AutoCycleShootControl {
                 break;
             case activate:
                 IntakeStates.setLockServoState(LockServoStates.unlock);
+                // Reset intake state so they don't fight, and so it can be restarted after shooting
+                IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
                 break;
             case turnBack:
                 IntakeStates.setTransferMotorState(TransferMotorStates.backward);
@@ -52,7 +55,7 @@ public class AutoCycleShootControl {
                         IntakeStates.setTransferMotorState(TransferMotorStates.forward);
                     }
                     else {
-                        if (motorControl.getMotorVelocity(MotorConstants.outtake1) > FAR_MIN_OUTTAKE_VELOCITY-200 && motorControl.getMotorVelocity(MotorConstants.outtake1) < FAR_MIN_OUTTAKE_VELOCITY) {
+                        if (motorControl.getMotorVelocity(MotorConstants.outtake1) > FAR_MIN_OUTTAKE_VELOCITY) {
                             IntakeStates.setIntakeMotorState(IntakeMotorStates.forward);
                             IntakeStates.setTransferMotorState(TransferMotorStates.forward);
                         } else {
@@ -74,6 +77,8 @@ public class AutoCycleShootControl {
                 IntakeStates.setIntakeMotorState(IntakeMotorStates.idle);
                 IntakeStates.setTransferMotorState(TransferMotorStates.idle);
                 IntakeStates.setLockServoState(LockServoStates.lock);
+                // Ensure intake is ready for next trigger press
+                IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
                 break;
             case idle:
                 break;

@@ -5,7 +5,7 @@ public class OuttakeConstants {
     public static double turretServo2Mult = 0.998;
     public static double turretServo3Mult = 1.0;
 
-    public static double turretServoMax = 0.78;
+    public static double turretServoMax = 0.9;
     public static double turretServoMin = 0.0;
 
     // turretLimitLeft must stay <= the angle of turretServoMax:
@@ -13,7 +13,7 @@ public class OuttakeConstants {
     // 0.81, past the hard stop, stalling the turret against it (the "stuck on
     // the left" jam during fast drivetrain rotation).
     public static double turretLimitRight = -120.0;
-    public static double turretLimitLeft = 110.0;
+    public static double turretLimitLeft = 100.0;
     public static double turretGearRatio = 1.0;
     public static double turretServoTravel = 323.0;
 
@@ -51,7 +51,7 @@ public class OuttakeConstants {
     public static double resetWait = 100.0;
 
     public static double outtakeSpeedCloseClose = 0.62;
-    public static double outtakeSpeedFar = 2270;
+    public static double outtakeSpeedFar = 2100;
     public static double outtakeSpeedCloseFar = 0.78;
 
     public static double farShootingThreshold = 2300;

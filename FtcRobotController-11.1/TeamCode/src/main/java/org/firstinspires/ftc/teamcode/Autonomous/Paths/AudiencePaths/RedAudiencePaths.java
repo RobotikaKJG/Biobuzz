@@ -18,7 +18,7 @@ public class RedAudiencePaths implements AudiencePaths {
     private PathChain takeUpPos_shootPos;
     private PathChain shootPos_park;
 
-    private final Pose pt_startPose = new Pose(78.6, 7.36, Math.toRadians(90));
+    private final Pose pt_startPose = new Pose(86.5, 7, Math.toRadians(90));
     private final Pose pt_shootPose = new Pose(92.5, 9.53, Math.toRadians(0));
 
     private final Pose pt_takeThreePose = new Pose(118.06, 25.99);

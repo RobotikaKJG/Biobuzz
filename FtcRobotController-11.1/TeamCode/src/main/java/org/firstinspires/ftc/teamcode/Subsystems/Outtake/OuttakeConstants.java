@@ -13,7 +13,7 @@ public class OuttakeConstants {
     // 0.81, past the hard stop, stalling the turret against it (the "stuck on
     // the left" jam during fast drivetrain rotation).
     public static double turretLimitRight = -120.0;
-    public static double turretLimitLeft = 90.0;
+    public static double turretLimitLeft = 110.0;
     public static double turretGearRatio = 1.0;
     public static double turretServoTravel = 323.0;
 

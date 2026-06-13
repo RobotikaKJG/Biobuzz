@@ -216,7 +216,7 @@ public class MotorControl {
     }
 
     public void setMotorRPM(int index, double velocityTicksPerSecond) {
-        setMotorRPM(index, velocityTicksPerSecond, new PIDFCoefficients(60, 0, 0, 11.75));
+        setMotorRPM(index, velocityTicksPerSecond, new PIDFCoefficients(60, 0, 0, 1));
     }
 
     public void setMotorRPM(int index, double velocityTicksPerSecond, PIDFCoefficients pidf) {

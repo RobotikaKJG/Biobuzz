@@ -20,28 +20,29 @@ public class BlueGoalPaths implements GoalPaths {
     private PathChain takeThirdPos_shootPosPark;
     private PathChain shootPos_takeSecondPos_shootPosPark;
 
-    private final Pose pt_startPose = new Pose(120.9, 119.2, Math.toRadians(36.2));
-    private final Pose pt_shootPose = new Pose(93.6, 81.9, Math.toRadians(0));
+    private final Pose pt_startPose = new Pose(23.1, 119.2, Math.toRadians(143.8));
+    private final Pose pt_shootPose = new Pose(50.4, 81.9, Math.toRadians(180));
 
-    private final Pose pt_takeFirstPose = new Pose(124.4, 54.65);
-    private final Pose cp_takeFirstPose = new Pose(114.8, 54.5);
-    private final Pose cp_takeFirstPoseBack = new Pose(95.7, 81.27);
+    private final Pose pt_takeFirstPose = new Pose(19.6, 54.65);
+    private final Pose cp_takeFirstPose = new Pose(29.2, 54.5);
+    private final Pose cp_takeFirstPoseBack = new Pose(48.3, 81.27);
 
-    private final Pose pt_openGatePose = new Pose(127.3, 58.5, Math.toRadians(26));
-    private final Pose pt_openGatePoseBreak = new Pose(115, 58.5);
-    private final Pose cp_openGatePose = new Pose(98.2, 58.9);
-    private final Pose pt_retryOpenStart = new Pose(127.3, 57);
-    private final Pose pt_openGatePoseNew = new Pose(127.3, 59.2);
-    private final Pose cp_openGatePoseNew = new Pose(120.8, 55.6);
+    private final Pose pt_openGatePose = new Pose(16.7, 58.5, Math.toRadians(154));
+    private final Pose pt_openGatePoseBreak = new Pose(29.0, 58.5);
+    private final Pose cp_openGatePose = new Pose(45.8, 58.9);
 
-    private final Pose pt_takeSecondPose = new Pose(111.5, 81.9);
-    private final Pose pt_shootPoseSecond = new Pose(93.6, 85.9, Math.toRadians(0));
+    private final Pose pt_retryOpenStart = new Pose(16.7, 57);
+    private final Pose pt_openGatePoseNew = new Pose(16.7, 59.2);
+    private final Pose cp_openGatePoseNew = new Pose(23.2, 55.6);
 
-    private final Pose pt_takeThirdPose = new Pose(114.5, 34.9);
-    private final Pose cp_takeThirdPose = new Pose(114.5, 54.8);
-    private final Pose cp_takeThirdPoseBack = new Pose(93.9, 87.5);
+    private final Pose pt_takeSecondPose = new Pose(32.5, 81.9);
+    private final Pose pt_shootPoseSecond = new Pose(50.4, 85.9, Math.toRadians(180));
 
-    private final Pose pt_shootPosePark = new Pose(82.4, 96.5, Math.toRadians(0));
+    private final Pose pt_takeThirdPose = new Pose(29.5, 34.9);
+    private final Pose cp_takeThirdPose = new Pose(29.5, 54.8);
+    private final Pose cp_takeThirdPoseBack = new Pose(50.1, 87.5);
+
+    private final Pose pt_shootPosePark = new Pose(61.6, 96.5, Math.toRadians(180));
 
     public BlueGoalPaths(Follower follower) {
         this.follower = follower;

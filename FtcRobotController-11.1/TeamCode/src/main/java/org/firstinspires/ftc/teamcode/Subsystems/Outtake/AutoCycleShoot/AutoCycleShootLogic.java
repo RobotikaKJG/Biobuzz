@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot;
 
+import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
@@ -98,9 +99,14 @@ public class AutoCycleShootLogic {
     }
 
     private void startFeed() {
-        feedStartSec = getSeconds();
-        clearSinceSec = -1;
+        if (!wasIfCalled) {
+            feedStartSec = getSeconds();
+            clearSinceSec = -1;
+            wasIfCalled = true;
+        }
+        if (!GlobalVariables.far &&  motorControl.getMotorVelocity(MotorConstants.outtake2) > OuttakeConstants.outtakeSpeedClose + 10) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
+        wasIfCalled = false;
     }
 
     private void stopTransfer() {

@@ -34,8 +34,8 @@ public class OuttakeConstants {
     public static double maxDistance = 98.43;
     public static double minDistance = 53.94;
 
-    public static double oneBallWait = 0.1;
-    public static double servoOpenWait = 0.1;
+    public static double oneBallWait = 0.2;
+    public static double servoOpenWait = 0.2;
     public static double deactivateAfter = 0.3;
 
     // TeleOp auto-finish for a shot: feed until both ball sensors have read empty
@@ -51,7 +51,8 @@ public class OuttakeConstants {
     public static double resetWait = 100.0;
 
     public static double outtakeSpeedCloseClose = 0.62;
-    public static double outtakeSpeedFar = 2100;
+    public static double outtakeSpeedFar = 2170;
+    public static double outtakeSpeedClose = 1650;
     public static double outtakeSpeedCloseFar = 0.78;
 
     public static double farShootingThreshold = 2300;

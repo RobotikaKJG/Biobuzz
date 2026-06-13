@@ -39,14 +39,15 @@ public class OuttakeMotorControl {
                 motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar - 100);
                 break;
             case forwardStart:
-                motorControl.setMotorRPM(MotorConstants.outtake, 1670 + GlobalVariables.rpmOffset);
+                motorControl.setMotorRPM(MotorConstants.outtake, 1700 + GlobalVariables.rpmOffset);
                 break;
             case forwardFar:
                 motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar + GlobalVariables.rpmOffset);
                 break;
             case forwardClose:
                 calculateSpeed();
-                motorControl.setMotorRPM(MotorConstants.outtake, 1650 + GlobalVariables.rpmOffset);
+                setMotorPowerControl(OuttakeConstants.outtakeSpeedClose);
+//                motorControl.setMotorRPM(MotorConstants.outtake, 1700 + GlobalVariables.rpmOffset);
                 break;
             case backward:
                 motorControl.setMotorSpeed(MotorConstants.outtake, -0.5);
@@ -54,6 +55,20 @@ public class OuttakeMotorControl {
             case idle:
                 motorControl.setMotorRPM(MotorConstants.outtake, 0);
                 break;
+        }
+    }
+
+    private void setMotorPowerControl(double targetVelocity) {
+
+        double currentVelocity = motorControl.getMotorVelocity(MotorConstants.outtake);
+        double error = targetVelocity - currentVelocity;
+
+        if (Math.abs(error) > 100) {
+            double power = Math.signum(error);
+            motorControl.setMotorSpeed(MotorConstants.outtake, power);
+            motorControl.setMotors(MotorConstants.outtake);
+        } else {
+            motorControl.setMotorRPM(MotorConstants.outtake, targetVelocity + GlobalVariables.rpmOffset);
         }
     }
 

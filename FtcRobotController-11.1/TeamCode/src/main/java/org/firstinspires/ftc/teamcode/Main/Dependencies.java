@@ -5,10 +5,12 @@ import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.GoBildaIndicator;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
 import org.firstinspires.ftc.teamcode.PedroPathing.Constants;
@@ -39,6 +41,7 @@ public class Dependencies {
     public SensorControl sensorControl;
     public ServoControl servoControl;
     public TurretServoControl turretServoControl;
+    public GoBildaIndicator indicator;
     public EdgeDetection edgeDetection = new EdgeDetection();
     public EdgeDetection gamepad2EdgeDetection = new EdgeDetection();
 
@@ -65,6 +68,7 @@ public class Dependencies {
         sensorControl = new SensorControl(hardwareMap, edgeDetection, pedroLocalizer);
         servoControl = new ServoControl(hardwareMap);
         turretServoControl = new TurretServoControl(servoControl, sensorControl);
+        indicator = new GoBildaIndicator(hardwareMap.get(Servo.class, "led"));
     }
 
     public Drivebase createDrivebase() {

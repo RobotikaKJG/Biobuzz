@@ -14,15 +14,15 @@ public class RedAudiencePaths implements AudiencePaths {
     private PathChain takeThreePos_shootPos;
     private PathChain shootPos_takeBottomPos;
     private PathChain takeBottomPos_shootPos;
-    private PathChain shootPos_takeUpPos;
+    private PathChain takeBottomPos_takeUpPos;
     private PathChain takeUpPos_shootPos;
     private PathChain shootPos_park;
 
     private final Pose pt_startPose = new Pose(86.5, 7, Math.toRadians(90));
-    private final Pose pt_shootPose = new Pose(92.5, 9.53, Math.toRadians(0));
+    private final Pose pt_shootPose = new Pose(92.5, 14, Math.toRadians(0));
 
     private final Pose pt_takeThreePose = new Pose(118.06, 25.99);
-    private final Pose cp_takeThreePose = new Pose(118.07, 11.7);
+    private final Pose cp_takeThreePose = new Pose(118.07, 6.7);
 
     private final Pose pt_takeBottomPose = new Pose(128.28, 9.26);
 
@@ -64,9 +64,9 @@ public class RedAudiencePaths implements AudiencePaths {
                 .setReversed()
                 .build();
 
-        shootPos_takeUpPos = follower.pathBuilder()
-                .addPath(new BezierCurve(pt_shootPose, cp_takeUpPose, pt_takeUpPose))
-                .setTangentHeadingInterpolation()
+        takeBottomPos_takeUpPos = follower.pathBuilder()
+                .addPath(new BezierCurve(pt_takeBottomPose, cp_takeUpPose, pt_takeUpPose))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
 
         takeUpPos_shootPos = follower.pathBuilder()
@@ -107,8 +107,8 @@ public class RedAudiencePaths implements AudiencePaths {
         return takeBottomPos_shootPos;
     }
 
-    public PathChain shootPos_takeUpPos() {
-        return shootPos_takeUpPos;
+    public PathChain takeBottomPos_takeUpPos() {
+        return takeBottomPos_takeUpPos;
     }
 
     public PathChain takeUpPos_shootPos() {

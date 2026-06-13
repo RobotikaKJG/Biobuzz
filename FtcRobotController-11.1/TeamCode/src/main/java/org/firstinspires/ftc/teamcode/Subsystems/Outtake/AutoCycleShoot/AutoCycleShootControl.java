@@ -64,6 +64,7 @@ public class AutoCycleShootControl {
                         }
                     }
                 } else {
+
                     IntakeStates.setIntakeMotorState(IntakeMotorStates.forward);
                     IntakeStates.setTransferMotorState(TransferMotorStates.forward);
                 }

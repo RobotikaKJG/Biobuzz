@@ -14,22 +14,22 @@ public class BlueAudiencePaths implements AudiencePaths {
     private PathChain takeThreePos_shootPos;
     private PathChain shootPos_takeBottomPos;
     private PathChain takeBottomPos_shootPos;
-    private PathChain shootPos_takeUpPos;
+    private PathChain takeBottomPos_takeUpPos;
     private PathChain takeUpPos_shootPos;
     private PathChain shootPos_park;
 
-    private final Pose pt_startPose = new Pose(78.6, 7.36, Math.toRadians(90));
-    private final Pose pt_shootPose = new Pose(92.5, 9.53, Math.toRadians(0));
+    private final Pose pt_startPose = new Pose(57.5, 7, Math.toRadians(90));
+    private final Pose pt_shootPose = new Pose(51.5, 9.53, Math.toRadians(180));
 
-    private final Pose pt_takeThreePose = new Pose(118.06, 25.99);
-    private final Pose cp_takeThreePose = new Pose(118.07, 11.7);
+    private final Pose pt_takeThreePose = new Pose(25.94, 25.99);
+    private final Pose cp_takeThreePose = new Pose(25.93, 11.7);
 
-    private final Pose pt_takeBottomPose = new Pose(128.28, 9.26);
+    private final Pose pt_takeBottomPose = new Pose(15.72, 9.26);
 
-    private final Pose pt_takeUpPose = new Pose(129.15, 28.6);
-    private final Pose cp_takeUpPose = new Pose(112.64, 28.24);
+    private final Pose pt_takeUpPose = new Pose(14.85, 28.6);
+    private final Pose cp_takeUpPose = new Pose(31.36, 28.24);
 
-    private final Pose pt_parkPose = new Pose(102.7, 10);
+    private final Pose pt_parkPose = new Pose(41.3, 10);
 
     public BlueAudiencePaths(Follower follower) {
         this.follower = follower;
@@ -50,6 +50,7 @@ public class BlueAudiencePaths implements AudiencePaths {
         takeThreePos_shootPos = follower.pathBuilder()
                 .addPath(new BezierLine(pt_takeThreePose, pt_shootPose))
                 .setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
 
         shootPos_takeBottomPos = follower.pathBuilder()
@@ -60,16 +61,18 @@ public class BlueAudiencePaths implements AudiencePaths {
         takeBottomPos_shootPos = follower.pathBuilder()
                 .addPath(new BezierLine(pt_takeBottomPose, pt_shootPose))
                 .setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
 
-        shootPos_takeUpPos = follower.pathBuilder()
-                .addPath(new BezierCurve(pt_shootPose, cp_takeUpPose, pt_takeUpPose))
+        takeBottomPos_takeUpPos = follower.pathBuilder()
+                .addPath(new BezierCurve(pt_takeBottomPose, cp_takeUpPose, pt_takeUpPose))
                 .setTangentHeadingInterpolation()
                 .build();
 
         takeUpPos_shootPos = follower.pathBuilder()
                 .addPath(new BezierLine(pt_takeUpPose, pt_shootPose))
                 .setTangentHeadingInterpolation()
+                .setReversed()
                 .build();
 
         shootPos_park = follower.pathBuilder()
@@ -104,8 +107,8 @@ public class BlueAudiencePaths implements AudiencePaths {
         return takeBottomPos_shootPos;
     }
 
-    public PathChain shootPos_takeUpPos() {
-        return shootPos_takeUpPos;
+    public PathChain takeBottomPos_takeUpPos() {
+        return takeBottomPos_takeUpPos;
     }
 
     public PathChain takeUpPos_shootPos() {

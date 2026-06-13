@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
@@ -80,8 +81,8 @@ public class AudienceAuton implements Auton {
             case shoot_second:
                 shoot_second();
                 break;
-            case drive_shootPos_takeUpPos:
-                drive_shootPos_takeUpPos();
+            case drive_takeBottomPos_takeUpPos:
+                drive_takeBottomPos_takeUpPos();
                 break;
             case drive_takeUpPos_shootPos:
                 drive_takeUpPos_shootPos();
@@ -103,7 +104,7 @@ public class AudienceAuton implements Auton {
         if(follower.isBusy() || getSeconds() < currentWait) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         audienceAutonState = AudienceAutonState.shoot_preload;
-        addWaitTime(AutonomousConstants.shootTime + 5.3);
+        addWaitTime(AutonomousConstants.shootTime + 0.6);
     }
 
     private void shoot_preload() {
@@ -111,7 +112,7 @@ public class AudienceAuton implements Auton {
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
-        follower.followPath(paths.shootPos_takeThreePos(), false);
+        follower.followPath(paths.shootPos_takeThreePos(), 0.8, false);
         audienceAutonState = AudienceAutonState.drive_shootPos_takeThreePos;
         addWaitTime(0.75);
     }
@@ -119,7 +120,7 @@ public class AudienceAuton implements Auton {
     private void drive_shootPos_takeThreePos() {
         if (getSeconds() < currentWait) return;
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
-        if (follower.isBusy()) return;
+        if (follower.isBusy() && IntakeStates.getAutoIntakeTransferState() != AutoIntakeTransferStates.idle) return;
         follower.followPath(paths.takeThreePos_shootPos(), false);
         audienceAutonState = AudienceAutonState.drive_takeThreePos_shootPos;
     }
@@ -128,7 +129,7 @@ public class AudienceAuton implements Auton {
         if (follower.isBusy()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         audienceAutonState = AudienceAutonState.shoot_first;
-        addWaitTime(AutonomousConstants.shootTime + 0.3);
+        addWaitTime(AutonomousConstants.shootTime + 0.6);
     }
 
     private void shoot_first() {
@@ -144,16 +145,23 @@ public class AudienceAuton implements Auton {
     private void drive_shootPos_takeBottomPos() {
         if (getSeconds() < currentWait) return;
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
-        if (follower.isBusy()) return;
-        follower.followPath(paths.takeBottomPos_shootPos(), false);
-        audienceAutonState = AudienceAutonState.drive_takeBottomPos_shootPos;
+        if (follower.isBusy() && IntakeStates.getAutoIntakeTransferState() != AutoIntakeTransferStates.idle) return;
+//        if (IntakeStates.getAutoIntakeTransferState() == AutoIntakeTransferStates.checkAgainFront || IntakeStates.getAutoIntakeTransferState() == AutoIntakeTransferStates.idle || IntakeStates.getAutoIntakeTransferState() != AutoIntakeTransferStates.stop) {
+        if (IntakeStates.getTransferMotorState() != TransferMotorStates.forward) {
+            audienceAutonState = AudienceAutonState.drive_takeBottomPos_shootPos;
+            follower.followPath(paths.takeBottomPos_shootPos(), false);
+        }
+        else {
+            audienceAutonState = AudienceAutonState.drive_takeBottomPos_takeUpPos;
+            follower.followPath(paths.takeBottomPos_takeUpPos(), false);
+        }
     }
 
     private void drive_takeBottomPos_shootPos() {
         if (follower.isBusy()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
         audienceAutonState = AudienceAutonState.shoot_second;
-        addWaitTime(AutonomousConstants.shootTime + 0.3);
+        addWaitTime(AutonomousConstants.shootTime + 0.6);
     }
 
     private void shoot_second() {
@@ -161,15 +169,15 @@ public class AudienceAuton implements Auton {
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);
         IntakeStates.setLockServoState(LockServoStates.lock);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
-        follower.followPath(paths.shootPos_takeUpPos(), false);
-        audienceAutonState = AudienceAutonState.drive_shootPos_takeUpPos;
+        follower.followPath(paths.shootPos_takeBottomPos(), false);
+        audienceAutonState = AudienceAutonState.drive_shootPos_takeBottomPos;
         addWaitTime(0.75);
     }
 
-    private void drive_shootPos_takeUpPos() {
+    private void drive_takeBottomPos_takeUpPos() {
         if (getSeconds() < currentWait) return;
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
-        if (follower.isBusy()) return;
+        if (follower.isBusy() && IntakeStates.getAutoIntakeTransferState() != AutoIntakeTransferStates.idle) return;
         follower.followPath(paths.takeUpPos_shootPos(), false);
         audienceAutonState = AudienceAutonState.drive_takeUpPos_shootPos;
     }
@@ -177,8 +185,8 @@ public class AudienceAuton implements Auton {
     private void drive_takeUpPos_shootPos() {
         if (follower.isBusy()) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.activate);
-        audienceAutonState = AudienceAutonState.shoot_third;
-        addWaitTime(AutonomousConstants.shootTime + 0.3);
+        audienceAutonState = AudienceAutonState.shoot_first;
+        addWaitTime(AutonomousConstants.shootTime + 0.6);
     }
 
     private void shoot_third() {

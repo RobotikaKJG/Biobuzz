@@ -1,12 +1,11 @@
 package org.firstinspires.ftc.teamcode.Main;
 
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.Gamepad;
-
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.GoBildaIndicator;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
@@ -34,8 +33,8 @@ public class IterativeController {
     private final OuttakeControl outtakeControl;
     private final IntakeControl intakeControl;
     private final SensorControl sensorControl;
-    private final RevBlinkinLedDriver led;
-    private RevBlinkinLedDriver.BlinkinPattern lastLedPattern = null;
+    private final GoBildaIndicator indicator;
+    private GoBildaIndicator.Color lastColor = null;
     private boolean isLimelightRecalibrating = false;
 
     public IterativeController(Dependencies dependencies) {
@@ -48,8 +47,7 @@ public class IterativeController {
         outtakeControl = dependencies.createOuttakeControl();
         intakeControl = dependencies.createIntakeControl();
         sensorControl = dependencies.sensorControl;
-
-        led = dependencies.hardwareMap.get(RevBlinkinLedDriver.class, "led");
+        indicator = dependencies.indicator;
 
         sensorControl.initLimelight(0);
 
@@ -74,15 +72,15 @@ public class IterativeController {
             }
         }
 
-        RevBlinkinLedDriver.BlinkinPattern ledPattern = isLimelightRecalibrating
-                ? RevBlinkinLedDriver.BlinkinPattern.VIOLET
+        GoBildaIndicator.Color ledColor = isLimelightRecalibrating
+                ? GoBildaIndicator.Color.RED
                 : (GlobalVariables.far
-                ? RevBlinkinLedDriver.BlinkinPattern.SKY_BLUE
-                : RevBlinkinLedDriver.BlinkinPattern.HOT_PINK);
+                ? GoBildaIndicator.Color.BLUE
+                : GoBildaIndicator.Color.GREEN);
 
-        if (ledPattern != lastLedPattern) {
-            led.setPattern(ledPattern);
-            lastLedPattern = ledPattern;
+        if (ledColor != lastColor) {
+            indicator.setColor(ledColor);
+            lastColor = ledColor;
         }
 
         buttonControl.update();

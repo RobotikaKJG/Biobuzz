@@ -9,7 +9,7 @@ public enum AudienceAutonState {
     drive_shootPos_takeBottomPos,
     drive_takeBottomPos_shootPos,
     shoot_second,
-    drive_shootPos_takeUpPos,
+    drive_takeBottomPos_takeUpPos,
     drive_takeUpPos_shootPos,
     shoot_third,
 

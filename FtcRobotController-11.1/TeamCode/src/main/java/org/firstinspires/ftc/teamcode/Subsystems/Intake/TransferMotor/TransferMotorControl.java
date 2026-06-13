@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
+import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
 public class TransferMotorControl {
@@ -23,7 +24,10 @@ public class TransferMotorControl {
     public void updateStates() {
         switch (IntakeStates.getTransferMotorState()) {
             case forward:
-                motorControl.setMotorSpeed(MotorConstants.transfer, 0.7);
+                if (GlobalVariables.far)
+                    motorControl.setMotorSpeed(MotorConstants.transfer, 0.6);
+                else
+                    motorControl.setMotorSpeed(MotorConstants.transfer, 1);
                 break;
             case backward:
                 motorControl.setMotorSpeed(MotorConstants.transfer, -1.0);

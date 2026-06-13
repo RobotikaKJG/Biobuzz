@@ -73,6 +73,11 @@ public class ServoControl {
     }
 
     public void setTurretServosPos(double position) {
+        // Hard floor/ceiling at the turret's usable travel: past turretServoMax the
+        // mechanism is against its hard stop and the servos stall. Callers should
+        // stay inside this range; this clamp is the last line of defense.
+        position = Math.max(OuttakeConstants.turretServoMin,
+                Math.min(OuttakeConstants.turretServoMax, position));
         if (!Double.isNaN(lastTurretBasePos)
                 && Math.abs(position - lastTurretBasePos) < TURRET_POS_EPSILON) {
             return;

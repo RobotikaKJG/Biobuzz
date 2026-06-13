@@ -222,18 +222,27 @@ at the goal whenever `OuttakeStates.isTurretTrackingEnabled()` is true (toggled
 by Right Bumper).
 
 Geometry / constraints:
-- Angle limits: `turretLimitRight = -120.0°`, `turretLimitLeft = 100.0°` (defined in `OuttakeConstants.java`).
+- Angle limits: `turretLimitRight = -120.0°`, `turretLimitLeft = 90.0°` (defined in
+  `OuttakeConstants.java`). The left limit must stay ≤ the angle of `turretServoMax`
+  (`(0.78 − 0.5) × 323 = +90.4°`) or the turret stalls against its hard stop.
 - `turretGearRatio = 1.0`, `turretServoTravel = 323.0°`.
 - Mapping: `servoPos = (targetAngleDeg * turretGearRatio) / turretServoTravel + 0.5`, then
-  clamped to `[0.01, 0.99]`.
+  clamped to `[turretServoMin, turretServoMax]`.
+- Dead-zone hold: when the aim target is outside the reachable window, the turret
+  parks at the limit the target left from and holds it until the target re-enters
+  the window (prevents the ±180° wrap from flipping the clamp between the two
+  limits during fast drivetrain rotation).
+- Slew limit: the commanded position is rate-limited to
+  `turretServoSlewPerSec = 2.0` (full travel per 0.5 s) so target jumps become
+  controlled sweeps instead of full-speed slams.
 - Per-servo multipliers (`OuttakeConstants`): `turretServo1Mult = 1.0`,
   `turretServo2Mult = 0.998`, `turretServo3Mult = 1.0`.
 - Servo travel range (`OuttakeConstants`): `turretServoMin = 0.0`,
   `turretServoMax = 0.78` (per-servo max/min are these × the multiplier).
 - `ServoConstants.servoMinPos/servoMaxPos` enforce bounds at the
-  `ServoControl.setServoPos` level (turret bounds use the multiplier values;
-  note `setTurretServosPos` bypasses the per-index bound check and applies its
-  own multipliers directly).
+  `ServoControl.setServoPos` level (turret bounds are the per-servo Max/Min
+  values). `setTurretServosPos` clamps its base position to
+  `[turretServoMin, turretServoMax]` before applying the per-servo multipliers.
 
 Aiming math (`SensorControl.getTurretTargetAngleDegrees()`):
 - Goal position depends on alliance: Red `(62, 62)`, Blue `(-62, 62)` inches.
@@ -339,8 +348,8 @@ gamepad2 drive), `isAutonomous`, `wasAutonomous`, `alliance`,
 `IntakeConstants`: `stopFeederAfter 0.1`, `lockServoMinPos 0.044`,
 `lockServoMaxPos 0.3`, `checkAgainAfter 0.2`.
 
-`TurretServoControl`: (uses `OuttakeConstants`: `turretLimitRight −120.0`, `turretLimitLeft 100.0`,
-`turretGearRatio 1`, `turretServoTravel 323`).
+`TurretServoControl`: (uses `OuttakeConstants`: `turretLimitRight −120.0`, `turretLimitLeft 90.0`,
+`turretGearRatio 1`, `turretServoTravel 323`, `turretServoSlewPerSec 2.0`).
 
 `SensorControl`: `ballDistanceIn 4.0`, goal Red `(62,62)` / Blue `(−62,62)`,
 `FieldHalfInches 66.93`, `LimelightFrames 7`,

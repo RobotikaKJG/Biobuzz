@@ -8,10 +8,20 @@ public class OuttakeConstants {
     public static double turretServoMax = 0.78;
     public static double turretServoMin = 0.0;
 
+    // turretLimitLeft must stay <= the angle of turretServoMax:
+    // (0.78 - 0.5) * 323 = +90.4 deg. The old value of 100 commanded servo pos
+    // 0.81, past the hard stop, stalling the turret against it (the "stuck on
+    // the left" jam during fast drivetrain rotation).
     public static double turretLimitRight = -120.0;
-    public static double turretLimitLeft = 100.0;
+    public static double turretLimitLeft = 90.0;
     public static double turretGearRatio = 1.0;
     public static double turretServoTravel = 323.0;
+
+    // Max commanded servo-position change per second (1.0 = full 0-to-1 travel).
+    // Caps how hard the turret slams toward a limit when the aim target jumps
+    // (e.g. the +/-180 wrap while the drivetrain spins). Full-speed tracking
+    // only needs ~0.7/s, so 2.0 leaves headroom and never slows normal aiming.
+    public static double turretServoSlewPerSec = 2.0;
 
     public static double turretServo1Max = turretServoMax * turretServo1Mult;
     public static double turretServo2Max = turretServoMax * turretServo2Mult;
@@ -24,8 +34,8 @@ public class OuttakeConstants {
     public static double maxDistance = 98.43;
     public static double minDistance = 53.94;
 
-    public static double oneBallWait = 0.05;
-    public static double servoOpenWait = 0.05;
+    public static double oneBallWait = 0.1;
+    public static double servoOpenWait = 0.1;
     public static double deactivateAfter = 0.3;
 
     // TeleOp auto-finish for a shot: feed until both ball sensors have read empty

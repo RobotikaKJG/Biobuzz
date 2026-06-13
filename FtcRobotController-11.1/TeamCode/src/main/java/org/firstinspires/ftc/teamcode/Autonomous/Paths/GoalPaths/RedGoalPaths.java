@@ -13,6 +13,7 @@ public class RedGoalPaths implements GoalPaths {
     private PathChain takeFirstPos_shootPos;
     private PathChain shootPos_openGatePosBreak;
     private PathChain openGatePosBreak_openGatePos;
+    private PathChain openGatePos_openGatePosBreak_openGatePosNew;
     private PathChain openGatePos_shootPos;
     private PathChain shootPos_takeSecondPos_shootPos;
     private PathChain shootPos_takeThirdPos;
@@ -29,6 +30,9 @@ public class RedGoalPaths implements GoalPaths {
     private final Pose pt_openGatePose = new Pose(127.3, 58.5, Math.toRadians(26));
     private final Pose pt_openGatePoseBreak = new Pose(115, 58.5);
     private final Pose cp_openGatePose = new Pose(98.2, 58.9);
+    private final Pose pt_retryOpenStart = new Pose(127.3, 57);
+    private final Pose pt_openGatePoseNew = new Pose(127.3, 59.2);
+    private final Pose cp_openGatePoseNew = new Pose(120.8, 55.6);
 
     private final Pose pt_takeSecondPose = new Pose(111.5, 81.9);
     private final Pose pt_shootPoseSecond = new Pose(93.6, 85.9, Math.toRadians(0));
@@ -70,6 +74,11 @@ public class RedGoalPaths implements GoalPaths {
         openGatePosBreak_openGatePos = follower.pathBuilder()
                 .addPath(new BezierLine(pt_openGatePoseBreak, pt_openGatePose))
                 .setLinearHeadingInterpolation(Math.toRadians(0), pt_openGatePose.getHeading())
+                .build();
+
+        openGatePos_openGatePosBreak_openGatePosNew = follower.pathBuilder()
+                .addPath(new BezierCurve(pt_retryOpenStart, cp_openGatePoseNew, pt_openGatePoseNew))
+                .setConstantHeadingInterpolation(pt_openGatePose.getHeading())
                 .build();
 
 
@@ -126,6 +135,10 @@ public class RedGoalPaths implements GoalPaths {
 
     public PathChain openGatePosBreak_openGatePos() {
         return openGatePosBreak_openGatePos;
+    }
+
+    public PathChain openGatePos_openGatePosBreak_openGatePosNew() {
+        return openGatePos_openGatePosBreak_openGatePosNew;
     }
 
     public PathChain openGatePos_shootPos() {

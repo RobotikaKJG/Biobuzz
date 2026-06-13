@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous.Autos.GoalAuton;
 
+import android.provider.Settings;
+
 import com.pedropathing.follower.Follower;
 
 import org.firstinspires.ftc.teamcode.Autonomous.Auton;
@@ -9,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Autonomous.Paths.GoalPaths.BlueGoalPaths;
 import org.firstinspires.ftc.teamcode.Autonomous.Paths.GoalPaths.GoalPaths;
 import org.firstinspires.ftc.teamcode.Autonomous.Paths.GoalPaths.RedGoalPaths;
 import org.firstinspires.ftc.teamcode.Autonomous.Paths.GoalPaths.GoalPaths;
+import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
@@ -26,6 +29,7 @@ public class GoalAuton implements Auton {
     private double currentWait = 0;
     private boolean wasIfCalled = false;
     private int gateCount = 0;
+    private boolean corrected = false;
 
     public GoalAuton(Follower follower) {
         this.follower = follower;
@@ -171,11 +175,17 @@ public class GoalAuton implements Auton {
     }
 
     private void intake_gate() {
+        if (getSeconds() > currentWait - 1 && !corrected && ((follower.getPose().getHeading() < Math.toRadians(27) && GlobalVariables.alliance == Alliance.Red) || (follower.getPose().getHeading() > Math.toRadians(153) && GlobalVariables.alliance == Alliance.Blue))) {
+            follower.followPath(paths.openGatePos_openGatePosBreak_openGatePosNew());
+            addWaitTime(2);
+            corrected = true;
+        }
         if (getSeconds() < currentWait && !(IntakeStates.getAutoIntakeTransferState() == AutoIntakeTransferStates.stop || IntakeStates.getAutoIntakeTransferState() == AutoIntakeTransferStates.idle))
             return;
         follower.followPath(paths.openGatePos_shootPos(), true);
         addWaitTime(0.3);
         goalAutonState = GoalAutonState.drive_openGatePos_shootPos;
+        corrected = false;
     }
 
     private void drive_openGatePos_shootPos() {
@@ -257,7 +267,7 @@ public class GoalAuton implements Auton {
     }
 
     private void drive_takeThirdPos_shootPosPark() {
-        if (getSeconds() > currentWait - 0.75) {
+        if (getSeconds() > currentWait - 0.5) {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
         }
         if (getSeconds() < currentWait) return;

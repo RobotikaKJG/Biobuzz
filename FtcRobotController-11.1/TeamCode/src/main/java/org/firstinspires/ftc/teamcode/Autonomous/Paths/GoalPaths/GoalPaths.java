@@ -11,6 +11,7 @@ public interface GoalPaths {
     PathChain takeFirstPos_shootPos();
     PathChain shootPos_openGatePosBreak();
     PathChain openGatePosBreak_openGatePos();
+    PathChain openGatePos_openGatePosBreak_openGatePosNew();
     PathChain openGatePos_shootPos();
     PathChain shootPos_takeSecondPos_shootPos();
     PathChain shootPos_takeThirdPos();

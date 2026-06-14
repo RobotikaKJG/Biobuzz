@@ -100,6 +100,16 @@ public class Drivebase {
         double y = -currentGamepad.left_stick_y;// * yGain;
         double x = -currentGamepad.left_stick_x;// * xGain;
         double rotation = currentGamepad.right_stick_x;// * rotationGain;
+
+        // Snap to full power straight if within 5 degrees of vertical (top/bottom)
+        if (Math.abs(y) > 0.7) {
+            double angleFromVertical = Math.atan2(Math.abs(x), Math.abs(y));
+            if (angleFromVertical < Math.toRadians(5)) {
+                y = Math.signum(y);
+                x = 0;
+            }
+        }
+
         robotOrientedGamepadDrive(y, x, rotation, maxSpeed);
     }
 

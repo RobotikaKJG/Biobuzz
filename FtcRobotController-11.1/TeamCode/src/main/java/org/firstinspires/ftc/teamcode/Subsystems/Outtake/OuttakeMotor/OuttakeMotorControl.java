@@ -36,10 +36,10 @@ public class OuttakeMotorControl {
     public void updateStates() {
         switch (OuttakeStates.getMotorState()) {
             case autonomous:
-                motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar - 100);
+                motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar - 100 + GlobalVariables.rpmOffset);
                 break;
             case forwardStart:
-                motorControl.setMotorRPM(MotorConstants.outtake, 1700 + GlobalVariables.rpmOffset);
+                motorControl.setMotorRPM(MotorConstants.outtake, 1750 + GlobalVariables.rpmOffset);
                 break;
             case forwardFar:
                 motorControl.setMotorRPM(MotorConstants.outtake, OuttakeConstants.outtakeSpeedFar + GlobalVariables.rpmOffset);
@@ -59,16 +59,16 @@ public class OuttakeMotorControl {
     }
 
     private void setMotorPowerControl(double targetVelocity) {
-
+        double targetWithOffset = targetVelocity + GlobalVariables.rpmOffset;
         double currentVelocity = motorControl.getMotorVelocity(MotorConstants.outtake);
-        double error = targetVelocity - currentVelocity;
+        double error = targetWithOffset - currentVelocity;
 
         if (Math.abs(error) > 100) {
             double power = Math.signum(error);
             motorControl.setMotorSpeed(MotorConstants.outtake, power);
             motorControl.setMotors(MotorConstants.outtake);
         } else {
-            motorControl.setMotorRPM(MotorConstants.outtake, targetVelocity + GlobalVariables.rpmOffset);
+            motorControl.setMotorRPM(MotorConstants.outtake, targetWithOffset);
         }
     }
 

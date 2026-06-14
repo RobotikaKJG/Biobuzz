@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -30,6 +31,8 @@ public class SensorControl {
     private final Limelight3A limelight;
     private final EdgeDetection edgeDetection;
     private final PinpointLocalizer pedroLocalizer;
+    public GoBildaIndicator indicator1;
+    public GoBildaIndicator indicator2;
 
     public final LynxI2cColorRangeSensor rangeSensorMid;
     public final LynxI2cColorRangeSensor rangeSensorFront;
@@ -98,6 +101,8 @@ public class SensorControl {
         rangeSensorMid = hardwareMap.get(LynxI2cColorRangeSensor.class, MID_COLOR_SENSOR_NAME);
         rangeSensorFront = hardwareMap.get(LynxI2cColorRangeSensor.class, FRONT_COLOR_SENSOR_NAME);
         limelight = hardwareMap.get(Limelight3A.class, LIMELIGHT_NAME);
+        indicator1 = new GoBildaIndicator(hardwareMap.get(Servo.class, "led1"));
+        indicator2 = new GoBildaIndicator(hardwareMap.get(Servo.class, "led2"));
 
         setInitialLocalisationAngle();
     }
@@ -137,6 +142,11 @@ public class SensorControl {
             default:
                 return false; // Or throw an exception
         }
+    }
+
+    public void setLEDColor(GoBildaIndicator.Color color) {
+        indicator1.setColor(color);
+        indicator2.setColor(color);
     }
 
     //

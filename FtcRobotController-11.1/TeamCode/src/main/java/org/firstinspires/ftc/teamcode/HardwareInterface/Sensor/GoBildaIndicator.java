@@ -12,14 +12,14 @@ public class GoBildaIndicator {
     private final ServoImplEx led;
 
     public enum Color {
-        RED(1000),
-        ORANGE(1143),
-        YELLOW(1286),
-        GREEN(1429),
-        CYAN(1571),
-        BLUE(1714),
-        PURPLE(1857),
-        WHITE(2000),
+        RED(1101),
+        ORANGE(1130),
+        YELLOW(1160),
+        GREEN(1310),
+        CYAN(1540),
+        BLUE(1710),
+        PURPLE(1900),
+        WHITE(1910),
         OFF(500);
 
         public final int us;

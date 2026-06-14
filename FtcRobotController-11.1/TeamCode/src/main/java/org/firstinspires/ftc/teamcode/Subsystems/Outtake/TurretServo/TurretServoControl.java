@@ -27,6 +27,8 @@ public class TurretServoControl {
     private double lastCommandedPos = Double.NaN;
     private long lastUpdateNs = 0;
 
+    private double manualAngleDeg = 0.0;
+
     public TurretServoControl(ServoControl servoControl, SensorControl sensorControl) {
         this.servoControl = servoControl;
         this.sensorControl = sensorControl;
@@ -34,11 +36,19 @@ public class TurretServoControl {
 
     public void update() {
         if (!OuttakeStates.isTurretTrackingEnabled()) return;
-        if (sensorControl.getLocalizerPose().getY() < -10 && !GlobalVariables.far) {
-            return;
+
+        double target;
+
+        if (OuttakeStates.getTurretServoState() == TurretServoStates.manual) {
+            target = manualAngleDeg;
+        } else {
+            if (sensorControl.getLocalizerPose().getY() < -10 && !GlobalVariables.far) {
+                return;
+            }
+
+            target = sensorControl.getTurretTargetAngleDegrees();
         }
 
-        double target = sensorControl.getTurretTargetAngleDegrees();
         if (!isFinite(target)) {
             // Pose/velocity glitch produced a bad angle. Hold the last good aim rather
             // than writing an illegal (NaN) servo position. Root cause is guarded in the
@@ -130,5 +140,9 @@ public class TurretServoControl {
 
     public double getTargetAngleDeg() {
         return targetAngleDeg;
+    }
+
+    public void setManualAngleDeg(double angle) {
+        this.manualAngleDeg = angle;
     }
 }

@@ -20,7 +20,7 @@ public class OuttakeStates {
         outtakeState = SubsystemState.Idle;
         outtakeMotorState = OuttakeMotorStates.idle;
         autoCycleShootStates = AutoCycleShootStates.idle;
-        turretServoState = TurretServoStates.idle;
+        turretServoState = TurretServoStates.tracking;
         autoOuttakeFarCloseState = AutoOuttakeFarCloseStates.idle;
         autoResetPosState = AutoResetPosStates.idle;
         turretTrackingEnabled = true;

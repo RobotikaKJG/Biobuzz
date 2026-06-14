@@ -21,6 +21,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoI
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.LED.LEDControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.LED.LEDLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootLogic;
@@ -41,9 +43,7 @@ public class Dependencies {
     public SensorControl sensorControl;
     public ServoControl servoControl;
     public TurretServoControl turretServoControl;
-    public GoBildaIndicator indicator;
     public EdgeDetection edgeDetection = new EdgeDetection();
-    public EdgeDetection gamepad2EdgeDetection = new EdgeDetection();
 
     public Dependencies(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry) {
 
@@ -68,7 +68,6 @@ public class Dependencies {
         sensorControl = new SensorControl(hardwareMap, edgeDetection, pedroLocalizer);
         servoControl = new ServoControl(hardwareMap);
         turretServoControl = new TurretServoControl(servoControl, sensorControl);
-        indicator = new GoBildaIndicator(hardwareMap.get(Servo.class, "led"));
     }
 
     public Drivebase createDrivebase() {
@@ -80,11 +79,7 @@ public class Dependencies {
     }
 
     ButtonControl createSubsystemControl() {
-        return new ButtonControl(edgeDetection, sensorControl, motorControl);
-    }
-
-    ButtonControl createSubsystemControl2() {
-        return new ButtonControl(gamepad2EdgeDetection, sensorControl, motorControl);
+        return new ButtonControl(edgeDetection, sensorControl, motorControl, turretServoControl);
     }
 
     public OuttakeControl createOuttakeControl() {
@@ -96,7 +91,7 @@ public class Dependencies {
     }
 
     public IntakeControl createIntakeControl() {
-        return new IntakeControl(createAutoIntakeTransferControl(), createAutoIntakeTransferLogic(), createIntakeMotorControl(), createTransferMotorControl(), createLockServoControl());
+        return new IntakeControl(createAutoIntakeTransferControl(), createAutoIntakeTransferLogic(), createIntakeMotorControl(), createLEDControl(), createLEDLogic(), createTransferMotorControl(), createLockServoControl());
     }
 
     private AutoIntakeTransferControl createAutoIntakeTransferControl() {
@@ -133,5 +128,13 @@ public class Dependencies {
 
     private AutoResetPosControl createAutoResetPosControl() {
         return new AutoResetPosControl(sensorControl);
+    }
+    
+    private LEDControl createLEDControl() {
+        return new LEDControl(sensorControl);
+    }
+    
+    private LEDLogic createLEDLogic() {
+        return new LEDLogic(sensorControl, turretServoControl, motorControl);
     }
 }

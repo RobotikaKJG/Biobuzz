@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Intake;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.LED.LEDStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
@@ -10,6 +11,7 @@ public class IntakeStates {
     private static SubsystemState intakeState = SubsystemState.Idle;
     private static AutoIntakeTransferStates autoIntakeTransferState = AutoIntakeTransferStates.idle;
     private static IntakeMotorStates intakeMotorState = IntakeMotorStates.idle;
+    private static LEDStates ledStates = LEDStates.idle;
     private static TransferMotorStates transferMotorState = TransferMotorStates.idle;
     private static LockServoStates lockServoState = LockServoStates.idle;
 
@@ -43,6 +45,14 @@ public class IntakeStates {
 
     public static void setIntakeMotorState(IntakeMotorStates state) {
         intakeMotorState = state;
+    }
+
+    public static LEDStates getLEDState() {
+        return ledStates;
+    }
+
+    public static void setLEDState(LEDStates state) {
+        ledStates = state;
     }
 
     public static TransferMotorStates getTransferMotorState() {

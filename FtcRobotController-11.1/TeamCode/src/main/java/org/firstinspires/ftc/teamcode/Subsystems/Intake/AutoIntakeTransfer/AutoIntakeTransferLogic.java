@@ -92,6 +92,7 @@ public class AutoIntakeTransferLogic {
         if (isFrontBall()) {
             RobotLog.ii(TAG, "checkAgainFront: confirmed (front=%.1f) -> stop (3 balls loaded)", currentDistanceInchesFront);
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
+            gamepad1.rumble(300);
         }
         else {
             RobotLog.ii(TAG, "checkAgainFront: lost (front=%.1f) -> stopTransfer", currentDistanceInchesFront);
@@ -100,8 +101,6 @@ public class AutoIntakeTransferLogic {
     }
 
     private void stop() {
-        RobotLog.ii(TAG, "stop: intake complete (mid=%.1f front=%.1f)", currentDistanceInchesMid, currentDistanceInchesFront);
-        gamepad1.rumble(300);
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
     }
 

@@ -6,7 +6,7 @@ public class OuttakeConstants {
     public static double turretServo3Mult = 1.0;
 
     public static double turretServoMax = 0.9;
-    public static double turretServoMin = 0.0;
+    public static double turretServoMin = 0.1;
 
     // turretLimitLeft must stay <= the angle of turretServoMax:
     // (0.78 - 0.5) * 323 = +90.4 deg. The old value of 100 commanded servo pos

@@ -7,7 +7,9 @@ import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
 
@@ -31,8 +33,11 @@ public class LEDLogic {
         boolean transferActive = IntakeStates.getAutoIntakeTransferState() != AutoIntakeTransferStates.stopTransfer && IntakeStates.getAutoIntakeTransferState() != AutoIntakeTransferStates.checkAgainFront && IntakeStates.getAutoIntakeTransferState() != AutoIntakeTransferStates.stop && IntakeStates.getAutoIntakeTransferState() != AutoIntakeTransferStates.idle;
 
         // Detect intake turning off
-        if (prevIntakeActive && !intakeActive) {
-            blueFlashEndTime = getSeconds() + 0.5;
+        if (prevIntakeActive && !intakeActive && IntakeStates.getLockServoState() == LockServoStates.lock) {
+            // Only flash blue if it wasn't a manual stop via gamepad
+            if (!IntakeStates.isManualStop()) {
+                blueFlashEndTime = getSeconds() + 0.5;
+            }
         }
         prevIntakeActive = intakeActive;
 

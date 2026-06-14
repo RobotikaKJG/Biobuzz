@@ -14,6 +14,7 @@ public class IntakeStates {
     private static LEDStates ledStates = LEDStates.idle;
     private static TransferMotorStates transferMotorState = TransferMotorStates.idle;
     private static LockServoStates lockServoState = LockServoStates.idle;
+    private static boolean manualStop = false;
 
     public static void setInitialStates() {
         autoIntakeTransferState = AutoIntakeTransferStates.idle;
@@ -21,6 +22,15 @@ public class IntakeStates {
         intakeMotorState = IntakeMotorStates.idle;
         transferMotorState = TransferMotorStates.idle;
         lockServoState = LockServoStates.lock;
+        manualStop = false;
+    }
+
+    public static boolean isManualStop() {
+        return manualStop;
+    }
+
+    public static void setManualStop(boolean stop) {
+        manualStop = stop;
     }
 
     public static SubsystemState getIntakeState() {

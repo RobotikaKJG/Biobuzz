@@ -99,14 +99,14 @@ public class AutoCycleShootLogic {
     }
 
     private void startFeed() {
-        if (!wasIfCalled) {
-            feedStartSec = getSeconds();
-            clearSinceSec = -1;
-            wasIfCalled = true;
-        }
-        if (!GlobalVariables.far &&  motorControl.getMotorVelocity(MotorConstants.outtake2) > OuttakeConstants.outtakeSpeedClose + 10) return;
+//        if (!wasIfCalled) {
+        feedStartSec = getSeconds();
+        clearSinceSec = -1;
+//            wasIfCalled = true;
+//        }
+//        if (!GlobalVariables.far &&  motorControl.getMotorVelocity(MotorConstants.outtake2) > OuttakeConstants.outtakeSpeedClose + 10) return;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
-        wasIfCalled = false;
+//        wasIfCalled = false;
     }
 
     private void stopTransfer() {

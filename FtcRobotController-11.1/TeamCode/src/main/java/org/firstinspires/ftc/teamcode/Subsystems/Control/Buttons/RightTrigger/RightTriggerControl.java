@@ -13,9 +13,11 @@ public class RightTriggerControl {
     public void update() {
         switch (ButtonStates.getRightTriggerState()) {
             case forward:
+                IntakeStates.setManualStop(false);
                 IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
                 break;
             case stop:
+                IntakeStates.setManualStop(true);
                 IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
                 IntakeStates.setLockServoState(LockServoStates.lock);
                 OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.idle);

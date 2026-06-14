@@ -27,19 +27,19 @@ public class BlueGoalPaths implements GoalPaths {
     private final Pose cp_takeFirstPose = new Pose(34.2, 54.5);
     private final Pose cp_takeFirstPoseBack = new Pose(48.3, 81.27);
 
-    private final Pose pt_openGatePose = new Pose(16.7, 57.7, Math.toRadians(154));
+    private final Pose pt_openGatePose = new Pose(18, 57.7, Math.toRadians(154));
     private final Pose pt_openGatePoseBreak = new Pose(29.0, 57.7);
     private final Pose cp_openGatePose = new Pose(45.8, 58.2);
 
-    private final Pose pt_retryOpenStart = new Pose(16.7, 57);
-    private final Pose pt_openGatePoseNew = new Pose(16.7, 59.2);
+    private final Pose pt_retryOpenStart = new Pose(18, 57);
+    private final Pose pt_openGatePoseNew = new Pose(18, 59.2);
     private final Pose cp_openGatePoseNew = new Pose(23.2, 55.6);
 
     private final Pose pt_takeSecondPose = new Pose(32.5, 81.9);
     private final Pose pt_shootPoseSecond = new Pose(50.4, 85.9, Math.toRadians(180));
 
-    private final Pose pt_takeThirdPose = new Pose(29.5, 34.9);
-    private final Pose cp_takeThirdPose = new Pose(29.5, 54.8);
+    private final Pose pt_takeThirdPose = new Pose(31.5, 34.9);
+    private final Pose cp_takeThirdPose = new Pose(31.5, 54.8);
     private final Pose cp_takeThirdPoseBack = new Pose(50.1, 87.5);
 
     private final Pose pt_shootPosePark = new Pose(61.6, 96.5, Math.toRadians(180));

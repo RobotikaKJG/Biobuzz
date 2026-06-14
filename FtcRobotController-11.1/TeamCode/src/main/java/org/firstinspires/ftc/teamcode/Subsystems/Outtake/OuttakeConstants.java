@@ -23,6 +23,13 @@ public class OuttakeConstants {
     // only needs ~0.7/s, so 2.0 leaves headroom and never slows normal aiming.
     public static double turretServoSlewPerSec = 2.0;
 
+    // Hysteresis band (deg) around the dead-zone bisector used when the aim
+    // target is behind the turret. While in the dead zone the turret holds the
+    // angularly NEARER limit, re-evaluated each loop; the held limit only flips
+    // once the target moves this far past the bisector, so noise near the
+    // bisector can't make it chatter between the two limits.
+    public static double turretDeadZoneHysteresisDeg = 20.0;
+
     public static double turretServo1Max = turretServoMax * turretServo1Mult;
     public static double turretServo2Max = turretServoMax * turretServo2Mult;
     public static double turretServo3Max = turretServoMax * turretServo3Mult;

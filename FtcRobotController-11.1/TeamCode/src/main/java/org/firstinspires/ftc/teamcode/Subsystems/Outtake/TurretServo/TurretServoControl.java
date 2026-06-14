@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.RobotLog;
+
+import com.pedropathing.geometry.Pose;
+
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
@@ -11,6 +15,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 public class TurretServoControl {
+
+    private static final String TAG = "TurretServo";
 
     private final ServoControl servoControl;
     private final SensorControl sensorControl;
@@ -73,26 +79,75 @@ public class TurretServoControl {
 
     /**
      * Clamp the aim angle to the reachable window [turretLimitRight, turretLimitLeft].
-     * When the target is in the dead zone behind the turret, park at the limit the
-     * target left from and HOLD it until the target re-enters the window. Without
-     * the hold, the ±180° wrap in the aim math flips the clamped target between
-     * the two limits while the drivetrain spins, slamming the turret full-range
-     * into its hard stops (the "stuck + jitter" failure).
+     * When the target is in the dead zone behind the turret, hold the angularly
+     * NEARER limit — re-evaluated every loop, with a hysteresis band around the
+     * dead-zone bisector so noise near the bisector can't make the held limit
+     * flip-flop (the original "stuck + jitter" full-range slam).
+     *
+     * Re-evaluating each loop (instead of latching the entry limit until the
+     * target re-enters the window) is what fixes the limit-to-limit overshoot:
+     * as the goal sweeps behind the robot, the held limit switches ONCE at the
+     * bisector, so the turret eases onto the correct limit while the goal is
+     * still behind — instead of holding the wrong limit across the whole rear
+     * sweep and then slamming across on exit.
      */
     private double resolveTargetWithinLimits(double targetDeg) {
         double left = OuttakeConstants.turretLimitLeft;
         double right = OuttakeConstants.turretLimitRight;
+
         if (targetDeg >= right && targetDeg <= left) {
-            deadZoneLimitDeg = Double.NaN;
+            if (!Double.isNaN(deadZoneLimitDeg)) {
+                logLatchEvent("RELEASE", targetDeg, targetDeg);
+                deadZoneLimitDeg = Double.NaN;
+            }
             return targetDeg;
         }
+
+        // In the dead zone. distPastLeft + distBeforeRight == dead-zone width, so
+        // bias > 0 means the target is angularly nearer the RIGHT limit, bias < 0
+        // nearer the LEFT; bias == 0 is the dead-zone bisector (directly behind).
+        double distPastLeft = normalizeDegrees(targetDeg - left);
+        double distBeforeRight = normalizeDegrees(right - targetDeg);
+        double bias = distPastLeft - distBeforeRight;
+        double hyst = OuttakeConstants.turretDeadZoneHysteresisDeg;
+
         if (Double.isNaN(deadZoneLimitDeg)) {
-            // Just entered the dead zone: pick the angularly nearer limit once.
-            double pastLeft = normalizeDegrees(targetDeg - left);
-            double beforeRight = normalizeDegrees(right - targetDeg);
-            deadZoneLimitDeg = (pastLeft <= beforeRight) ? left : right;
+            // Just entered the dead zone: pick the nearer limit.
+            deadZoneLimitDeg = (bias <= 0) ? left : right;
+            logLatchEvent("ENGAGE", targetDeg, deadZoneLimitDeg);
+        } else if (deadZoneLimitDeg == left && bias > hyst) {
+            // Target has crossed the bisector toward the right by the hysteresis margin.
+            deadZoneLimitDeg = right;
+            logLatchEvent("SWITCH->right", targetDeg, deadZoneLimitDeg);
+        } else if (deadZoneLimitDeg == right && bias < -hyst) {
+            deadZoneLimitDeg = left;
+            logLatchEvent("SWITCH->left", targetDeg, deadZoneLimitDeg);
         }
+        // else: hold the current limit (target still within the hysteresis band).
         return deadZoneLimitDeg;
+    }
+
+    /**
+     * Log a dead-zone latch transition (engage / limit switch / release) with the
+     * raw aim target and the pose that produced it. These events are edge-triggered
+     * and rare, so logging every one is cheap; pull with {@code adb logcat} /
+     * {@code deploy.sh logs}. A logging failure must never disturb aiming.
+     */
+    private void logLatchEvent(String event, double rawTargetDeg, double resolvedDeg) {
+        try {
+            Pose pose = sensorControl.getLocalizerPose();
+            if (pose != null) {
+                RobotLog.ii(TAG,
+                        "deadzone %s: rawTarget=%.1f resolved=%.1f pose=(x=%.1f y=%.1f h=%.1f)",
+                        event, rawTargetDeg, resolvedDeg,
+                        pose.getX(), pose.getY(), Math.toDegrees(pose.getHeading()));
+            } else {
+                RobotLog.ii(TAG, "deadzone %s: rawTarget=%.1f resolved=%.1f pose=null",
+                        event, rawTargetDeg, resolvedDeg);
+            }
+        } catch (Exception ignored) {
+            // Never let telemetry/logging interfere with turret control.
+        }
     }
 
     /**

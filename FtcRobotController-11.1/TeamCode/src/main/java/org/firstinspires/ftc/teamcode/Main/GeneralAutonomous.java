@@ -73,6 +73,7 @@ public class GeneralAutonomous extends LinearOpMode {
     private void updateAutonData() {
         telemetry.addData("Auton:", GlobalVariables.autonomousMode);
         telemetry.addData("Alliance:", GlobalVariables.alliance);
+        telemetry.addData("Gates:", GlobalVariables.gateTotal);
 
         telemetry.addLine(" ");
         dependencies.sensorControl.updateLocalizer();

@@ -22,7 +22,7 @@ public class BlueAudiencePaths implements AudiencePaths {
     private final Pose pt_shootPose = new Pose(51.5, 9.53, Math.toRadians(180));
 
     private final Pose pt_takeThreePose = new Pose(25.94, 25.99);
-    private final Pose cp_takeThreePose = new Pose(25.93, 11.7);
+    private final Pose cp_takeThreePose = new Pose(25.93, 6.7);
 
     private final Pose pt_takeBottomPose = new Pose(15.72, 9.26);
 
@@ -66,7 +66,7 @@ public class BlueAudiencePaths implements AudiencePaths {
 
         takeBottomPos_takeUpPos = follower.pathBuilder()
                 .addPath(new BezierCurve(pt_takeBottomPose, cp_takeUpPose, pt_takeUpPose))
-                .setTangentHeadingInterpolation()
+                .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
         takeUpPos_shootPos = follower.pathBuilder()
@@ -77,7 +77,7 @@ public class BlueAudiencePaths implements AudiencePaths {
 
         shootPos_park = follower.pathBuilder()
                 .addPath(new BezierLine(pt_shootPose, pt_parkPose))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
     }

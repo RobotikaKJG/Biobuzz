@@ -30,6 +30,7 @@ public class RedGoalPaths implements GoalPaths {
     private final Pose pt_openGatePose = new Pose(127.3, 58.7, Math.toRadians(26));
     private final Pose pt_openGatePoseBreak = new Pose(115, 59);
     private final Pose cp_openGatePose = new Pose(98.2, 58.9);
+
     private final Pose pt_retryOpenStart = new Pose(127.3, 57);
     private final Pose pt_openGatePoseNew = new Pose(127.3, 59.2);
     private final Pose cp_openGatePoseNew = new Pose(120.8, 55.6);

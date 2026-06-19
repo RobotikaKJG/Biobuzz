@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.AutoIntakeTransfer.AutoIntakeTransferStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.LED.LEDStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.LockServo.LockServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
@@ -15,6 +16,7 @@ public class RightTriggerControl {
             case forward:
                 IntakeStates.setManualStop(false);
                 IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.activate);
+                IntakeStates.setLEDState(LEDStates.intakeNo);
                 break;
             case stop:
                 IntakeStates.setManualStop(true);

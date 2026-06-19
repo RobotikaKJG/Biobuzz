@@ -115,9 +115,17 @@ public class Drivebase {
 
     public void driverOrientedGamepadDrive(double maxSpeed) {
         selectGamepad();
-        double y = currentGamepad.left_stick_y;
-        double x = currentGamepad.left_stick_x;
-        double rotation = currentGamepad.right_stick_x;
+        double y, x, rotation;
+        if (GlobalVariables.alliance == Alliance.Red) {
+            y = currentGamepad.left_stick_y;
+            x = currentGamepad.left_stick_x;
+            rotation = currentGamepad.right_stick_x;
+        }
+        else {
+            y = -currentGamepad.left_stick_y;
+            x = -currentGamepad.left_stick_x;
+            rotation = currentGamepad.right_stick_x;
+        }
         driverOrientedGamepadDrive(y, x, rotation, maxSpeed);
     }
 

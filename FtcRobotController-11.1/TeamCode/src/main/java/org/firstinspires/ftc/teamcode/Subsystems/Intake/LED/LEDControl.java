@@ -22,7 +22,7 @@ public class LEDControl {
     public void updateStates() {
         switch (IntakeStates.getLEDState()) {
             case intakeNo:
-                sensorControl.setLEDColor(GoBildaIndicator.Color.OFF);
+                sensorControl.setLEDColor(GoBildaIndicator.Color.WHITE);
                 break;
             case intakeTwo:
                 sensorControl.setLEDColor(GoBildaIndicator.Color.ORANGE);

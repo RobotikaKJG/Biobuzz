@@ -44,7 +44,7 @@ public class ManualServoControl extends LinearOpMode {
             }
             if(dependencies.edgeDetection.rising(GamepadIndexValues.square))
             {
-                if(currentServo < 1)
+                if(currentServo < 3)
                     currentServo ++;
                 else currentServo = 0;
             }

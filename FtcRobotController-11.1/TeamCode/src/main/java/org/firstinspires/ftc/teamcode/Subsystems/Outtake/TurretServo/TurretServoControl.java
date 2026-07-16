@@ -153,7 +153,7 @@ public class TurretServoControl {
     /**
      * Rate-limit the commanded servo position to turretServoSlewPerSec so a target
      * jump (dead-zone exit, pose correction) becomes a controlled sweep instead of
-     * a full-speed slam of three ganged servos.
+     * a full-speed slam of the ganged servos.
      */
     private double slewLimit(double desiredPos) {
         long now = System.nanoTime();

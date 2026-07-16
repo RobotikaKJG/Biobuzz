@@ -75,17 +75,17 @@ public class AutoCycleShootLogic {
     }
 
     private void turnTransfer() {
-        // TeleOp auto-finish: feed until the ball queue (both sensors — including the
-        // mid/back one that fills first when intaking) has been empty CONTINUOUSLY for
+        // TeleOp auto-finish: feed until the ball queue (both sensor pairs — including the
+        // transfer one that fills first when intaking) has been empty CONTINUOUSLY for
         // shootClearHoldSec. The "held" requirement is critical: while feeding, a ball
-        // is briefly in transit BETWEEN the two sensors and both momentarily read empty;
+        // is briefly in transit BETWEEN the two pairs and both momentarily read empty;
         // without the hold that ended the shot early and only 2 of 3 balls fired. The
         // hold also gives the last ball time to launch before the gate closes.
         // Autonomous scripts its own stop, so leave that path unchanged.
         if (GlobalVariables.isAutonomous) return;
         double now = getSeconds();
         double elapsed = now - feedStartSec;
-        boolean queueEmpty = !sensorControl.isMidBall() && !sensorControl.isFrontBall();
+        boolean queueEmpty = !sensorControl.isTransferBall() && !sensorControl.isIntakeBall();
         if (queueEmpty && elapsed >= OuttakeConstants.shootFeedMinSec) {
             if (clearSinceSec < 0) clearSinceSec = now;   // queue just went empty
         } else {
@@ -126,9 +126,7 @@ public class AutoCycleShootLogic {
     }
 
     private boolean isNoBallSeen() {
-        // Shared, centrally-throttled reads (see SensorControl). Preserves the exact
-        // original semantics: true only when BOTH front and mid currently see a ball.
-        return !sensorControl.isFrontBall() && !sensorControl.isMidBall();
+        return !sensorControl.isIntakeBall() && !sensorControl.isTransferBall();
     }
 
     private void addWaitTime(double waitTime) {

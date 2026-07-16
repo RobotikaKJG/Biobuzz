@@ -51,16 +51,15 @@ These are the exact strings that must match the Robot Controller configuration.
   and flushes once per loop; velocity-controlled motors are skipped by
   `setMotors()` so a stray `setPower` can't clobber the flywheel velocity target.
 
-### Servos — 4× `Servo` (`HardwareInterface/Servo/ServoControl.java`, indexes in `ServoConstants.java`)
+### Servos — 3× `Servo` (`HardwareInterface/Servo/ServoControl.java`, indexes in `ServoConstants.java`)
 
 | Index | Config name | Subsystem | Role |
 |------|---------------|-----------|------|
 | 0 | `lockServo`    | Intake/Transfer | Ball lock / release gate |
 | 1 | `turretServo1` | Outtake turret | Turret rotation (servo 1) |
 | 2 | `turretServo2` | Outtake turret | Turret rotation (servo 2) |
-| 3 | `turretServo3` | Outtake turret | Turret rotation (servo 3) |
 
-- The **turret is actuated by 3 servos** (`turretServo1/2/3`) driven in unison
+- The **turret is actuated by 2 servos** (`turretServo1/2`) driven in unison
   via `ServoControl.setTurretServosPos(pos)`. Each servo gets `pos * multN` so
   mechanical mismatch can be trimmed (multipliers below).
 - A commented-out alternative exists for a single `CRServo "turretServo"` with
@@ -75,16 +74,26 @@ These are the exact strings that must match the Robot Controller configuration.
 |-------------|------|---------|
 | `pinpointIMU` | Two-wheel odometry localizer | Pose (x, y, heading), velocity |
 | `limelight`   | `Limelight3A` | AprilTag vision, pose reset & fusion |
-| `FrontColorSensor` | `LynxI2cColorRangeSensor` | Front ball-detect range in transfer path |
-| `MidColorSensor`   | `LynxI2cColorRangeSensor` | Mid ball-detect range in transfer path |
+| `infraTransfer1` | `InfraRedSensor` (digital port 3) | Transfer artifact detection |
+| `infraTransfer2` | `InfraRedSensor` (digital port 5) | Transfer artifact detection |
+| `infraIntake1`   | `InfraRedSensor` (digital port 6) | Intake artifact detection |
+| `infraIntake2`   | `InfraRedSensor` (digital port 7) | Intake artifact detection |
 | (voltage)     | `VoltageSensor` (hardwareMap) | Battery voltage |
 | `led`         | `RevBlinkinLedDriver` | Status LED (driven in `IterativeController`) |
 
-- **Two distance/range sensors live in the transfer**: `MidColorSensor`
-  (`rangeSensorMid`) sits upstream, `FrontColorSensor` (`rangeSensorFront`) sits
-  at the front of the transfer toward the flywheel. A ball is "seen" when
-  `getDistance(INCH) < ballDistanceIn` (`ballDistanceIn = 4.0`). Reads are I2C
-  (~2.7 ms each) and are throttled/cached (50 ms windows) by the logic classes.
+- **Artifact detection is four digital IR sensors**, in two pairs, each pair
+  OR'd together so either sensor firing is enough:
+  - **Transfer pair** — `infraTransfer1` (port 3) + `infraTransfer2` (port 5),
+    exposed as `SensorControl.isTransferBall()`. Stops the **transfer**.
+  - **Intake pair** — `infraIntake1` (port 6) + `infraIntake2` (port 7),
+    exposed as `SensorControl.isIntakeBall()`. Stops the **intake**.
+- All four are `InfraRedSensor` (a custom `@DigitalIoDeviceType`, xmlTag
+  `InfraRedSensor`) configured `SwitchConfig.NC`; a sensor reads "artifact
+  present" when `isObstructed()` is true. The `infraRedSensors[]` array in
+  `SensorControl` is indexed by `InfraRedSensors` ordinal — keep the two in the
+  same order.
+- Reads are digital (cheap), so unlike the previous I2C color/range sensors they
+  are **not** cached or throttled.
 - Encoders: only `outtake1Motor` / `outtake2Motor` use encoders (velocity
   control). Drive uses the external `pinpointIMU` two-wheel localizer, not motor
   encoders.
@@ -155,19 +164,22 @@ Files: `AutoIntakeTransfer/AutoIntakeTransferControl.java` (writes states) +
 `AutoIntakeTransferStates`: `activate`, `checkAgainMid`, `stopTransfer`,
 `checkAgainFront`, `stop`, `idle`.
 
-Purpose: pull balls in and stage exactly up to the front sensor without jamming.
-Distance reads throttled to 50 ms; ball threshold `ballDistanceIn = 4.0 in`;
-debounce wait `checkAgainAfter = 0.2 s`.
+Purpose: pull balls in and stage them without jamming. Debounce wait
+`checkAgainAfter = 0.2 s`.
 
-Protocol (Logic drives transitions, Control sets hardware):
-1. `activate` → intake **forward** + transfer **forward**. When the **Mid**
-   sensor sees a ball → go to `checkAgainMid` (start 0.2 s debounce).
-2. `checkAgainMid` → after debounce, re-read Mid. Still a ball → `stopTransfer`;
-   otherwise → back to `activate`.
-3. `stopTransfer` → transfer **idle** (intake keeps running). When the **Front**
-   sensor sees a ball → `checkAgainFront` (0.2 s debounce).
-4. `checkAgainFront` → after debounce, re-read Front. Still a ball → `stop`;
-   otherwise → back to `stopTransfer`.
+Protocol (Logic drives transitions, Control sets hardware). Note the state names
+still say Mid/Front for historical reasons; the **transfer** pair drives the
+`Mid` states and the **intake** pair drives the `Front` states:
+1. `activate` → intake **forward** + transfer **forward**. When the **transfer**
+   pair (`isTransferBall()`, port 3 or 5) sees an artifact → go to
+   `checkAgainMid` (start 0.2 s debounce).
+2. `checkAgainMid` → after debounce, re-check the transfer pair. Still seen →
+   `stopTransfer`; otherwise → back to `activate`.
+3. `stopTransfer` → transfer **idle** (intake keeps running). When the **intake**
+   pair (`isIntakeBall()`, port 6 or 7) sees an artifact → `checkAgainFront`
+   (0.2 s debounce).
+4. `checkAgainFront` → after debounce, re-check the intake pair. Still seen →
+   `stop`; otherwise → back to `stopTransfer`.
 5. `stop` → intake **idle** + transfer **idle**, `gamepad1.rumble(300)` to
    signal "loaded", then → `idle`.
 
@@ -215,7 +227,7 @@ Distance-based close speed (`calculateSpeed()`), distance from
 Velocity PIDF (default in `MotorControl.setMotorRPM`):
 `PIDFCoefficients(p=60, i=0, d=0, f=11.75)`.
 
-### 4.2 Turret — 3-servo rotation (`TurretServo/TurretServoControl.java`)
+### 4.2 Turret — 2-servo rotation (`TurretServo/TurretServoControl.java`)
 
 State enum `TurretServoStates`: `adjust`, `idle`. The turret continuously aims
 at the goal whenever `OuttakeStates.isTurretTrackingEnabled()` is true (toggled
@@ -236,7 +248,7 @@ Geometry / constraints:
   `turretServoSlewPerSec = 2.0` (full travel per 0.5 s) so target jumps become
   controlled sweeps instead of full-speed slams.
 - Per-servo multipliers (`OuttakeConstants`): `turretServo1Mult = 1.0`,
-  `turretServo2Mult = 0.998`, `turretServo3Mult = 1.0`.
+  `turretServo2Mult = 0.998`.
 - Servo travel range (`OuttakeConstants`): `turretServoMin = 0.0`,
   `turretServoMax = 0.78` (per-servo max/min are these × the multiplier).
 - `ServoConstants.servoMinPos/servoMaxPos` enforce bounds at the
@@ -306,8 +318,8 @@ State enum `AutoResetPosStates`: `resetPos`, `waitForReset`, `idle`.
   `ANGULAR_VELOCITY_THRESHOLD = 10°/s`), distance window
   `[MIN 10 in, MAX 120 in]`, 7-frame trimmed-average sliding window, blended at
   `CONTINUOUS_FUSION_ALPHA = 0.1` (2–10% vision per frame).
-- **Range sensors**: `getFrontColorSensorDistance` / `getMidColorSensorDistance`
-  (INCH). Ball present when `< ballDistanceIn = 4.0`.
+- **Artifact sensors**: `isTransferBall()` (IR ports 3 ∥ 5) and `isIntakeBall()`
+  (IR ports 6 ∥ 7); both delegate to `isInfraRedObstructed(InfraRedSensors)`.
 - **Shooting helpers**: `getHoodTicksFromDegrees(d) = 0.02·d − 0.7`,
   `getFlywheelTicksFromVelocity(v) = 94.501·v/12 − 187.96 + flywheelOffset`.
 
@@ -339,7 +351,7 @@ gamepad2 drive), `isAutonomous`, `wasAutonomous`, `alliance`,
 ## 7. Quick constants reference
 
 `OuttakeConstants`: `turretServo1Mult 1.0`, `turretServo2Mult 0.998`,
-`turretServo3Mult 1.0`, `turretServoMax 0.78`, `turretServoMin 0.0`,
+`turretServoMax 0.78`, `turretServoMin 0.0`,
 `maxDistance 98.43`, `minDistance 53.94`, `oneBallWait 0.1`, `servoOpenWait 0.1`,
 `deactivateAfter 0.3`, `resetWait 100.0`, `outtakeSpeedCloseClose 0.62`,
 `outtakeSpeedFar 0.89`, `outtakeSpeedCloseFar 0.78`, `farShootingThreshold 2300`,
@@ -351,6 +363,6 @@ gamepad2 drive), `isAutonomous`, `wasAutonomous`, `alliance`,
 `TurretServoControl`: (uses `OuttakeConstants`: `turretLimitRight −120.0`, `turretLimitLeft 90.0`,
 `turretGearRatio 1`, `turretServoTravel 323`, `turretServoSlewPerSec 2.0`).
 
-`SensorControl`: `ballDistanceIn 4.0`, goal Red `(62,62)` / Blue `(−62,62)`,
+`SensorControl`: goal Red `(62,62)` / Blue `(−62,62)`,
 `FieldHalfInches 66.93`, `LimelightFrames 7`,
 `LIMELIGHT_RESET_TIMEOUT_MS 3000`.

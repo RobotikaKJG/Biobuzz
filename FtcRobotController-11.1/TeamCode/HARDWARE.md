@@ -234,12 +234,14 @@ at the goal whenever `OuttakeStates.isTurretTrackingEnabled()` is true (toggled
 by Right Bumper).
 
 Geometry / constraints:
-- Angle limits: `turretLimitRight = -120.0°`, `turretLimitLeft = 90.0°` (defined in
-  `OuttakeConstants.java`). The left limit must stay ≤ the angle of `turretServoMax`
-  (`(0.78 − 0.5) × 323 = +90.4°`) or the turret stalls against its hard stop.
-- `turretGearRatio = 1.0`, `turretServoTravel = 323.0°`.
-- Mapping: `servoPos = (targetAngleDeg * turretGearRatio) / turretServoTravel + 0.5`, then
-  clamped to `[turretServoMin, turretServoMax]`.
+- Angle limits: `turretLimitRight = -100.0°`, `turretLimitLeft = 120.0°` (defined in
+  `OuttakeConstants.java`). With `turretDirection = -1`, the right limit is the one
+  near `turretServoMax` (`-100° → 0.81`); pushing it further stalls the turret
+  against its hard stop.
+- `turretGearRatio = 1.0`, `turretServoTravel = 323.0°`, `turretDirection = -1.0`.
+- Mapping: `servoPos = (targetAngleDeg * turretGearRatio * turretDirection) / turretServoTravel + 0.5`,
+  then clamped to `[turretServoMin, turretServoMax]`. Flip `turretDirection` if the
+  turret ever aims to the side opposite the target.
 - Dead-zone hold: when the aim target is outside the reachable window, the turret
   parks at the limit the target left from and holds it until the target re-enters
   the window (prevents the ±180° wrap from flipping the clamp between the two
@@ -360,8 +362,9 @@ gamepad2 drive), `isAutonomous`, `wasAutonomous`, `alliance`,
 `IntakeConstants`: `stopFeederAfter 0.1`, `lockServoMinPos 0.044`,
 `lockServoMaxPos 0.3`, `checkAgainAfter 0.2`.
 
-`TurretServoControl`: (uses `OuttakeConstants`: `turretLimitRight −120.0`, `turretLimitLeft 90.0`,
-`turretGearRatio 1`, `turretServoTravel 323`, `turretServoSlewPerSec 2.0`).
+`TurretServoControl`: (uses `OuttakeConstants`: `turretLimitRight −100.0`, `turretLimitLeft 120.0`,
+`turretGearRatio 1`, `turretServoTravel 323`, `turretDirection −1.0`,
+`turretServoSlewPerSec 2.0`).
 
 `SensorControl`: goal Red `(62,62)` / Blue `(−62,62)`,
 `FieldHalfInches 66.93`, `LimelightFrames 7`,

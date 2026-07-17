@@ -65,7 +65,8 @@ public class TurretServoControl {
         targetAngleDeg = resolveTargetWithinLimits(target);
         turretAngleDeg = getCurrentTurretAngleDeg();
 
-        double pos = (targetAngleDeg * OuttakeConstants.turretGearRatio) / OuttakeConstants.turretServoTravel + 0.5;
+        double pos = (targetAngleDeg * OuttakeConstants.turretGearRatio * OuttakeConstants.turretDirection)
+                / OuttakeConstants.turretServoTravel + 0.5;
         // Never command past the servos' usable travel — past turretServoMax the
         // turret presses into its hard stop and stalls (even if the angle limits
         // are someday re-widened, this clamp keeps the hardware safe).
@@ -182,7 +183,8 @@ public class TurretServoControl {
 
     private double getCurrentTurretAngleDeg() {
         double pos = servoControl.getServoPos(ServoConstants.turretServo1);
-        return ((pos - 0.5) * OuttakeConstants.turretServoTravel) / OuttakeConstants.turretGearRatio;
+        return ((pos - 0.5) * OuttakeConstants.turretServoTravel)
+                / (OuttakeConstants.turretGearRatio * OuttakeConstants.turretDirection);
     }
 
     private double clamp(double val, double min, double max) {

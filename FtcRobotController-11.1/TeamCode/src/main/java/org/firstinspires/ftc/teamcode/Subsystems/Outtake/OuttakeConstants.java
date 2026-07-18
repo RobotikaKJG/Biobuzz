@@ -57,6 +57,14 @@ public class OuttakeConstants {
     public static double shootClearHoldSec = 0.5;   // queue must stay empty this long to stop
     public static double shootFeedMaxSec = 3.5;     // hard cap (jam / sensor failure)
 
+    // Transfer feed gating (TeleOp): latch flywheel RPM just before the first ball,
+    // then pause intake+transfer whenever measured velocity falls below that baseline
+    // (minus a small noise margin). Stops stacking balls 2/3 onto a still-recovering
+    // wheel — logs show ~259 / 364 / 451 RPM avg drops for balls 1/2/3 without this.
+    // Units: encoder ticks/s (same as setMotorRPM / getMotorVelocity).
+    public static double feedArmTargetFrac = 0.98;      // must be this close to target to latch baseline
+    public static double feedResumeMarginTicks = 40;    // allow ~85 RPM of noise under baseline
+
     public static double resetWait = 100.0;
 
     public static double outtakeSpeedCloseClose = 1600;

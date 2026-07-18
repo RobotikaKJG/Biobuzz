@@ -30,8 +30,16 @@ export interface Shot {
   minV2: number
   /** time from min back up to exit threshold, ms (null if never recovered in window) */
   recoveryMs: number | null
-  /** tMin distance from previous shot's tMin, ms (null for first shot of burst) */
+  /** marker distance from the previous shot marker, ms (null for first shot of burst) */
   spacingMs: number | null
+  /** chart marker time; current peak when paired, otherwise RPM minimum */
+  markerMs: number
+  /** peak currents at marker time, when current telemetry is available */
+  peakI1?: number
+  peakI2?: number
+  /** rise of mean motor current above the local pre-shot baseline */
+  currentRiseA?: number
+  detection: 'current+rpm' | 'rpm'
 }
 
 export interface Burst {
@@ -55,6 +63,16 @@ export interface AnalysisOptions {
   mergeGapMs: number
   /** extend each window by this much to capture the last ball's recovery */
   tailMs: number
+  /** with current telemetry, begin tracking shallower candidate RPM dips */
+  currentEnterFrac: number
+  /** minimum mean-current rise for a current/RPM paired shot */
+  minCurrentRiseA: number
+  /** current may lead the RPM dip by this much */
+  currentPairBeforeMs: number
+  /** current peak search tail after the RPM minimum/recovery */
+  currentPairAfterMs: number
+  /** pre-dip window used to estimate current baseline */
+  currentBaselineMs: number
 }
 
 export const DEFAULT_ANALYSIS: AnalysisOptions = {
@@ -64,9 +82,26 @@ export const DEFAULT_ANALYSIS: AnalysisOptions = {
   minDropTicks: 25,
   mergeGapMs: 1000,
   tailMs: 1500,
+  currentEnterFrac: 0.99,
+  minCurrentRiseA: 0.35,
+  currentPairBeforeMs: 250,
+  currentPairAfterMs: 200,
+  currentBaselineMs: 800,
 }
 
 const meanV = (s: Sample) => (s.v1 + s.v2) / 2
+
+const meanCurrent = (s: Sample): number | null => {
+  const values = [s.i1, s.i2].filter((v): v is number => typeof v === 'number')
+  return values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : null
+}
+
+const median = (values: number[]): number | null => {
+  if (!values.length) return null
+  values.sort((a, b) => a - b)
+  const mid = Math.floor(values.length / 2)
+  return values.length % 2 ? values[mid] : (values[mid - 1] + values[mid]) / 2
+}
 
 /**
  * Contiguous ranges where the shoot sequence is active.
@@ -123,6 +158,10 @@ export function analyzeSession(
     }
     if (burstTarget <= 0) continue // never velocity-controlled — nothing to measure against
 
+    const hasCurrent = samples
+      .slice(i0, i1 + 1)
+      .some((s) => typeof s.i1 === 'number' || typeof s.i2 === 'number')
+
     const shots: Shot[] = []
     let armed = false
     let inDip = false
@@ -132,10 +171,47 @@ export function analyzeSession(
     let dipMinV1 = Infinity
     let dipMinV2 = Infinity
 
+    const currentPair = () => {
+      if (!hasCurrent) return null
+
+      const baselineValues: number[] = []
+      const candidates: Array<{ sample: Sample; current: number }> = []
+      const baselineStart = dipStart - opts.currentBaselineMs
+      const baselineEnd = dipStart - opts.currentPairBeforeMs
+      const pairStart = dipStart - opts.currentPairBeforeMs
+      const pairEnd = dipMinT + opts.currentPairAfterMs
+
+      for (let i = i0; i <= i1; i++) {
+        const s = samples[i]
+        const current = meanCurrent(s)
+        if (current === null) continue
+        if (s.t >= baselineStart && s.t < baselineEnd) baselineValues.push(current)
+        if (s.t >= pairStart && s.t <= pairEnd) candidates.push({ sample: s, current })
+      }
+      if (!candidates.length) return null
+
+      const peak = candidates.reduce((best, candidate) =>
+        candidate.current > best.current ? candidate : best,
+      )
+      // A burst may arm too quickly to provide a full baseline. In that case the
+      // local minimum still gives a conservative estimate of the observed rise.
+      const base = median(baselineValues) ?? Math.min(...candidates.map((c) => c.current))
+      const rise = peak.current - base
+      if (rise < opts.minCurrentRiseA) return null
+      return {
+        markerMs: peak.sample.t,
+        peakI1: peak.sample.i1,
+        peakI2: peak.sample.i2,
+        currentRiseA: rise,
+      }
+    }
+
     const finishDip = (recoveredAtMs: number | null) => {
       const drop = burstTarget - dipMinV
-      if (drop >= opts.minDropTicks) {
+      const pair = currentPair()
+      if (drop >= opts.minDropTicks || pair) {
         const prev = shots[shots.length - 1]
+        const markerMs = pair?.markerMs ?? dipMinT
         shots.push({
           tStartMs: dipStart,
           tMinMs: dipMinT,
@@ -145,7 +221,12 @@ export function analyzeSession(
           minV1: dipMinV1,
           minV2: dipMinV2,
           recoveryMs: recoveredAtMs === null ? null : recoveredAtMs - dipMinT,
-          spacingMs: prev ? dipMinT - prev.tMinMs : null,
+          spacingMs: prev ? markerMs - prev.markerMs : null,
+          markerMs,
+          peakI1: pair?.peakI1,
+          peakI2: pair?.peakI2,
+          currentRiseA: pair?.currentRiseA,
+          detection: pair ? 'current+rpm' : 'rpm',
         })
       }
       inDip = false
@@ -163,7 +244,8 @@ export function analyzeSession(
         // commanded at the burst target — velocity falling after the command drops
         // (or in the recovery tail) is spin-down, not a ball.
         const commanded = !Number.isNaN(carriedTg[i]) && carriedTg[i] >= 0.9 * burstTarget
-        if (i <= iCore && commanded && v < opts.enterFrac * burstTarget) {
+        const enterFrac = hasCurrent ? Math.max(opts.enterFrac, opts.currentEnterFrac) : opts.enterFrac
+        if (i <= iCore && commanded && v < enterFrac * burstTarget) {
           inDip = true
           dipStart = s.t
           dipMinV = v

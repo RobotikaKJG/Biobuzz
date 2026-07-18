@@ -8,7 +8,7 @@ import { parseJsonl, toJsonl } from './lib/parse'
 import type { ConnStatus } from './lib/robot'
 import { fetchSessionFile, fetchSessions, RobotConnection } from './lib/robot'
 import type { Sample, Session, SessionHeader, SessionInfo } from './lib/types'
-import { DEFAULT_TICKS_PER_REV } from './lib/types'
+import { DEFAULT_TICKS_PER_REV, ticksToRpm } from './lib/types'
 
 const DEFAULT_HOST = '192.168.43.1:8765'
 
@@ -16,12 +16,14 @@ export default function App() {
   const [status, setStatus] = useState<ConnStatus>('disconnected')
   const [robotSessions, setRobotSessions] = useState<SessionInfo[]>([])
   const [loadedSession, setLoadedSession] = useState<Session | null>(null)
-  const [viewingLive, setViewingLive] = useState(false)
+  const [activeTab, setActiveTab] = useState<'live' | 'diagnose'>('live')
+  const [diagnoseLive, setDiagnoseLive] = useState(true)
   const [liveVersion, setLiveVersion] = useState(0)
   const [follow, setFollow] = useState(true)
   const [showBattery, setShowBattery] = useState(false)
   const [ticksPerRevOverride, setTicksPerRevOverride] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [wsError, setWsError] = useState<string | null>(null)
 
   // Live session lives in a ref (mutated per batch); liveVersion triggers renders.
   const liveRef = useRef<Session>({ name: 'live', header: null, samples: [] })
@@ -42,7 +44,7 @@ export default function App() {
     const conn = new RobotConnection({
       onStatus: (s) => {
         setStatus(s)
-        if (s === 'connected') void refreshSessions()
+        if (s === 'connected' || s === 'live') void refreshSessions()
       },
       onHeader: (header: SessionHeader) => {
         liveRef.current = {
@@ -50,7 +52,8 @@ export default function App() {
           header,
           samples: [],
         }
-        setViewingLive(true)
+        setActiveTab('live')
+        setDiagnoseLive(true)
         setFollow(true)
         setLiveVersion((v) => v + 1)
       },
@@ -63,6 +66,7 @@ export default function App() {
         setLiveVersion((v) => v + 1)
         void refreshSessions() // the new file is now on disk
       },
+      onError: (msg) => setWsError(msg || null),
     })
     connRef.current = conn
     return () => conn.disconnect()
@@ -75,7 +79,8 @@ export default function App() {
       try {
         const text = await fetchSessionFile(h, name)
         setLoadedSession(parseJsonl(name, text))
-        setViewingLive(false)
+        setDiagnoseLive(false)
+        setActiveTab('diagnose')
         setFollow(false)
         setError(null)
       } catch (e) {
@@ -89,7 +94,8 @@ export default function App() {
     const file = files[0]
     void file.text().then((text) => {
       setLoadedSession(parseJsonl(file.name, text))
-      setViewingLive(false)
+      setDiagnoseLive(false)
+      setActiveTab('diagnose')
       setFollow(false)
     })
   }, [])
@@ -97,20 +103,36 @@ export default function App() {
   const loadDemo = useCallback(async () => {
     const res = await fetch('/demo.jsonl')
     setLoadedSession(parseJsonl('demo.jsonl', await res.text()))
-    setViewingLive(false)
+    setDiagnoseLive(false)
+    setActiveTab('diagnose')
     setFollow(false)
   }, [])
 
-  const session: Session | null = viewingLive ? liveRef.current : loadedSession
+  const liveHasData = liveRef.current.samples.length > 0
+  const liveSession = liveHasData ? liveRef.current : null
+  const session: Session | null =
+    activeTab === 'live' ? liveSession : diagnoseLive ? liveSession : loadedSession
   const samples = session?.samples ?? []
+  const sessionVersion = session === liveRef.current ? liveVersion : 0
   const ticksPerRev =
     ticksPerRevOverride ?? session?.header?.ticksPerRev ?? DEFAULT_TICKS_PER_REV
 
   const bursts = useMemo(
-    () => analyzeSession(samples),
-    // liveVersion forces recompute while the live array is mutated in place
+    () => (activeTab === 'diagnose' ? analyzeSession(samples) : []),
+    // sessionVersion forces recompute while the live array is mutated in place
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [samples, liveVersion],
+    [activeTab, samples, sessionVersion],
+  )
+
+  const latest = samples.length ? samples[samples.length - 1] : null
+  const latestTarget = (() => {
+    for (let i = samples.length - 1; i >= 0; i--) {
+      if (typeof samples[i].tg === 'number') return samples[i].tg!
+    }
+    return null
+  })()
+  const hasCurrent = samples.some(
+    (sample) => typeof sample.i1 === 'number' || typeof sample.i2 === 'number',
   )
 
   const saveSession = useCallback(() => {
@@ -125,30 +147,44 @@ export default function App() {
     URL.revokeObjectURL(a.href)
   }, [session])
 
-  const liveHasData = liveRef.current.samples.length > 0
-
   return (
     <div className="app">
-      <header>
-        <h1>Shooter Telemetry</h1>
+      <header className="app-header">
+        <div className="app-header-row">
+          <h1>Shooter Telemetry</h1>
+          <nav className="view-tabs" aria-label="Telemetry view">
+            <button
+              className={activeTab === 'live' ? 'active' : ''}
+              onClick={() => setActiveTab('live')}
+            >
+              Live
+            </button>
+            <button
+              className={activeTab === 'diagnose' ? 'active' : ''}
+              onClick={() => setActiveTab('diagnose')}
+            >
+              Diagnose
+            </button>
+          </nav>
+        </div>
         <ConnectionBar
           status={status}
           defaultHost={DEFAULT_HOST}
-          onConnect={(host) => connRef.current?.connect(host)}
-          onDisconnect={() => connRef.current?.disconnect()}
+          wsError={wsError}
+          onWsConnect={(host) => connRef.current?.connect(host)}
+          onWsDisconnect={() => connRef.current?.disconnect()}
         />
       </header>
 
       {error && <div className="error-bar">{error}</div>}
 
-      <div className="body">
-        <aside>
+      <div className={`body ${activeTab}`}>
+        {activeTab === 'diagnose' && <aside>
           {liveHasData && (
             <button
-              className={`live-session-btn ${viewingLive ? 'selected' : ''}`}
+              className={`live-session-btn ${diagnoseLive ? 'selected' : ''}`}
               onClick={() => {
-                setViewingLive(true)
-                setFollow(status === 'live')
+                setDiagnoseLive(true)
               }}
             >
               ● {liveRef.current.name} ({liveRef.current.samples.length} samples)
@@ -156,14 +192,14 @@ export default function App() {
           )}
           <SessionList
             sessions={robotSessions}
-            selected={!viewingLive && loadedSession ? loadedSession.name : null}
+            selected={!diagnoseLive && loadedSession ? loadedSession.name : null}
             canFetch={status === 'connected' || status === 'live'}
             onRefresh={() => void refreshSessions()}
             onOpen={(name) => void openRobotSession(name)}
             onOpenFiles={openFiles}
             onLoadDemo={() => void loadDemo()}
           />
-        </aside>
+        </aside>}
 
         <main>
           {session ? (
@@ -180,7 +216,7 @@ export default function App() {
                   )}
                 </span>
                 <span className="spacer" />
-                {viewingLive && status === 'live' && (
+                {activeTab === 'live' && (
                   <label>
                     <input
                       type="checkbox"
@@ -190,14 +226,14 @@ export default function App() {
                     follow
                   </label>
                 )}
-                <label>
+                {activeTab === 'diagnose' && <label>
                   <input
                     type="checkbox"
                     checked={showBattery}
                     onChange={(e) => setShowBattery(e.target.checked)}
                   />
                   battery
-                </label>
+                </label>}
                 <label className="tpr">
                   ticks/rev
                   <input
@@ -209,31 +245,81 @@ export default function App() {
                 </label>
                 <button onClick={saveSession}>Save .jsonl</button>
               </div>
+              {activeTab === 'live' && latest && (
+                <div className="live-readouts">
+                  <div>
+                    <span>RPM 1</span>
+                    <strong>{ticksToRpm(latest.v1, ticksPerRev).toFixed(0)}</strong>
+                  </div>
+                  <div>
+                    <span>RPM 2</span>
+                    <strong>{ticksToRpm(latest.v2, ticksPerRev).toFixed(0)}</strong>
+                  </div>
+                  <div>
+                    <span>Target</span>
+                    <strong>
+                      {latestTarget === null ? '—' : ticksToRpm(latestTarget, ticksPerRev).toFixed(0)}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Δ (1−2)</span>
+                    <strong>
+                      {(() => {
+                        const d =
+                          ticksToRpm(latest.v1, ticksPerRev) - ticksToRpm(latest.v2, ticksPerRev)
+                        return `${d >= 0 ? '+' : ''}${d.toFixed(0)}`
+                      })()}
+                    </strong>
+                  </div>
+                  {hasCurrent && (
+                    <div>
+                      <span>Motor current</span>
+                      <strong>
+                        {typeof latest.i1 === 'number' ? latest.i1.toFixed(1) : '—'} /{' '}
+                        {typeof latest.i2 === 'number' ? latest.i2.toFixed(1) : '—'} A
+                      </strong>
+                    </div>
+                  )}
+                  <div>
+                    <span>Samples</span>
+                    <strong>{samples.length}</strong>
+                  </div>
+                </div>
+              )}
               <ChartView
                 samples={samples}
                 ticksPerRev={ticksPerRev}
                 bursts={bursts}
-                showBattery={showBattery}
-                follow={viewingLive && follow && status === 'live'}
-                followWindowSec={30}
-                dataVersion={liveVersion}
+                variant={activeTab}
+                showCurrent={activeTab === 'diagnose' && hasCurrent}
+                showBattery={activeTab === 'diagnose' && showBattery}
+                follow={activeTab === 'live' && follow && status === 'live'}
+                followWindowSec={25}
+                dataVersion={sessionVersion}
                 onUserZoom={() => setFollow(false)}
               />
               <div className="chart-hint">
                 drag = zoom · wheel = zoom at cursor · double-click = reset
               </div>
-              <ShotStats bursts={bursts} ticksPerRev={ticksPerRev} />
+              {activeTab === 'diagnose' && (
+                <ShotStats bursts={bursts} ticksPerRev={ticksPerRev} />
+              )}
             </>
           ) : (
             <div className="placeholder">
-              <p>
-                Connect to the robot (default <code>{DEFAULT_HOST}</code> on robot WiFi) to stream
-                live, or open a pulled <code>.jsonl</code> session file.
-              </p>
-              <p>
-                Robot logs live in <code>/sdcard/FIRST/shooter-logs/</code> — fetch them here over
-                WiFi via the session list, or <code>npm run pull</code>.
-              </p>
+              {activeTab === 'live' ? (
+                <p>
+                  Connect to the Hub and start an OpMode. The rolling 25-second RPM graph will
+                  appear as soon as telemetry arrives.
+                </p>
+              ) : (
+                <>
+                  <p>Choose a live or saved session from the sidebar to analyze shots.</p>
+                  <p>
+                    Robot logs: <code>/sdcard/FIRST/shooter-logs/</code>.
+                  </p>
+                </>
+              )}
             </div>
           )}
         </main>

@@ -14,3 +14,7 @@ hardware/cad/
 shooter-viewer/node_modules/
 shooter-viewer/dist/
 shooter-viewer/logs/
+
+# Local hub-live WiFi restore state
+FtcRobotController-11.1/.live-wifi-state
+FtcRobotController-11.1/logs/

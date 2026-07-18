@@ -17,6 +17,10 @@ export interface Sample {
   v1: number
   /** outtake2 velocity, ticks/s */
   v2: number
+  /** outtake1 current, amps (added in log version 2) */
+  i1?: number
+  /** outtake2 current, amps (added in log version 2) */
+  i2?: number
   /** commanded velocity, ticks/s (absent while power-controlled) */
   tg?: number
   /** AutoCycleShootStates name */

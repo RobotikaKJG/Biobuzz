@@ -78,7 +78,7 @@ public class ShooterLogger {
                     .format(new Date(sessionStartMs));
             File file = new File(LOG_DIR, stamp + "_" + opModeName + ".jsonl");
 
-            String headerJson = "{\"type\":\"header\",\"version\":1"
+            String headerJson = "{\"type\":\"header\",\"version\":2"
                     + ",\"epochMs\":" + sessionStartMs
                     + ",\"opMode\":\"" + opModeName + "\""
                     + ",\"alliance\":\"" + GlobalVariables.alliance + "\""
@@ -145,6 +145,10 @@ public class ShooterLogger {
             s.tMs = now - sessionStartMs;
             s.v1 = motorControl.getMotorVelocity(MotorConstants.outtake1);
             s.v2 = motorControl.getMotorVelocity(MotorConstants.outtake2);
+            // getMotorCurrent() is cached per motor for 150 ms, so sampling here does
+            // not add an ADC round-trip on every control-loop iteration.
+            s.i1 = motorControl.getMotorCurrent(MotorConstants.outtake1);
+            s.i2 = motorControl.getMotorCurrent(MotorConstants.outtake2);
             s.target = motorControl.getLastCommandedVelocity(MotorConstants.outtake1);
             s.shootState = OuttakeStates.getAutoCycleShootState().name();
             s.motorState = motorState.name();

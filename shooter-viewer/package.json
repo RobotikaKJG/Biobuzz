@@ -4,7 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/dev.mjs",
+    "dev:ui": "vite",
+    "server": "node server/index.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "mock-robot": "node scripts/mock-robot.mjs",

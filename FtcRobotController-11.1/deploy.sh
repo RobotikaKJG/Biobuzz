@@ -22,10 +22,65 @@ case "$OS" in
 esac
 
 TIMEOUT=60
+MAX_DEPLOY_LOGS=20
+LOG_DIR="$SCRIPT_DIR/logs"
+mkdir -p "$LOG_DIR"
+
+# Tee full run (stdout+stderr) into a timestamped deploy log so we can diagnose
+# offline after the robot WiFi drop (no internet). Keep a rolling window.
+DEPLOY_LOG="$LOG_DIR/deploy-$(date +%Y%m%d-%H%M%S).log"
+exec > >(tee -a "$DEPLOY_LOG") 2>&1
+prune_deploy_logs() {
+    # shellcheck disable=SC2012
+    ls -1t "$LOG_DIR"/deploy-*.log 2>/dev/null | tail -n +"$((MAX_DEPLOY_LOGS + 1))" | while read -r f; do
+        rm -f "$f"
+    done
+}
+prune_deploy_logs
+echo "=== deploy log: $DEPLOY_LOG ==="
 
 ts()  { date "+%H:%M:%S"; }
 log() { echo "[$(ts)] $*"; }
 logn(){ printf "\r[$(ts)] %s" "$*"; }
+
+# macOS: ping -W is milliseconds. Linux: seconds. Windows: ping.exe -w is ms.
+ping_hub_once() {
+    case "$OS" in
+        Darwin)  ping -c 1 -W 1000 "$HUB_IP" ;;
+        Windows) ping.exe -n 1 -w 1000 "$HUB_IP" ;;
+        *)       ping -c 1 -W 1 "$HUB_IP" ;;
+    esac
+}
+
+diag_net() {
+    local ssid ip
+    ssid=$(wifi_current_ssid 2>/dev/null || true)
+    ip=$(get_ip || true)
+    log "  diag: ssid='${ssid:-?}' ip='${ip:-none}' if=$WIFI_IF hub=$HUB_IP"
+    if [[ "$OS" == "Darwin" ]]; then
+        route -n get "$HUB_IP" 2>&1 | sed 's/^/  diag: /' || true
+        arp -n "$HUB_IP" 2>&1 | sed 's/^/  arp: /' || true
+        # Better association check than networksetup (often lies as "not associated")
+        ifconfig "$WIFI_IF" 2>&1 | grep -E 'status:|inet |ether ' | sed 's/^/  ifconfig: /' || true
+    fi
+}
+
+# DHCP + "No route to host" to .1 usually means L2/ARP or macOS Local Network privacy,
+# not a wrong password. Other machines working is a strong signal for this Mac's settings.
+hint_mac_local_network() {
+    [[ "$OS" == "Darwin" ]] || return 0
+    log "── macOS tip (other PCs work but this Mac can't reach hub) ──"
+    log "You have a 192.168.43.x IP (AP DHCP OK) but ping .1 fails with 'No route to host'."
+    log "That is usually NOT ADB — the Mac never reaches the hub at layer 2/3."
+    log "Try, in order:"
+    log "  1) System Settings → Privacy & Security → Local Network"
+    log "     → enable Terminal (and iTerm/Cursor/Warp if you use them), then reopen the app"
+    log "  2) System Settings → Wi‑Fi → 24500-RC → Details"
+    log "     → turn OFF 'Limit IP Address Tracking' / Private Wi‑Fi Address"
+    log "  3) Forget 24500-RC, reconnect manually, confirm a checkmark, then:"
+    log "       ping -c 3 $HUB_IP"
+    log "  4) Only after ping works: ./deploy.sh"
+}
 
 # ── WiFi helpers ─────────────────────────────────────────────────────────────
 
@@ -98,20 +153,26 @@ SAVED_IP=""
 save_current_network() {
     SAVED_IP=$(get_ip || true)
     SAVED_NETWORK=$(wifi_current_ssid)
+    log "Saved network: ssid='${SAVED_NETWORK:-none}' ip='${SAVED_IP:-none}'"
     if [[ "$SAVED_NETWORK" == *"not associated"* ]]; then
         # iPhone Instant Hotspot isn't visible as a regular SSID; detect by IP range
         if [[ "$SAVED_IP" == 172.20.10.* ]]; then
             SAVED_NETWORK="__hotspot__"
+            log "Treating as iPhone Instant Hotspot"
         else
             SAVED_NETWORK=""
         fi
     fi
 }
 
-restore_wifi() {
-    echo ""
+graceful_disconnect() {
     adb disconnect "$HUB" &>/dev/null
     sleep 1
+}
+
+restore_wifi() {
+    echo ""
+    graceful_disconnect
     if [[ "$SAVED_NETWORK" == "__hotspot__" ]]; then
         # iPhone Instant Hotspot reconnects automatically once FTC is dropped
         log "Reconnecting to iPhone hotspot..."
@@ -136,6 +197,7 @@ restore_wifi() {
     else
         log "No previous network to restore"
     fi
+    log "Deploy log saved at: $DEPLOY_LOG"
 }
 
 # ── Connect to hub ───────────────────────────────────────────────────────────
@@ -149,39 +211,188 @@ connect_hub() {
     fi
     trap restore_wifi EXIT
 
-    logn "Pinging hub "
-    local elapsed=0
-    while [ $elapsed -lt $TIMEOUT ]; do
-        case "$OS" in
-            Windows) ping.exe -n 1 -w 1000 "$HUB_IP" &>/dev/null && break ;;
-            *)       ping -c 1 -W 1 "$HUB_IP" &>/dev/null && break ;;
-        esac
+    # DHCP can lag behind association — wait briefly for an IP before pinging.
+    logn "Waiting for IP "
+    local elapsed=0 ip=""
+    while [ $elapsed -lt 20 ]; do
+        ip=$(get_ip || true)
+        if [[ -n "$ip" ]]; then
+            echo ""; log "Got IP $ip"; break
+        fi
         printf "."; sleep 1; elapsed=$((elapsed + 1))
     done
-    if [ $elapsed -ge $TIMEOUT ]; then
-        echo ""; log "Hub not reachable after ${TIMEOUT}s"; exit 1
+    if [[ -z "$ip" ]]; then
+        echo ""; log "No IP on $WIFI_IF after ${elapsed}s (still trying to ping hub)"
+        diag_net
     fi
-    echo ""; log "Hub reachable (${elapsed}s)"
 
-    logn "ADB connect "
-    adb disconnect "$HUB" &>/dev/null
-    adb connect "$HUB" &>/dev/null
+    logn "Pinging hub ($HUB_IP) "
+    elapsed=0
+    local ping_out=""
+    while [ $elapsed -lt $TIMEOUT ]; do
+        if ping_out=$(ping_hub_once 2>&1); then
+            echo ""; log "Hub reachable (${elapsed}s)"
+            echo "$ping_out" | sed 's/^/  ping: /' | head -5
+            break
+        fi
+        printf "."
+        # Every 5s dump why ping failed (saved to deploy log; no internet needed).
+        if (( elapsed % 5 == 4 )); then
+            echo ""
+            log "ping still failing at ${elapsed}s — diagnostics:"
+            diag_net
+            echo "$ping_out" | sed 's/^/  ping: /' | tail -8
+            logn "Pinging hub ($HUB_IP) "
+        fi
+        sleep 1; elapsed=$((elapsed + 1))
+    done
+    if [ $elapsed -ge $TIMEOUT ]; then
+        echo ""; log "Hub not reachable after ${TIMEOUT}s"
+        diag_net
+        log "Last ping output:"; echo "$ping_out" | sed 's/^/  ping: /'
+        if echo "$ping_out" | grep -q 'No route to host'; then
+            hint_mac_local_network
+        fi
+        exit 1
+    fi
+
+    # Port 5555 must be open before adb connect (ftc-decode hub.sh style).
+    logn "ADB port 5555 "
+    local port_open=false
     for _ in $(seq 1 10); do
-        if [[ "$(adb -s "$HUB" get-state 2>/dev/null)" == "device" ]]; then
-            echo ""; log "ADB connected"; return
+        case "$OS" in
+            Windows)
+                powershell.exe -Command "try { \$c = New-Object Net.Sockets.TcpClient('$HUB_IP',5555); \$c.Close(); exit 0 } catch { exit 1 }" &>/dev/null \
+                    && port_open=true ;;
+            *)
+                nc -z -w 2 "$HUB_IP" 5555 &>/dev/null && port_open=true ;;
+        esac
+        if $port_open; then
+            echo ""; log "Port 5555 open"
+            connect_adb
+            return
         fi
         printf "."; sleep 1
     done
     echo ""
-    log "ADB could not connect - unplug battery, wait 5s, replug"
+    log "Port 5555 not responding — adbd may be stuck"
+    log "  Unplug battery, wait 5s, replug, then re-run ./deploy.sh"
+    diag_net
+    exit 1
+}
+
+# ── ADB (from ftc-decode hub.sh: reuse / soft reconnect / hard reset) ────────
+
+adb_state() { adb -s "$HUB" get-state 2>&1 || echo "error"; }
+
+adb_wait_online() {
+    local max_wait=$1
+    local last_state=""
+    for _ in $(seq 1 "$max_wait"); do
+        local state
+        state=$(adb_state)
+        if [[ "$state" == "device" ]]; then
+            echo ""
+            return 0
+        fi
+        if [[ "$state" != "$last_state" ]]; then
+            [[ -n "$last_state" ]] && echo ""
+            logn "    adb:$state "
+            last_state="$state"
+        else
+            printf "."
+        fi
+        sleep 1
+    done
+    echo ""
+    return 1
+}
+
+connect_adb() {
+    logn "ADB "
+    local state offline_count=0
+    state=$(adb_state)
+
+    if [[ "$state" == "device" ]]; then
+        echo ""
+        log "ADB connected (reused)"
+        adb -s "$HUB" devices -l 2>&1 | sed 's/^/  adb: /'
+        return
+    fi
+
+    # Not known — normal case after graceful disconnect
+    if [[ "$state" == *"not found"* ]]; then
+        local adb_out
+        adb_out=$(adb connect "$HUB" 2>&1) || true
+        log "adb connect: $adb_out"
+        if adb_wait_online 6; then
+            log "ADB connected"
+            adb -s "$HUB" devices -l 2>&1 | sed 's/^/  adb: /'
+            return
+        fi
+    fi
+
+    state=$(adb_state)
+    [[ "$state" == *"offline"* ]] && offline_count=$((offline_count + 1))
+
+    for attempt in 1 2; do
+        logn "  reconnect #$attempt "
+        adb disconnect "$HUB" &>/dev/null; sleep 1
+        local adb_out
+        adb_out=$(adb connect "$HUB" 2>&1) || true
+        log "adb connect: $adb_out"
+        if adb_wait_online 6; then
+            log "ADB connected (reconnect #$attempt)"
+            adb -s "$HUB" devices -l 2>&1 | sed 's/^/  adb: /'
+            return
+        fi
+        state=$(adb_state)
+        [[ "$state" == *"offline"* ]] && offline_count=$((offline_count + 1))
+        if [[ $offline_count -ge 3 ]]; then
+            log "adbd stuck offline — unplug battery, wait 5s, replug"
+            exit 1
+        fi
+        sleep 2
+    done
+
+    for attempt in 1 2 3; do
+        logn "  hard reset #$attempt "
+        adb kill-server &>/dev/null; sleep 2
+        adb start-server &>/dev/null 2>&1; sleep 2
+        local adb_out
+        adb_out=$(adb connect "$HUB" 2>&1) || true
+        log "adb connect: $adb_out"
+        if adb_wait_online 10; then
+            log "ADB connected (hard reset #$attempt)"
+            adb -s "$HUB" devices -l 2>&1 | sed 's/^/  adb: /'
+            return
+        fi
+        state=$(adb_state)
+        [[ "$state" == *"offline"* ]] && offline_count=$((offline_count + 1))
+        if [[ $offline_count -ge 3 ]]; then
+            log "adbd stuck offline — unplug battery, wait 5s, replug"
+            exit 1
+        fi
+        sleep 3
+    done
+
+    log "ADB could not connect — unplug battery, wait 5s, replug"
+    adb devices 2>&1 | sed 's/^/  adb: /'
     exit 1
 }
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 log "Building APK..."
-./gradlew assembleDebug -q
+if ! ./gradlew assembleDebug -q; then
+    log "Build FAILED — aborting before WiFi switch"
+    exit 1
+fi
 log "Build complete"
+if [[ ! -f "$APK" ]]; then
+    log "APK missing: $APK"
+    exit 1
+fi
 
 connect_hub
 
@@ -200,12 +411,11 @@ log "Deploy complete!"
 # ring buffer — RobotLog output: TurretThread / ControlThread / DriveLoop /
 # CycleTimer — from the run *before* this deploy, then clear it so the next run
 # logs cleanly. No arguments needed; this happens every deploy.
-mkdir -p "$SCRIPT_DIR/logs"
-LOG_FILE="$SCRIPT_DIR/logs/robot-$(date +%Y%m%d-%H%M%S).log"
+LOG_FILE="$LOG_DIR/robot-$(date +%Y%m%d-%H%M%S).log"
 log "Pulling logcat -> logs/$(basename "$LOG_FILE")"
 adb -s "$HUB" logcat -d > "$LOG_FILE" 2>&1 || true
 log "Pulled $(wc -l < "$LOG_FILE" 2>/dev/null | tr -d ' ') lines"
-recent=$(grep -E "TurretThread|ControlThread|DriveLoop|CycleTimer" "$LOG_FILE" 2>/dev/null | tail -30)
+recent=$(grep -E "TurretThread|ControlThread|DriveLoop|CycleTimer|ShooterTelemetry" "$LOG_FILE" 2>/dev/null | tail -30)
 if [[ -n "$recent" ]]; then
     log "── Recent robot-loop log lines ──"
     echo "$recent"
@@ -213,7 +423,8 @@ fi
 
 # Also pull the FTC per-OpMode match logs — complete per-run logcat dumps the SDK
 # writes on opmode stop (not subject to ring-buffer rollover like `logcat -d`).
-adb -s "$HUB" pull /storage/emulated/0/FIRST/matchlogs "$SCRIPT_DIR/logs/" >/dev/null 2>&1 \
+adb -s "$HUB" pull /storage/emulated/0/FIRST/matchlogs "$LOG_DIR/" >/dev/null 2>&1 \
     && log "Pulled match logs -> logs/matchlogs/" || log "No match logs found"
 
 adb -s "$HUB" logcat -c 2>/dev/null || true   # clear buffer so the next run starts clean
+log "Full deploy transcript: $DEPLOY_LOG"

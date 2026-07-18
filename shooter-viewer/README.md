@@ -9,22 +9,25 @@ computes **per-shot RPM drop / recovery** automatically.
 ```sh
 cd shooter-viewer
 npm install
-npm run dev        # opens http://localhost:5173
+npm run dev        # starts local API (:5174) + Vite UI → http://localhost:5173
 ```
+
+`npm run dev` starts the UI **and** a local backend. Pressing **Connect to Hub** in the
+UI is the only step — the backend runs WiFi/ping/telemetry checks (via `hub-live.sh`)
+and then opens the WebSocket. You do not run `hub-live.sh` yourself.
 
 ## Network (important)
 
-**You** join the robot’s WiFi (phone hotspot / RC AP). The robot does **not**
-join your laptop’s network. On that robot AP, the RC is usually
-`192.168.43.1` — the viewer opens a client connection to the robot’s server
-on port `8765`. No reverse tunnel, no robot dialing out.
+**You** join the robot’s WiFi (RC AP). The robot does **not** join your laptop’s
+network. Default hub address: `192.168.43.1:8765`.
 
 ## Using it
 
-- **Live**: join the robot WiFi on the laptop, then hit **Connect** (default
-  `192.168.43.1:8765`). The dot goes green + **LIVE** while an OpMode is running;
-  samples stream in real time. Uncheck *follow* (or drag/scroll the chart) to scrub
-  back through the session while it's still recording. **Save .jsonl** keeps a copy.
+- **Live**: click **Connect to Hub**. `hub-live.sh` auto-detects if you’re already on
+  the hub subnet (`192.168.43.x`) and skips the WiFi switch; otherwise it joins the
+  robot AP, pings, and probes `:8765`. Console streams every step. WebSocket opens
+  when ready. Badge shows hub/telemetry reachability. Start an OpMode once after
+  boot so the telemetry server is listening.
 - **Recorded sessions**: the robot keeps the last ~40 runs in
   `/sdcard/FIRST/shooter-logs/`. While connected (an OpMode has run at least once
   since boot), the sidebar lists them — click to view. Or `npm run pull` to download

@@ -14,7 +14,14 @@ export function parseJsonl(name: string, text: string): Session {
       continue // truncated tail line etc.
     }
     if (obj.type === 'header') header = obj as SessionHeader
-    else if (typeof obj.t === 'number') samples.push(obj as Sample)
+    else if (typeof obj.t === 'number') {
+      const sample = obj as Sample
+      // i1/i2 were added in log v2. Keep them optional so v1 JSONL continues
+      // through the exact same analysis path without synthetic zero-current data.
+      if (typeof sample.i1 !== 'number' || !Number.isFinite(sample.i1)) delete sample.i1
+      if (typeof sample.i2 !== 'number' || !Number.isFinite(sample.i2)) delete sample.i2
+      samples.push(sample)
+    }
   }
   samples.sort((a, b) => a.t - b.t)
   return { name, header, samples }

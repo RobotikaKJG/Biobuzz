@@ -10,6 +10,8 @@ interface Props {
   samples: Sample[]
   ticksPerRev: number
   bursts: Burst[]
+  variant: 'live' | 'diagnose'
+  showCurrent: boolean
   showBattery: boolean
   /** live follow mode: keep the view pinned to the last N seconds */
   follow: boolean
@@ -17,6 +19,16 @@ interface Props {
   /** bumped on every live batch so we know to refresh data */
   dataVersion: number
   onUserZoom?: () => void
+}
+
+/** Fixed flywheel range — hides encoder jitter and makes motor split obvious. */
+const RPM_RANGE: [number, number] = [0, 4000]
+
+/** Belt-sync mismatch (RPM1 − RPM2); symmetric so zero is the midline. */
+const DELTA_RANGE: [number, number] = [-200, 200]
+
+function currentRange(_u: uPlot, _dataMin: number, dataMax: number): [number, number] {
+  return [0, Math.max(5, Number.isFinite(dataMax) ? dataMax * 1.2 : 5)]
 }
 
 /** mouse-wheel zoom around cursor on the x axis */
@@ -49,6 +61,8 @@ export default function ChartView({
   samples,
   ticksPerRev,
   bursts,
+  variant,
+  showCurrent,
   showBattery,
   follow,
   followWindowSec,
@@ -65,13 +79,16 @@ export default function ChartView({
   const onUserZoomRef = useRef(onUserZoom)
   onUserZoomRef.current = onUserZoom
 
-  // Build aligned data arrays (t sec, rpm1, rpm2, target rpm, battery carried forward)
+  // Build aligned arrays: time, RPMs, Δ, target, motor currents, carried battery.
   const data = useMemo<uPlot.AlignedData>(() => {
     const n = samples.length
     const t = new Float64Array(n)
     const r1 = new Float64Array(n)
     const r2 = new Float64Array(n)
+    const dRpm = new Float64Array(n)
     const tg = new Float64Array(n)
+    const current1: (number | null)[] = new Array(n)
+    const current2: (number | null)[] = new Array(n)
     const bat: (number | null)[] = new Array(n)
     let lastTg = NaN
     let lastBat: number | null = null
@@ -80,12 +97,15 @@ export default function ChartView({
       t[i] = s.t / 1000
       r1[i] = ticksToRpm(s.v1, ticksPerRev)
       r2[i] = ticksToRpm(s.v2, ticksPerRev)
+      dRpm[i] = r1[i] - r2[i]
       if (typeof s.tg === 'number') lastTg = s.tg
       tg[i] = ticksToRpm(lastTg, ticksPerRev)
+      current1[i] = typeof s.i1 === 'number' ? s.i1 : null
+      current2[i] = typeof s.i2 === 'number' ? s.i2 : null
       if (typeof s.bat === 'number') lastBat = s.bat
       bat[i] = lastBat
     }
-    return [t, r1, r2, tg, bat] as unknown as uPlot.AlignedData
+    return [t, r1, r2, dRpm, tg, current1, current2, bat] as unknown as uPlot.AlignedData
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [samples, ticksPerRev, dataVersion])
 
@@ -128,7 +148,7 @@ export default function ChartView({
       for (const burst of burstsRef.current) {
         for (const shot of burst.shots) {
           n++
-          const x = u.valToPos(shot.tMinMs / 1000, 'x', true)
+          const x = u.valToPos(shot.markerMs / 1000, 'x', true)
           if (x < u.bbox.left || x > u.bbox.left + u.bbox.width) continue
           ctx.beginPath()
           ctx.moveTo(x, top)
@@ -141,12 +161,14 @@ export default function ChartView({
     }
 
     const opts: uPlot.Options = {
-      width: el.clientWidth,
-      height: Math.max(el.clientHeight, 320),
+      width: Math.max(el.clientWidth - 16, 320),
+      height: Math.max(el.clientHeight - 16, 320),
       scales: {
         x: { time: false },
-        rpm: { auto: true },
-        v: { auto: true },
+        rpm: { auto: false, range: RPM_RANGE },
+        delta: { auto: false, range: DELTA_RANGE },
+        amps: { auto: true, range: currentRange },
+        volts: { auto: false, range: [10, 14.5] },
       },
       series: [
         {
@@ -156,6 +178,14 @@ export default function ChartView({
         { label: 'RPM 1', scale: 'rpm', stroke: '#4fc3f7', width: 1.5, points: { show: false } },
         { label: 'RPM 2', scale: 'rpm', stroke: '#ffb74d', width: 1.5, points: { show: false } },
         {
+          label: 'Δ (1−2)',
+          scale: 'delta',
+          stroke: '#80cbc4',
+          width: 1.2,
+          points: { show: false },
+          value: (_u, v) => (v == null ? '' : `${v >= 0 ? '+' : ''}${v.toFixed(0)} RPM`),
+        },
+        {
           label: 'Target',
           scale: 'rpm',
           stroke: '#ce93d8',
@@ -164,8 +194,26 @@ export default function ChartView({
           points: { show: false },
         },
         {
+          label: 'M1 current',
+          scale: 'amps',
+          stroke: '#ef5350',
+          width: 1.2,
+          points: { show: false },
+          show: showCurrent,
+          value: (_u, v) => (v == null ? '' : `${v.toFixed(2)} A`),
+        },
+        {
+          label: 'M2 current',
+          scale: 'amps',
+          stroke: '#ab47bc',
+          width: 1.2,
+          points: { show: false },
+          show: showCurrent,
+          value: (_u, v) => (v == null ? '' : `${v.toFixed(2)} A`),
+        },
+        {
           label: 'Battery',
-          scale: 'v',
+          scale: 'volts',
           stroke: '#81c784',
           width: 1,
           points: { show: false },
@@ -174,20 +222,48 @@ export default function ChartView({
         },
       ],
       axes: [
-        { stroke: '#9aa', grid: { stroke: 'rgba(255,255,255,0.06)' }, ticks: { stroke: 'rgba(255,255,255,0.15)' } },
         {
-          scale: 'rpm',
+          label: 'Time (s)',
           stroke: '#9aa',
           grid: { stroke: 'rgba(255,255,255,0.06)' },
           ticks: { stroke: 'rgba(255,255,255,0.15)' },
-          size: 60,
         },
         {
-          scale: 'v',
+          scale: 'rpm',
+          label: 'Flywheel (RPM)',
+          stroke: '#9aa',
+          grid: { stroke: 'rgba(255,255,255,0.06)' },
+          ticks: { stroke: 'rgba(255,255,255,0.15)' },
+          size: 68,
+          values: (_u, splits) => splits.map((v) => (v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k` : String(v))),
+        },
+        {
+          scale: 'delta',
           side: 1,
+          label: 'Δ RPM (1−2)',
+          stroke: '#80cbc4',
+          grid: { show: false },
+          size: 58,
+          // Hide when amps take the right axis — Δ still in legend / live readout.
+          show: !showCurrent,
+        },
+        {
+          scale: 'amps',
+          side: 1,
+          label: 'Motor current (A)',
+          stroke: '#ef6c6c',
+          grid: { show: false },
+          size: 62,
+          show: showCurrent,
+        },
+        {
+          scale: 'volts',
+          side: 1,
+          label: 'Battery (V)',
           stroke: '#81c784',
           grid: { show: false },
-          size: 50,
+          size: 58,
+          show: showBattery,
         },
       ],
       cursor: {
@@ -195,8 +271,8 @@ export default function ChartView({
         points: { size: 6 },
       },
       hooks: {
-        drawClear: [drawBands],
-        draw: [drawShotMarkers],
+        drawClear: variant === 'diagnose' ? [drawBands] : [],
+        draw: variant === 'diagnose' ? [drawShotMarkers] : [],
         setSelect: [
           (u) => {
             if (u.select.width > 0) onUserZoomRef.current?.()
@@ -210,7 +286,10 @@ export default function ChartView({
     plotRef.current = plot
 
     const ro = new ResizeObserver(() => {
-      plot.setSize({ width: el.clientWidth, height: Math.max(el.clientHeight, 320) })
+      plot.setSize({
+        width: Math.max(el.clientWidth - 16, 320),
+        height: Math.max(el.clientHeight - 16, 320),
+      })
     })
     ro.observe(el)
 
@@ -219,9 +298,9 @@ export default function ChartView({
       plot.destroy()
       plotRef.current = null
     }
-    // recreate only on mount; data/series updates handled below
+    // Recreate when axes/mode change; sample updates are handled below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [showBattery, showCurrent, variant])
 
   // data updates
   useEffect(() => {
@@ -234,10 +313,5 @@ export default function ChartView({
     }
   }, [data, follow, followWindowSec, samples])
 
-  // battery series toggle
-  useEffect(() => {
-    plotRef.current?.setSeries(4, { show: showBattery })
-  }, [showBattery])
-
-  return <div ref={containerRef} className="chart-container" />
+  return <div ref={containerRef} className={`chart-container ${variant}`} />
 }

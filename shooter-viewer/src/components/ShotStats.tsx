@@ -21,6 +21,8 @@ export default function ShotStats({ bursts, ticksPerRev }: Props) {
   }
 
   const allShots = bursts.flatMap((b) => b.shots)
+  const pairedShots = allShots.filter((shot) => shot.detection === 'current+rpm').length
+  const hasCurrent = pairedShots > 0
   const avgDrop = allShots.reduce((a, s) => a + s.dropV, 0) / allShots.length
   const maxDrop = Math.max(...allShots.map((s) => s.dropV))
 
@@ -40,6 +42,11 @@ export default function ShotStats({ bursts, ticksPerRev }: Props) {
         <span>
           worst drop <b>{fmt(toRpm(maxDrop))} RPM</b>
         </span>
+        {hasCurrent && (
+          <span>
+            current-paired <b>{pairedShots}/{allShots.length}</b>
+          </span>
+        )}
       </div>
       {bursts.map((burst, bi) => (
         <div key={bi} className="burst">
@@ -59,6 +66,8 @@ export default function ShotStats({ bursts, ticksPerRev }: Props) {
                 <th>min M1/M2</th>
                 <th>recovery</th>
                 <th>spacing</th>
+                {hasCurrent && <th>peak M1/M2</th>}
+                {hasCurrent && <th>current rise</th>}
               </tr>
             </thead>
             <tbody>
@@ -67,7 +76,7 @@ export default function ShotStats({ bursts, ticksPerRev }: Props) {
                 return (
                   <tr key={si}>
                     <td>#{shotNo}</td>
-                    <td>{(s.tMinMs / 1000).toFixed(2)}</td>
+                    <td>{(s.markerMs / 1000).toFixed(2)}</td>
                     <td>{fmt(toRpm(s.minV))}</td>
                     <td className="drop">−{fmt(toRpm(s.dropV))}</td>
                     <td>{((s.dropV / s.targetV) * 100).toFixed(1)}%</td>
@@ -76,6 +85,15 @@ export default function ShotStats({ bursts, ticksPerRev }: Props) {
                     </td>
                     <td>{s.recoveryMs === null ? '—' : `${s.recoveryMs} ms`}</td>
                     <td>{s.spacingMs === null ? '—' : `${s.spacingMs} ms`}</td>
+                    {hasCurrent && (
+                      <td>
+                        {s.peakI1 === undefined ? '—' : fmt(s.peakI1, 2)} /{' '}
+                        {s.peakI2 === undefined ? '—' : fmt(s.peakI2, 2)} A
+                      </td>
+                    )}
+                    {hasCurrent && (
+                      <td>{s.currentRiseA === undefined ? 'RPM only' : `+${fmt(s.currentRiseA, 2)} A`}</td>
+                    )}
                   </tr>
                 )
               })}

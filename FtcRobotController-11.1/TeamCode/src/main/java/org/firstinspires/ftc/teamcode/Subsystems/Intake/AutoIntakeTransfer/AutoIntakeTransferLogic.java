@@ -17,12 +17,20 @@ public class AutoIntakeTransferLogic {
     private SensorControl sensorControl;
     private Gamepad gamepad1;
 
+    // Intake presence latch: set the instant either intake sensor sees the artifact,
+    // released only after both have been clear for intakeReleaseHoldSec. See
+    // updateIntakeFilter().
+    private boolean intakeLatched = false;
+    private double intakeClearSinceSec = -1;
+
     public AutoIntakeTransferLogic(SensorControl sensorControl, Gamepad gamepad1) {
         this.sensorControl = sensorControl;
         this.gamepad1 = gamepad1;
     }
 
     public void update() {
+        updateIntakeFilter();
+
         switch (IntakeStates.getAutoIntakeTransferState()) {
             case activate:
                 activate();
@@ -69,7 +77,7 @@ public class AutoIntakeTransferLogic {
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainFront);
             return;
         }
-        if (sensorControl.isIntakeBall()) {
+        if (intakeLatched) {
             RobotLog.ii(TAG, "stopTransfer: INTAKE artifact -> checkAgainFront");
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.checkAgainFront);
             addWaitTime(IntakeConstants.checkAgainAfter);
@@ -78,7 +86,7 @@ public class AutoIntakeTransferLogic {
 
     private void checkAgainFront() {
         if (currentWait > getSeconds()) return;
-        if (sensorControl.isIntakeBall()) {
+        if (intakeLatched) {
             RobotLog.ii(TAG, "checkAgainFront: confirmed -> stop (3 balls loaded)");
             IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.stop);
             gamepad1.rumble(300);
@@ -91,6 +99,41 @@ public class AutoIntakeTransferLogic {
 
     private void stop() {
         IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
+    }
+
+    /**
+     * Asymmetric debounce for the intake pair: presence latches immediately, absence only
+     * after intakeReleaseHoldSec of continuous clear. A spinning artifact chatters the raw
+     * sensors (shell, hole, shell, ...), which made checkAgainFront's single re-read land on
+     * a hole and bounce back to stopTransfer, leaving the intake running indefinitely.
+     * <p>
+     * The latch is armed only in the two states that consult it, so entering stopTransfer
+     * always requires a fresh detection and a stale latch can never confirm the next cycle
+     * early. Called every loop from {@link #update()} — the timing is only correct if it
+     * polls in every state.
+     */
+    private void updateIntakeFilter() {
+        AutoIntakeTransferStates state = IntakeStates.getAutoIntakeTransferState();
+        if (state != AutoIntakeTransferStates.stopTransfer
+                && state != AutoIntakeTransferStates.checkAgainFront) {
+            intakeLatched = false;
+            intakeClearSinceSec = -1;
+            return;
+        }
+
+        double now = getSeconds();
+        if (sensorControl.isIntakeBall()) {
+            intakeLatched = true;
+            intakeClearSinceSec = -1;          // ball seen -> restart the release timer
+        } else if (intakeLatched) {
+            if (intakeClearSinceSec < 0) {
+                intakeClearSinceSec = now;     // sensors just went clear
+            } else if (now - intakeClearSinceSec >= IntakeConstants.intakeReleaseHoldSec) {
+                RobotLog.ii(TAG, "intake latch released after held clear");
+                intakeLatched = false;
+                intakeClearSinceSec = -1;
+            }
+        }
     }
 
     private void addWaitTime(double waitTime) {

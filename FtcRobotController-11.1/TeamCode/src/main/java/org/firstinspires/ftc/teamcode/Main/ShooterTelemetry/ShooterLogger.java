@@ -199,6 +199,17 @@ public class ShooterLogger {
                 s.turretDeg = Double.NaN;
             }
 
+            try {
+                com.pedropathing.geometry.Pose pose = sensorControl.getLocalizerPose();
+                s.poseX = pose.getX();
+                s.poseY = pose.getY();
+                s.poseHeadingDeg = Math.toDegrees(pose.getHeading());
+            } catch (Throwable ignored) {
+                s.poseX = Double.NaN;
+                s.poseY = Double.NaN;
+                s.poseHeadingDeg = Double.NaN;
+            }
+
             if (!queue.offer(s)) {
                 queue.poll(); // drop oldest, keep newest
                 queue.offer(s);

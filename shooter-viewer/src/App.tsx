@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ChartView from './components/ChartView'
 import ConnectionBar from './components/ConnectionBar'
+import CalibrationView from './components/CalibrationView'
 import ControlView from './components/ControlView'
 import SessionList from './components/SessionList'
 import ShotStats from './components/ShotStats'
@@ -18,7 +19,9 @@ export default function App() {
   const [status, setStatus] = useState<ConnStatus>('disconnected')
   const [robotSessions, setRobotSessions] = useState<SessionInfo[]>([])
   const [loadedSession, setLoadedSession] = useState<Session | null>(null)
-  const [activeTab, setActiveTab] = useState<'live' | 'diagnose' | 'control'>('live')
+  const [activeTab, setActiveTab] = useState<'live' | 'diagnose' | 'control' | 'calibration'>(
+    'live',
+  )
   const [diagnoseLive, setDiagnoseLive] = useState(true)
   const [liveVersion, setLiveVersion] = useState(0)
   const [follow, setFollow] = useState(true)
@@ -119,7 +122,7 @@ export default function App() {
   const liveHasData = liveRef.current.samples.length > 0
   const liveSession = liveHasData ? liveRef.current : null
   const session: Session | null =
-    activeTab === 'control'
+    activeTab === 'control' || activeTab === 'calibration'
       ? null
       : activeTab === 'live'
         ? liveSession
@@ -196,6 +199,13 @@ export default function App() {
             >
               Control
             </button>
+            <button
+              className={activeTab === 'calibration' ? 'active' : ''}
+              onClick={() => setActiveTab('calibration')}
+              title="Field map + shooter distance / RPM calibration"
+            >
+              Calibration
+            </button>
           </nav>
         </div>
         <ConnectionBar
@@ -220,6 +230,13 @@ export default function App() {
             ticksPerRev={ticksPerRev}
           />
         )}
+        {activeTab === 'calibration' && (
+          <CalibrationView
+            samples={liveRef.current.samples}
+            dataVersion={liveVersion}
+            liveConnected={status === 'connected' || status === 'live'}
+          />
+        )}
         {activeTab === 'diagnose' && <aside>
           {liveHasData && (
             <button
@@ -242,7 +259,7 @@ export default function App() {
           />
         </aside>}
 
-        {activeTab !== 'control' && <main>
+        {activeTab !== 'control' && activeTab !== 'calibration' && <main>
           {session ? (
             <>
               <div className="toolbar">

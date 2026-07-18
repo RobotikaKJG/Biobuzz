@@ -31,6 +31,9 @@ public class ShooterSample {
     public double battery;      // volts, NaN if not sampled this tick
     public double distance;     // inches to goal (localizer); NaN if invalid
     public double turretDeg;    // turret angle degrees; NaN if unavailable
+    public double poseX;        // localizer pose X (inches; TeleOp center or Pedro corner)
+    public double poseY;        // localizer pose Y (inches)
+    public double poseHeadingDeg; // localizer heading degrees
 
     /** Serialize as one compact JSONL line. Hand-built (no reflection) — this runs
      *  on the writer thread but keeps allocation predictable. */
@@ -58,6 +61,9 @@ public class ShooterSample {
         appendNum(sb, "bat", battery);
         appendNum(sb, "d", distance);
         appendNum(sb, "ta", turretDeg);
+        appendNum(sb, "px", poseX);
+        appendNum(sb, "py", poseY);
+        appendNum(sb, "ph", poseHeadingDeg);
         sb.append('}');
         return sb.toString();
     }

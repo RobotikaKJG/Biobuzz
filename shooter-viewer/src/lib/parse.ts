@@ -17,7 +17,20 @@ export function parseJsonl(name: string, text: string): Session {
     else if (typeof obj.t === 'number') {
       const sample = obj as Sample
       // Optional fields (v2 currents, v3 drive/transfer/turret) — drop non-finite.
-      for (const key of ['i1', 'i2', 'id0', 'id1', 'id2', 'id3', 'ii', 'it', 'ta'] as const) {
+      for (const key of [
+        'i1',
+        'i2',
+        'id0',
+        'id1',
+        'id2',
+        'id3',
+        'ii',
+        'it',
+        'ta',
+        'px',
+        'py',
+        'ph',
+      ] as const) {
         const v = sample[key]
         if (typeof v !== 'number' || !Number.isFinite(v)) delete sample[key]
       }

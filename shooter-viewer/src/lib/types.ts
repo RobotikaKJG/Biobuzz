@@ -48,6 +48,10 @@ export interface Sample {
   d?: number
   /** turret angle, degrees (log version 3) */
   ta?: number
+  /** localizer pose X/Y inches + heading deg (calibration overlay) */
+  px?: number
+  py?: number
+  ph?: number
 }
 
 export interface Session {

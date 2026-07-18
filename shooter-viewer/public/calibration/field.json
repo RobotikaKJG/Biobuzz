@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "name": "DECODE field",
+  "sources": [
+    "DECODE Competition Manual (TU32)",
+    "TeamCode SensorControl / Pedro Pathing / OuttakeConstants",
+    "MeepMeep Decode field art"
+  ],
+  "field": {
+    "sizeInches": 144,
+    "sizeCm": 365.76,
+    "tiles": 6,
+    "tileInches": 24,
+    "tileCm": 60.96
+  },
+  "image": {
+    "path": "/field/decode-field.webp",
+    "pixelWidth": 1080,
+    "pixelHeight": 1080,
+    "imageYOrigin": "top",
+    "notes": "Full-bleed 6×6 tile art, rotated 90° counter-clockwise from Pedro's conventional view. Pedro red goal (134,133.5) maps top-left; blue goal (10,133) maps bottom-left."
+  },
+  "frames": {
+    "pedroCornerInches": {
+      "description": "Autonomous / Pedro Pathing. Origin bottom-left, +X right, +Y up, heading 0 = +X. Range [0,144]×[0,144].",
+      "origin": "bottom-left corner",
+      "mirrorBlueFromRed": "x' = 144 - x; y' = y; heading' = 180° - heading"
+    },
+    "teleopCenterInches": {
+      "description": "Cold TeleOp localizer reset. Origin field center, same axis directions as Pedro.",
+      "toPedro": "pedro = teleop + 72 on both axes",
+      "fromPedro": "teleop = pedro - 72 on both axes"
+    }
+  },
+  "goalsInches": {
+    "teleopCenter": {
+      "red": { "x": 62.0, "y": 61.5 },
+      "blue": { "x": -62.0, "y": 61.0 }
+    },
+    "pedroCorner": {
+      "red": { "x": 134.0, "y": 133.5 },
+      "blue": { "x": 10.0, "y": 133.0 }
+    },
+    "notes": "TeleOp distance uses center-frame goals. Auton turret aim adds +72 to those goals when pose is still Pedro-corner."
+  },
+  "distancePipeline": {
+    "rawUnit": "inches",
+    "axisQuirk": "getDistanceFromLocalizer uses robotX=pose.y, robotY=pose.x (swapped vs turret aim)",
+    "goalDistanceOffsetCm": 10,
+    "closeCurve": {
+      "model": "v = closeCalTicks * sqrt(clamp(dCm)/closeCalDistanceCm)",
+      "anchorDistanceCm": 275,
+      "anchorTicksPerSec": 1697,
+      "minDistanceCm": 140,
+      "maxDistanceCm": 290,
+      "minTicksPerSec": 1603,
+      "maxTicksPerSec": 1697,
+      "ticksPerRev": 28
+    }
+  },
+  "robotDraft": {
+    "lengthInches": 17.5197,
+    "widthInches": 11.6535,
+    "notes": "Measured footprint: 445 mm long × 296 mm wide.",
+    "shooterOffsetInches": {
+      "x": 0,
+      "y": 0,
+      "notes": "Relative to robot center; not defined in code yet — update when measured."
+    },
+    "limelightOffsetInches": {
+      "x": 0,
+      "y": 0,
+      "notes": "No mount offsets in TeamCode; Limelight botpose used raw."
+    },
+    "pinpointPodsMm": {
+      "forwardPodY": -88.15,
+      "strafePodX": -118.85
+    }
+  }
+}

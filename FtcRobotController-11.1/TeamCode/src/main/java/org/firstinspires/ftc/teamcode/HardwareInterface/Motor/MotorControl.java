@@ -204,7 +204,7 @@ public class MotorControl {
         utilities.resetMotorEncoders(motors, index);
     }
 
-    private double getBatteryVoltage() {
+    public double getBatteryVoltage() {
         double result = Double.POSITIVE_INFINITY;
         for (VoltageSensor sensor : hardwareMap.voltageSensor) {
             double voltage = sensor.getVoltage();
@@ -213,6 +213,16 @@ public class MotorControl {
             }
         }
         return result;
+    }
+
+    /**
+     * Last velocity target written via setMotorRPM (ticks/s), or NaN if the motor is
+     * currently power-controlled / no target has been written. Read-only, for telemetry.
+     */
+    public double getLastCommandedVelocity(int index) {
+        int mi = Utilities.motorIndex(index, 0);
+        double v = lastWrittenVelocity[mi];
+        return (v == Double.POSITIVE_INFINITY || !velocityControlled[mi]) ? Double.NaN : v;
     }
 
     public void setMotorRPM(int index, double velocityTicksPerSecond) {

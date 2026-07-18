@@ -46,6 +46,8 @@ public class GeneralRedTeleOp extends LinearOpMode {
 
         if (isStopRequested()) return;
 
+        dependencies.shooterLogger.start("GeneralRedTeleOp");
+
         // Background loops. Control: bulk cache + non-drive/non-turret subsystems
         // (motors 4..7). Turret: Pinpoint localizer + turret servo tracking.
         ControlThread controlThread = new ControlThread(this, allHubs, iterativeController);
@@ -128,6 +130,7 @@ public class GeneralRedTeleOp extends LinearOpMode {
             // Stop the background loops, then zero every motor from this thread.
             controlThread.stopLoop();
             turretThread.stopLoop();
+            dependencies.shooterLogger.stop();
             controlThread.interrupt();
             turretThread.interrupt();
             try { controlThread.join(500); } catch (InterruptedException ignored) {}

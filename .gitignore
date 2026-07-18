@@ -1,0 +1,16 @@
+# CAD / mechanical source files — kept locally for reference, not committed
+hardware/cad/
+*.dxf
+*.dwg
+*.f3d
+*.step
+*.stp
+*.iges
+*.igs
+*.sldprt
+*.sldasm
+
+# Shooter telemetry viewer (laptop app)
+shooter-viewer/node_modules/
+shooter-viewer/dist/
+shooter-viewer/logs/

@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.GoBildaIndicator;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
+import org.firstinspires.ftc.teamcode.Main.ShooterTelemetry.ShooterLogger;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeControl;
@@ -36,6 +37,7 @@ public class IterativeController {
     private final OuttakeControl outtakeControl;
     private final IntakeControl intakeControl;
     private final SensorControl sensorControl;
+    private final ShooterLogger shooterLogger;
     private GoBildaIndicator.Color lastColor = null;
     private boolean isLimelightRecalibrating = false;
 
@@ -52,6 +54,7 @@ public class IterativeController {
         outtakeControl = dependencies.createOuttakeControl();
         intakeControl = dependencies.createIntakeControl();
         sensorControl = dependencies.sensorControl;
+        shooterLogger = dependencies.shooterLogger;
 
         sensorControl.initLimelight(0);
 
@@ -82,6 +85,10 @@ public class IterativeController {
 
         // Drive motors (0..3) are written by the drive loop; write everything else here.
         motorControl.setMotors(MotorConstants.notDrive);
+
+        // Shooter telemetry: sample after all writes so velocities/states reflect this
+        // iteration. Reads hit this loop's bulk-cache snapshot; non-blocking, never throws.
+        shooterLogger.sample();
     }
 
     private void updateCommonValues() {

@@ -34,22 +34,31 @@ public class GeneralAutonomous extends LinearOpMode {
 
         if (isStopRequested()) return;
 
+        dependencies.shooterLogger.start("GeneralAutonomous");
+
         LoopTimer loopTimer = new LoopTimer(10);
 
-        while (opModeIsActive()) {
-            long startNs = System.nanoTime();
+        try {
+            while (opModeIsActive()) {
+                long startNs = System.nanoTime();
 
-            autonomousControl.runAutonomous();
-            follower.update();
+                autonomousControl.runAutonomous();
+                follower.update();
 
-            loopTimer.record(System.nanoTime() - startNs);
+                // Shooter telemetry (autonomous is single-threaded, so sample here).
+                dependencies.shooterLogger.sample();
 
-            telemetry.addData("outtake vel", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
-            telemetry.addData("Auto loop avg (ms, last 10)", "%.2f", loopTimer.getAvgMs());
-            telemetry.update();
+                loopTimer.record(System.nanoTime() - startNs);
 
-            if (gamepad1.triangle)
-                break;
+                telemetry.addData("outtake vel", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
+                telemetry.addData("Auto loop avg (ms, last 10)", "%.2f", loopTimer.getAvgMs());
+                telemetry.update();
+
+                if (gamepad1.triangle)
+                    break;
+            }
+        } finally {
+            dependencies.shooterLogger.stop();
         }
     }
 

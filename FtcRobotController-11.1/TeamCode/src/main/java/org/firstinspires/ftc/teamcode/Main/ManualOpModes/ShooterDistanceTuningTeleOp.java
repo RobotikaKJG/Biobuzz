@@ -49,6 +49,8 @@ public class ShooterDistanceTuningTeleOp extends LinearOpMode {
 
         if (isStopRequested()) return;
 
+        dependencies.shooterLogger.start("ShooterDistanceTuningTeleOp");
+
         // Start background threads for normal robot functioning
         ControlThread controlThread = new ControlThread(this, allHubs, iterativeController);
         TurretThread turretThread = new TurretThread(this, dependencies.sensorControl,
@@ -113,6 +115,7 @@ public class ShooterDistanceTuningTeleOp extends LinearOpMode {
             // Clean shutdown of background threads
             controlThread.stopLoop();
             turretThread.stopLoop();
+            dependencies.shooterLogger.stop();
             try { controlThread.join(500); } catch (InterruptedException ignored) {}
             try { turretThread.join(500); } catch (InterruptedException ignored) {}
             

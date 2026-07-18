@@ -28,6 +28,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferMotor.TransferMo
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootLogic;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoOuttakeFarClose.AutoOuttakeFarCloseControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoResetPos.AutoResetPosControl;
+import org.firstinspires.ftc.teamcode.Main.ShooterTelemetry.ShooterLogger;
+import org.firstinspires.ftc.teamcode.Main.ShooterTelemetry.ShooterTelemetryServer;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
@@ -43,6 +45,7 @@ public class Dependencies {
     public SensorControl sensorControl;
     public ServoControl servoControl;
     public TurretServoControl turretServoControl;
+    public ShooterLogger shooterLogger;
     public EdgeDetection edgeDetection = new EdgeDetection();
 
     public Dependencies(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry) {
@@ -68,6 +71,10 @@ public class Dependencies {
         sensorControl = new SensorControl(hardwareMap, edgeDetection, pedroLocalizer);
         servoControl = new ServoControl(hardwareMap);
         turretServoControl = new TurretServoControl(servoControl, sensorControl);
+        shooterLogger = new ShooterLogger(motorControl, sensorControl);
+        // Persistent singleton (no-op after the first OpMode); serves recorded
+        // sessions + live stream to the laptop viewer on port 8765.
+        ShooterTelemetryServer.ensureStarted();
     }
 
     public Drivebase createDrivebase() {

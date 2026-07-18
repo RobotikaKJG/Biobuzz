@@ -31,7 +31,7 @@ export interface Sample {
   tb: 0 | 1
   /** battery volts (throttled — absent on most samples) */
   bat?: number
-  /** distance to goal, inches (only while shooting) */
+  /** distance to goal, inches (localizer; carried forward in UI when absent) */
   d?: number
 }
 

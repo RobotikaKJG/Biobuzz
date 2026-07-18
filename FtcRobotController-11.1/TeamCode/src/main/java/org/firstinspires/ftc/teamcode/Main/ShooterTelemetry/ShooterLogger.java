@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
@@ -164,10 +165,11 @@ public class ShooterLogger {
                 s.battery = Double.NaN; // omitted from JSON; viewer carries last value forward
             }
 
-            // Distance drives the interpolated target — only meaningful (and only cheap
-            // to justify) while the flywheel is commanded.
-            s.distance = (motorState != OuttakeMotorStates.idle && motorState != OuttakeMotorStates.backward)
-                    ? sensorControl.getDistanceFromLocalizer() : Double.NaN;
+            // Localizer goal range (inches), with goalDistanceOffsetCm so the
+            // dashboard matches tape. Invalid pose returns negative → omit.
+            double distIn = OuttakeConstants.correctedDistanceInches(
+                    sensorControl.getDistanceFromLocalizer());
+            s.distance = distIn >= 0 ? distIn : Double.NaN;
 
             if (!queue.offer(s)) {
                 queue.poll(); // drop oldest, keep newest

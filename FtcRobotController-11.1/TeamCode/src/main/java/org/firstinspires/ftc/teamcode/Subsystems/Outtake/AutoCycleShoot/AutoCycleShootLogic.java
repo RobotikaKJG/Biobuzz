@@ -11,6 +11,8 @@ public class AutoCycleShootLogic {
     private double currentWait = 0;
     private double feedStartSec = 0;
     private double clearSinceSec = -1; // when the ball queue first went (and stayed) empty
+    /** When recovery hold began; used to freeze the feed-max clock while paused. */
+    private double feedPausedSinceSec = -1;
     private boolean wasIfCalled = false;
     private SensorControl sensorControl;
     private MotorControl motorControl;
@@ -84,6 +86,20 @@ public class AutoCycleShootLogic {
         // Autonomous scripts its own stop, so leave that path unchanged.
         if (GlobalVariables.isAutonomous) return;
         double now = getSeconds();
+
+        // Flywheel recovery pause: keep the shoot sequence in turnTransfer, but do not
+        // count empty-queue / feed-max time while intake+transfer are held. Otherwise a
+        // long recovery could abort ball 2/3 and look like the driver must re-trigger.
+        if (AutoCycleShootControl.isHoldingForRecovery()) {
+            if (feedPausedSinceSec < 0) feedPausedSinceSec = now;
+            clearSinceSec = -1;
+            return;
+        }
+        if (feedPausedSinceSec >= 0) {
+            feedStartSec += (now - feedPausedSinceSec);
+            feedPausedSinceSec = -1;
+        }
+
         double elapsed = now - feedStartSec;
         boolean queueEmpty = !sensorControl.isTransferBall() && !sensorControl.isIntakeBall();
         if (queueEmpty && elapsed >= OuttakeConstants.shootFeedMinSec) {
@@ -99,14 +115,10 @@ public class AutoCycleShootLogic {
     }
 
     private void startFeed() {
-//        if (!wasIfCalled) {
         feedStartSec = getSeconds();
         clearSinceSec = -1;
-//            wasIfCalled = true;
-//        }
-//        if (!GlobalVariables.far &&  motorControl.getMotorVelocity(MotorConstants.outtake2) > OuttakeConstants.outtakeSpeedClose + 10) return;
+        feedPausedSinceSec = -1;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
-//        wasIfCalled = false;
     }
 
     private void stopTransfer() {

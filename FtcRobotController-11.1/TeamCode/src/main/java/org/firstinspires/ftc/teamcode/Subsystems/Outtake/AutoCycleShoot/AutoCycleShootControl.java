@@ -17,21 +17,35 @@ public class AutoCycleShootControl {
 
     private static final double FAR_MIN_OUTTAKE_VELOCITY = 1900.0;
 
+    /** Mean velocity when first armed near target — the pre-1st-ball RPM baseline. */
+    private double armedVelocityTicks = Double.NaN;
+
+    /** True after flywheel has dipped from the armed level (first ball through). */
+    private boolean firstDropSeen = false;
+
     /**
-     * Mean flywheel velocity (ticks/s) latched once the wheel is near target at the
-     * start of a feed — the "RPM before the first ball". Transfer stays off while
-     * measured velocity is below this baseline (see {@link #canFeedBall()}).
+     * True once velocity has returned to pre-1st-ball (armed − margin) after that
+     * first drop. Until then feed stays open so ball 2 can still go; afterward
+     * further feed waits for nearly the same pre-1st RPM (3rd-ball protect).
      */
-    private double preFirstBallVelocityTicks = Double.NaN;
+    private boolean recoveredToPreFirst = false;
+
+    /** True while turnTransfer is holding the queue for flywheel recovery. */
+    private static volatile boolean holdingForRecovery = false;
 
     public AutoCycleShootControl(MotorControl motorControl) {
         this.motorControl = motorControl;
     }
 
+    /** Used by {@link AutoCycleShootLogic} so pause time doesn't end the shot. */
+    public static boolean isHoldingForRecovery() {
+        return holdingForRecovery;
+    }
+
     public void update() {
         if (OuttakeStates.getAutoCycleShootState() != prevAutoCycleShootState) {
             if (OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.turnTransfer) {
-                preFirstBallVelocityTicks = Double.NaN;
+                resetFeedGate();
             }
             updateStates();
             prevAutoCycleShootState = OuttakeStates.getAutoCycleShootState();
@@ -45,8 +59,7 @@ public class AutoCycleShootControl {
             case recalibrate:
                 break;
             case activate:
-                IntakeStates.setLockServoState(LockServoStates.unlock);
-                // Reset intake state so they don't fight, and so it can be restarted after shooting
+                // Unlock only once turnTransfer is ready to feed — avoids open latch + idle transfer.
                 IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
                 break;
             case turnBack:
@@ -54,37 +67,52 @@ public class AutoCycleShootControl {
                 break;
             case turnTransfer:
                 if (canFeedBall()) {
+                    holdingForRecovery = false;
+                    IntakeStates.setLockServoState(LockServoStates.unlock);
                     IntakeStates.setIntakeMotorState(IntakeMotorStates.forward);
                     IntakeStates.setTransferMotorState(TransferMotorStates.forward);
                 } else {
-                    // Hold the queue: don't push the next ball into a recovering flywheel.
+                    // Only after the post-1st recovery gate (or brief spin-up arm wait).
+                    holdingForRecovery = true;
                     IntakeStates.setIntakeMotorState(IntakeMotorStates.idle);
                     IntakeStates.setTransferMotorState(TransferMotorStates.idle);
                 }
                 break;
             case stop:
+                holdingForRecovery = false;
                 break;
             case turnTransferBack:
+                holdingForRecovery = false;
                 IntakeStates.setTransferMotorState(TransferMotorStates.backward);
                 break;
             case deactivate:
-                preFirstBallVelocityTicks = Double.NaN;
+                resetFeedGate();
                 IntakeStates.setIntakeMotorState(IntakeMotorStates.idle);
                 IntakeStates.setTransferMotorState(TransferMotorStates.idle);
                 IntakeStates.setLockServoState(LockServoStates.lock);
-                // Ensure intake is ready for next trigger press
                 IntakeStates.setAutoIntakeTransferState(AutoIntakeTransferStates.idle);
                 break;
             case idle:
-                preFirstBallVelocityTicks = Double.NaN;
+                resetFeedGate();
                 break;
         }
     }
 
+    private void resetFeedGate() {
+        armedVelocityTicks = Double.NaN;
+        firstDropSeen = false;
+        recoveredToPreFirst = false;
+        holdingForRecovery = false;
+    }
+
     /**
-     * TeleOp: latch pre-first-ball RPM once near target, then only feed while the
-     * flywheel has recovered to that baseline. Autonomous far path keeps the old
-     * absolute velocity gate.
+     * TeleOp feed gate (pre-1st-ball resume):
+     * <ul>
+     *   <li>Spin-up: wait until armed (near target, or settled cruise ≥ settle frac).</li>
+     *   <li>Through first drop / before full pre-1st recovery: keep feeding (1–2 balls).</li>
+     *   <li>After that recovery: only feed when velocity is back to armed − margin
+     *       (nearly pre-1st-ball RPM) so the 3rd ball does not stack onto a dead wheel.</li>
+     * </ul>
      */
     private boolean canFeedBall() {
         double v1 = motorControl.getMotorVelocity(MotorConstants.outtake1);
@@ -95,29 +123,51 @@ public class AutoCycleShootControl {
             return velocity > FAR_MIN_OUTTAKE_VELOCITY;
         }
 
-        maybeLatchPreFirstBallVelocity(velocity);
+        updateFeedGate(velocity);
 
-        if (Double.isNaN(preFirstBallVelocityTicks)) {
-            // Still spinning up — don't feed yet.
+        if (Double.isNaN(armedVelocityTicks)) {
             return false;
         }
 
-        return velocity >= preFirstBallVelocityTicks - OuttakeConstants.feedResumeMarginTicks;
+        // Open until we've fully recovered once to pre-1st after the first drop.
+        if (!recoveredToPreFirst) {
+            return true;
+        }
+
+        return velocity >= armedVelocityTicks - OuttakeConstants.feedResumeMarginTicks;
     }
 
-    private void maybeLatchPreFirstBallVelocity(double velocity) {
-        if (!Double.isNaN(preFirstBallVelocityTicks)) return;
+    private void updateFeedGate(double velocity) {
+        maybeArm(velocity);
+        if (Double.isNaN(armedVelocityTicks)) return;
+
+        if (!firstDropSeen
+                && velocity <= armedVelocityTicks - OuttakeConstants.feedFirstDropTicks) {
+            firstDropSeen = true;
+        }
+
+        if (firstDropSeen
+                && !recoveredToPreFirst
+                && velocity >= armedVelocityTicks - OuttakeConstants.feedResumeMarginTicks) {
+            recoveredToPreFirst = true;
+        }
+    }
+
+    private void maybeArm(double velocity) {
+        if (!Double.isNaN(armedVelocityTicks)) return;
 
         double target = motorControl.getLastCommandedVelocity(MotorConstants.outtake1);
         if (Double.isNaN(target) || target <= 0) {
-            // Fall back to the distance-interpolated target when velocity mode
-            // hasn't latched a command yet (power-assist spin-up).
+            // Bang-bang power mode reports NaN for last commanded velocity — use UI target.
             target = GlobalVariables.outtakeTargetSpeed;
         }
         if (target <= 0) return;
 
-        if (velocity >= target * OuttakeConstants.feedArmTargetFrac) {
-            preFirstBallVelocityTicks = velocity;
+        // Prefer near-target arm; fall back to settled cruise so an unreachable
+        // commanded target (3600 cmd / ~3400 cruise) cannot block feed forever.
+        if (velocity >= target * OuttakeConstants.feedArmTargetFrac
+                || velocity >= target * OuttakeConstants.feedArmSettleFrac) {
+            armedVelocityTicks = velocity;
         }
     }
 }

@@ -131,6 +131,13 @@ export default function App() {
     }
     return null
   })()
+  /** Localizer goal range (inches); carry last known when sample omits `d`. */
+  const latestDistanceIn = (() => {
+    for (let i = samples.length - 1; i >= 0; i--) {
+      if (typeof samples[i].d === 'number' && Number.isFinite(samples[i].d)) return samples[i].d!
+    }
+    return null
+  })()
   const hasCurrent = samples.some(
     (sample) => typeof sample.i1 === 'number' || typeof sample.i2 === 'number',
   )
@@ -245,7 +252,7 @@ export default function App() {
                 </label>
                 <button onClick={saveSession}>Save .jsonl</button>
               </div>
-              {activeTab === 'live' && latest && (
+              {latest && (
                 <div className="live-readouts">
                   <div>
                     <span>RPM 1</span>
@@ -262,15 +269,26 @@ export default function App() {
                     </strong>
                   </div>
                   <div>
-                    <span>Δ (1−2)</span>
+                    <span>Distance</span>
                     <strong>
-                      {(() => {
-                        const d =
-                          ticksToRpm(latest.v1, ticksPerRev) - ticksToRpm(latest.v2, ticksPerRev)
-                        return `${d >= 0 ? '+' : ''}${d.toFixed(0)}`
-                      })()}
+                      {latestDistanceIn === null
+                        ? '—'
+                        : `${(latestDistanceIn * 2.54).toFixed(0)} cm`}
                     </strong>
                   </div>
+                  {activeTab === 'live' && (
+                    <div>
+                      <span>Δ (1−2)</span>
+                      <strong>
+                        {(() => {
+                          const d =
+                            ticksToRpm(latest.v1, ticksPerRev) -
+                            ticksToRpm(latest.v2, ticksPerRev)
+                          return `${d >= 0 ? '+' : ''}${d.toFixed(0)}`
+                        })()}
+                      </strong>
+                    </div>
+                  )}
                   {hasCurrent && (
                     <div>
                       <span>Motor current</span>
@@ -280,10 +298,12 @@ export default function App() {
                       </strong>
                     </div>
                   )}
-                  <div>
-                    <span>Samples</span>
-                    <strong>{samples.length}</strong>
-                  </div>
+                  {activeTab === 'live' && (
+                    <div>
+                      <span>Samples</span>
+                      <strong>{samples.length}</strong>
+                    </div>
+                  )}
                 </div>
               )}
               <ChartView

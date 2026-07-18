@@ -20,7 +20,7 @@ public class ShooterSample {
     public boolean intakeBall;
     public boolean transferBall;
     public double battery;      // volts, NaN if not sampled this tick
-    public double distance;     // inches to goal, NaN when not shooting
+    public double distance;     // inches to goal (localizer); NaN if invalid
 
     /** Serialize as one compact JSONL line. Hand-built (no reflection) — this runs
      *  on the writer thread but keeps allocation predictable. */

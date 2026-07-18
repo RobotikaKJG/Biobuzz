@@ -22,6 +22,9 @@ case "$OS" in
 esac
 
 TIMEOUT=60
+BUILD_TIMEOUT="${BUILD_TIMEOUT:-300}"     # gradle assembleDebug
+INSTALL_TIMEOUT="${INSTALL_TIMEOUT:-120}" # adb install (wireless can hang forever)
+LOGCAT_TIMEOUT="${LOGCAT_TIMEOUT:-45}"    # logcat -d / matchlog pull
 MAX_DEPLOY_LOGS=20
 LOG_DIR="$SCRIPT_DIR/logs"
 mkdir -p "$LOG_DIR"
@@ -38,10 +41,63 @@ prune_deploy_logs() {
 }
 prune_deploy_logs
 echo "=== deploy log: $DEPLOY_LOG ==="
+echo "=== timeouts: build=${BUILD_TIMEOUT}s install=${INSTALL_TIMEOUT}s logcat=${LOGCAT_TIMEOUT}s hub-ping=${TIMEOUT}s ==="
 
 ts()  { date "+%H:%M:%S"; }
 log() { echo "[$(ts)] $*"; }
 logn(){ printf "\r[$(ts)] %s" "$*"; }
+
+# Portable timeout + heartbeat. macOS has no GNU timeout by default.
+# Runs "$@", prints a CLI heartbeat every HEARTBEAT_SEC, kills on timeout.
+# Sets RUN_OUTPUT to combined stdout/stderr. Returns command exit (124 = timeout).
+HEARTBEAT_SEC=5
+RUN_OUTPUT=""
+run_with_timeout() {
+    local timeout_sec=$1
+    local desc=$2
+    shift 2
+    local start_s end_s elapsed pid rc out_file last_beat=0
+    out_file=$(mktemp "${TMPDIR:-/tmp}/deploy-run.XXXXXX")
+    start_s=$(date +%s)
+
+    log "$desc — starting (timeout ${timeout_sec}s)"
+    "$@" >"$out_file" 2>&1 &
+    pid=$!
+
+    while kill -0 "$pid" 2>/dev/null; do
+        end_s=$(date +%s)
+        elapsed=$((end_s - start_s))
+        if (( elapsed >= timeout_sec )); then
+            echo ""
+            log "$desc — TIMEOUT after ${elapsed}s (limit ${timeout_sec}s), killing pid $pid"
+            kill "$pid" 2>/dev/null || true
+            sleep 1
+            kill -9 "$pid" 2>/dev/null || true
+            wait "$pid" 2>/dev/null || true
+            RUN_OUTPUT=$(cat "$out_file" 2>/dev/null || true)
+            rm -f "$out_file"
+            return 124
+        fi
+        if (( elapsed - last_beat >= HEARTBEAT_SEC )); then
+            last_beat=$elapsed
+            log "$desc — still running… ${elapsed}s / ${timeout_sec}s"
+        fi
+        sleep 1
+    done
+
+    wait "$pid"
+    rc=$?
+    end_s=$(date +%s)
+    elapsed=$((end_s - start_s))
+    RUN_OUTPUT=$(cat "$out_file" 2>/dev/null || true)
+    rm -f "$out_file"
+    if [[ $rc -eq 0 ]]; then
+        log "$desc — done (${elapsed}s)"
+    else
+        log "$desc — failed exit=$rc (${elapsed}s)"
+    fi
+    return $rc
+}
 
 # macOS: ping -W is milliseconds. Linux: seconds. Windows: ping.exe -w is ms.
 ping_hub_once() {
@@ -381,28 +437,98 @@ connect_adb() {
     exit 1
 }
 
+# ── Install helpers ──────────────────────────────────────────────────────────
+
+# Wireless adb install often hangs forever if the RC app is mid-OpMode / holding
+# the package. Force-stop first; retry once after a soft adb reconnect on timeout.
+RC_PACKAGE="${RC_PACKAGE:-com.qualcomm.ftcrobotcontroller}"
+
+prepare_for_install() {
+    local apk_bytes apk_mb
+    if [[ -f "$APK" ]]; then
+        apk_bytes=$(wc -c < "$APK" | tr -d ' ')
+        apk_mb=$(awk "BEGIN { printf \"%.1f\", $apk_bytes / 1000000 }")
+        log "APK ready: $APK (${apk_mb} MB)"
+    fi
+    log "Force-stopping $RC_PACKAGE (avoids install hangs while OpMode runs)"
+    adb -s "$HUB" shell am force-stop "$RC_PACKAGE" 2>&1 | sed 's/^/  adb: /' || true
+    # Brief settle so PackageManager releases the APK.
+    sleep 1
+    log "ADB state before install: $(adb_state)"
+}
+
+install_apk() {
+    local attempt=1 max_attempts=2 install_exit=0
+    prepare_for_install
+
+    while (( attempt <= max_attempts )); do
+        log "Install attempt $attempt/$max_attempts → adb install -r -g"
+        if run_with_timeout "$INSTALL_TIMEOUT" "adb install" \
+            adb -s "$HUB" install -r -g "$APK"
+        then
+            install_exit=0
+        else
+            install_exit=$?
+        fi
+
+        if [[ -n "$RUN_OUTPUT" ]]; then
+            echo "$RUN_OUTPUT" | while IFS= read -r line; do
+                [[ -n "$line" ]] && log "  install: $line"
+            done
+        fi
+
+        if [[ $install_exit -eq 0 && "$RUN_OUTPUT" == *"Success"* ]]; then
+            log "Install Success"
+            return 0
+        fi
+
+        if [[ $install_exit -eq 124 ]]; then
+            log "Install timed out — common when RC is busy or wireless ADB stalls"
+            log "  Tip: stop OpMode on DS, or unplug battery 5s, then re-run ./deploy.sh"
+            if (( attempt < max_attempts )); then
+                log "Soft-reconnect ADB and retry once…"
+                adb disconnect "$HUB" &>/dev/null
+                sleep 1
+                adb connect "$HUB" 2>&1 | sed 's/^/  adb: /' || true
+                adb_wait_online 8 || true
+                prepare_for_install
+            fi
+        else
+            log "Install failed (exit $install_exit)"
+        fi
+        attempt=$((attempt + 1))
+    done
+    return 1
+}
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
-log "Building APK..."
-if ! ./gradlew assembleDebug -q; then
+log "── Deploy start ──"
+log "Hub $HUB  SSID=$FTC_SSID  APK=$APK"
+
+# Baked into TeamCode BuildInfo.DEPLOYED and shown on Driver Station telemetry.
+export DEPLOY_STAMP
+DEPLOY_STAMP="$(date '+%Y-%m-%d %H:%M:%S')"
+log "Deploy stamp: $DEPLOY_STAMP (Driver Hub will show this after install)"
+
+if ! run_with_timeout "$BUILD_TIMEOUT" "gradle assembleDebug" ./gradlew assembleDebug -q; then
+    if [[ -n "$RUN_OUTPUT" ]]; then
+        echo "$RUN_OUTPUT" | tail -40 | sed 's/^/  gradle: /'
+    fi
     log "Build FAILED — aborting before WiFi switch"
     exit 1
 fi
-log "Build complete"
 if [[ ! -f "$APK" ]]; then
     log "APK missing: $APK"
     exit 1
 fi
 
+log "── Connecting to Control Hub WiFi ──"
 connect_hub
 
-log "Installing APK..."
-install_output=$(adb -s "$HUB" install -r -g "$APK" 2>&1)
-install_exit=$?
-echo "$install_output" | while IFS= read -r line; do log "  $line"; done
-
-if [[ $install_exit -ne 0 || "$install_output" != *"Success"* ]]; then
-    log "Install failed (exit $install_exit)"
+log "── Installing APK over wireless ADB ──"
+if ! install_apk; then
+    log "Install FAILED after retries"
     exit 1
 fi
 log "Deploy complete!"
@@ -412,9 +538,16 @@ log "Deploy complete!"
 # CycleTimer — from the run *before* this deploy, then clear it so the next run
 # logs cleanly. No arguments needed; this happens every deploy.
 LOG_FILE="$LOG_DIR/robot-$(date +%Y%m%d-%H%M%S).log"
-log "Pulling logcat -> logs/$(basename "$LOG_FILE")"
-adb -s "$HUB" logcat -d > "$LOG_FILE" 2>&1 || true
-log "Pulled $(wc -l < "$LOG_FILE" 2>/dev/null | tr -d ' ') lines"
+log "── Pulling robot logs ──"
+if run_with_timeout "$LOGCAT_TIMEOUT" "adb logcat -d" \
+    adb -s "$HUB" logcat -d
+then
+    printf '%s\n' "$RUN_OUTPUT" > "$LOG_FILE"
+    log "Pulled $(wc -l < "$LOG_FILE" 2>/dev/null | tr -d ' ') lines -> logs/$(basename "$LOG_FILE")"
+else
+    log "logcat pull timed out / failed — continuing"
+    : > "$LOG_FILE"
+fi
 recent=$(grep -E "TurretThread|ControlThread|DriveLoop|CycleTimer|ShooterTelemetry" "$LOG_FILE" 2>/dev/null | tail -30)
 if [[ -n "$recent" ]]; then
     log "── Recent robot-loop log lines ──"
@@ -423,8 +556,14 @@ fi
 
 # Also pull the FTC per-OpMode match logs — complete per-run logcat dumps the SDK
 # writes on opmode stop (not subject to ring-buffer rollover like `logcat -d`).
-adb -s "$HUB" pull /storage/emulated/0/FIRST/matchlogs "$LOG_DIR/" >/dev/null 2>&1 \
-    && log "Pulled match logs -> logs/matchlogs/" || log "No match logs found"
+if run_with_timeout "$LOGCAT_TIMEOUT" "adb pull matchlogs" \
+    adb -s "$HUB" pull /storage/emulated/0/FIRST/matchlogs "$LOG_DIR/"
+then
+    log "Pulled match logs -> logs/matchlogs/"
+else
+    log "No match logs found (or pull timed out)"
+fi
 
 adb -s "$HUB" logcat -c 2>/dev/null || true   # clear buffer so the next run starts clean
+log "── Deploy finished ──"
 log "Full deploy transcript: $DEPLOY_LOG"

@@ -102,6 +102,8 @@ public class GeneralRedTeleOp extends LinearOpMode {
                 // Throttle telemetry so it never caps the fast drive loop.
                 long nowMs = System.currentTimeMillis();
                 if (nowMs - lastTelemetryMs >= TELEMETRY_INTERVAL_MS) {
+                    telemetry.addData("Deployed", BuildInfo.DEPLOYED);
+                    telemetry.addLine(cycleTimer.toTable());
                     telemetry.addData("Drive loop",   "%.2f ms  (%.0f hz)", driveTimer.getAvgMs(), hz(driveTimer.getAvgMs()));
                     telemetry.addData("Turret loop",  "%.2f ms  (%.0f hz)", turretThread.getAvgLoopMs(), hz(turretThread.getAvgLoopMs()));
                     telemetry.addData("Control loop", "%.2f ms  (%.0f hz)", controlThread.getAvgLoopMs(), hz(controlThread.getAvgLoopMs()));
@@ -117,7 +119,6 @@ public class GeneralRedTeleOp extends LinearOpMode {
                         telemetry.addData("Control lastErr", controlThread.getErrorCount() + "x " + controlThread.getLastError());
                     if (driveErrors > 0)
                         telemetry.addData("Drive errors", driveErrors);
-                    telemetry.addLine(cycleTimer.toTable());
                     telemetry.update();
                     lastTelemetryMs = nowMs;
                 }

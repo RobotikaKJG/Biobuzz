@@ -57,20 +57,50 @@ public class OuttakeConstants {
     public static double shootClearHoldSec = 0.5;   // queue must stay empty this long to stop
     public static double shootFeedMaxSec = 3.5;     // hard cap (jam / sensor failure)
 
-    // Transfer feed gating (TeleOp): latch flywheel RPM just before the first ball,
-    // then pause intake+transfer whenever measured velocity falls below that baseline
-    // (minus a small noise margin). Stops stacking balls 2/3 onto a still-recovering
-    // wheel — logs show ~259 / 364 / 451 RPM avg drops for balls 1/2/3 without this.
-    // Units: encoder ticks/s (same as setMotorRPM / getMotorVelocity).
-    public static double feedArmTargetFrac = 0.98;      // must be this close to target to latch baseline
-    public static double feedResumeMarginTicks = 40;    // allow ~85 RPM of noise under baseline
+    // Transfer feed gating (TeleOp), ticks/s:
+    // 1) Arm near target OR settled cruise (= pre-1st-ball RPM), feed through 1 / 2.
+    // 2) After first drop has recovered to that pre-1st level once, further feed
+    //    waits until velocity is back to armed − feedResumeMarginTicks (3rd ball).
+    // Commanded target is often unreachable (e.g. 3600 cmd / ~3400 cruise); settle
+    // frac lets us arm on real cruise instead of blocking forever at 98% of target.
+    public static double feedArmTargetFrac = 0.98;      // preferred: this close to target to arm
+    public static double feedArmSettleFrac = 0.90;      // fallback: arm on actual cruise ≥ this × target
+    public static double feedFirstDropTicks = 80;       // ~170 RPM dip counts as first ball
+    public static double feedResumeMarginTicks = 40;    // ~85 RPM under pre-1st-ball baseline
+
+    // Close-mode recovery: slam to +100% power as soon as we're a little under
+    // target (shot dip), and stay there until nearly back — not wait for ~214 RPM.
+    public static double recoverEnterTicks = 25;        // ~54 RPM under → full power
+    public static double recoverExitTicks = 35;         // stay at 100% until within ~75 RPM
 
     public static double resetWait = 100.0;
 
-    public static double outtakeSpeedCloseClose = 1600;
+    // Close family +1% vs prior tune (1680 / 1600 / 1800 / 3400 RPM floor).
+    public static double outtakeSpeedCloseClose = 1616;
     public static double outtakeSpeedFar = 2190;
-    public static double outtakeSpeedClose = 1680;
-    public static double outtakeSpeedCloseFar = 1800;
+    public static double outtakeSpeedClose = 1697;
+    public static double outtakeSpeedCloseFar = 1818;
+
+    // Close-mode distance→velocity (ticks/s). Anchored at the empirically tuned
+    // 275 cm / outtakeSpeedClose shot; closer uses v = v0 * sqrt(d/d0), clamped.
+    // Beyond closeMaxDistanceCm, forwardFar / far toggle owns long shots.
+    public static double closeCalDistanceCm = 275.0;
+    public static double closeCalTicks = outtakeSpeedClose; // 1697
+    public static double closeMinDistanceCm = 140.0;
+    public static double closeMaxDistanceCm = 290.0; // small margin past calibration
+    // Floor at ~3434 RPM (3400×1.01; 28 PPR → ticks/s = RPM * 28/60).
+    public static double closeMinTicks = 1603; // 3434 * 28 / 60
+    public static double closeMaxTicks = outtakeSpeedClose;
+
+    // Localizer under-reads goal range vs tape (~260 shown when ~270 true).
+    // Applied to close RPM curve and shooter-log `d` (dashboard).
+    public static double goalDistanceOffsetCm = 10.0;
+
+    /** Raw localizer inches → corrected inches (negative / invalid unchanged). */
+    public static double correctedDistanceInches(double rawInches) {
+        if (rawInches < 0 || Double.isNaN(rawInches)) return rawInches;
+        return rawInches + goalDistanceOffsetCm / 2.54;
+    }
 
     public static double farShootingThreshold = 2300;
     public static double targetSpeedThreshold = 0.02;

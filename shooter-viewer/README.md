@@ -35,6 +35,9 @@ network. Default hub address: `192.168.43.1:8765`.
 - **Shot analysis**: each burst (auto-cycle shoot) gets a table — min RPM per shot,
   drop from target (absolute + %), per-motor minimums, recovery time, spacing.
   Red dashed lines on the chart mark detected shots.
+- **Control**: keyboard remote over the same WebSocket. Arm the panel, then
+  WASD + Q/E for mecanum, Space shoot, I intake, O spin, etc. Needs a running
+  TeleOp (redeploy TeamCode so `RemoteControl` is on the robot).
 
 Chart controls: drag = zoom, wheel = zoom at cursor, double-click = reset.
 

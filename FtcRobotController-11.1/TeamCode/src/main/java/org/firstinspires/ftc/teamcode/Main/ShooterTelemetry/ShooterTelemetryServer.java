@@ -29,6 +29,7 @@ import fi.iki.elonen.NanoWSD;
  *   GET /api/sessions/{name}   -> raw JSONL session file
  * WebSocket at /ws: on-connect hello (+header if a session is live), then
  * {"type":"batch","samples":[...]} every ~100 ms while an OpMode runs.
+ * Viewer may send {"type":"cmd",...} frames; see {@link RemoteControl}.
  */
 public class ShooterTelemetryServer extends NanoWSD {
     private static final String TAG = "ShooterTelemetrySrv";
@@ -204,7 +205,11 @@ public class ShooterTelemetryServer extends NanoWSD {
 
         @Override
         protected void onMessage(WebSocketFrame message) {
-            // Viewer doesn't send anything; ignore.
+            try {
+                RemoteControl.onMessage(message.getTextPayload());
+            } catch (Throwable t) {
+                RobotLog.ww(TAG, "cmd parse failed: %s", t.getMessage());
+            }
         }
 
         @Override

@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.GoBildaIndicator;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
+import org.firstinspires.ftc.teamcode.Main.ShooterTelemetry.RemoteControl;
 import org.firstinspires.ftc.teamcode.Main.ShooterTelemetry.ShooterLogger;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
@@ -94,6 +95,7 @@ public class IterativeController {
     private void updateCommonValues() {
         prevGamepad1.copy(currentGamepad1);
         currentGamepad1.copy(gamepad1);
+        RemoteControl.mergeInto(currentGamepad1);
         edgeDetection.refreshGamepad1Index(currentGamepad1, prevGamepad1);
 
         prevGamepad2.copy(currentGamepad2);

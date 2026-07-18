@@ -1,3 +1,4 @@
+import type { RemoteCmd } from './remoteCmd'
 import type { Sample, SessionHeader, SessionInfo } from './types'
 
 export type ConnStatus = 'disconnected' | 'connecting' | 'connected' | 'live'
@@ -49,6 +50,21 @@ export class RobotConnection {
       this.ws = null
     }
     this.setStatus('disconnected')
+  }
+
+  /** Send a remote-control command. Returns false if the socket is not open. */
+  sendCmd(cmd: RemoteCmd): boolean {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return false
+    try {
+      this.ws.send(JSON.stringify(cmd))
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  get canSend(): boolean {
+    return !!this.ws && this.ws.readyState === WebSocket.OPEN
   }
 
   private setStatus(s: ConnStatus) {

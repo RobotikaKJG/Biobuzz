@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ChartView from './components/ChartView'
 import ConnectionBar from './components/ConnectionBar'
+import ControlView from './components/ControlView'
 import SessionList from './components/SessionList'
 import ShotStats from './components/ShotStats'
 import { analyzeSession } from './lib/analysis'
 import { parseJsonl, toJsonl } from './lib/parse'
+import type { RemoteCmd } from './lib/remoteCmd'
 import type { ConnStatus } from './lib/robot'
 import { fetchSessionFile, fetchSessions, RobotConnection } from './lib/robot'
 import type { Sample, Session, SessionHeader, SessionInfo } from './lib/types'
@@ -16,7 +18,7 @@ export default function App() {
   const [status, setStatus] = useState<ConnStatus>('disconnected')
   const [robotSessions, setRobotSessions] = useState<SessionInfo[]>([])
   const [loadedSession, setLoadedSession] = useState<Session | null>(null)
-  const [activeTab, setActiveTab] = useState<'live' | 'diagnose'>('live')
+  const [activeTab, setActiveTab] = useState<'live' | 'diagnose' | 'control'>('live')
   const [diagnoseLive, setDiagnoseLive] = useState(true)
   const [liveVersion, setLiveVersion] = useState(0)
   const [follow, setFollow] = useState(true)
@@ -108,14 +110,29 @@ export default function App() {
     setFollow(false)
   }, [])
 
+  // Stable identity — ControlPanel keeps this in a ref; never put unstable
+  // closures in effects that own the key/command loop.
+  const sendRemoteCmd = useCallback((cmd: RemoteCmd) => {
+    return connRef.current?.sendCmd(cmd) ?? false
+  }, [])
+
   const liveHasData = liveRef.current.samples.length > 0
   const liveSession = liveHasData ? liveRef.current : null
   const session: Session | null =
-    activeTab === 'live' ? liveSession : diagnoseLive ? liveSession : loadedSession
+    activeTab === 'control'
+      ? null
+      : activeTab === 'live'
+        ? liveSession
+        : diagnoseLive
+          ? liveSession
+          : loadedSession
   const samples = session?.samples ?? []
   const sessionVersion = session === liveRef.current ? liveVersion : 0
   const ticksPerRev =
-    ticksPerRevOverride ?? session?.header?.ticksPerRev ?? DEFAULT_TICKS_PER_REV
+    ticksPerRevOverride
+    ?? liveRef.current.header?.ticksPerRev
+    ?? session?.header?.ticksPerRev
+    ?? DEFAULT_TICKS_PER_REV
 
   const bursts = useMemo(
     () => (activeTab === 'diagnose' ? analyzeSession(samples) : []),
@@ -172,6 +189,13 @@ export default function App() {
             >
               Diagnose
             </button>
+            <button
+              className={activeTab === 'control' ? 'active' : ''}
+              onClick={() => setActiveTab('control')}
+              title="Keyboard remote drive / TeleOp buttons"
+            >
+              Control
+            </button>
           </nav>
         </div>
         <ConnectionBar
@@ -186,6 +210,16 @@ export default function App() {
       {error && <div className="error-bar">{error}</div>}
 
       <div className={`body ${activeTab}`}>
+        {activeTab === 'control' && (
+          <ControlView
+            status={status}
+            canSend={status === 'connected' || status === 'live'}
+            onSend={sendRemoteCmd}
+            samples={liveRef.current.samples}
+            dataVersion={liveVersion}
+            ticksPerRev={ticksPerRev}
+          />
+        )}
         {activeTab === 'diagnose' && <aside>
           {liveHasData && (
             <button
@@ -208,7 +242,7 @@ export default function App() {
           />
         </aside>}
 
-        <main>
+        {activeTab !== 'control' && <main>
           {session ? (
             <>
               <div className="toolbar">
@@ -342,7 +376,7 @@ export default function App() {
               )}
             </div>
           )}
-        </main>
+        </main>}
       </div>
     </div>
   )

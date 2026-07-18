@@ -92,6 +92,25 @@ wss.on('connection', (ws) => {
   console.log('viewer connected')
   ws.send(JSON.stringify({ type: 'hello', opModeRunning: liveRunning, opMode: liveRunning ? 'MockTeleOp' : null }))
   if (liveRunning && liveHeader) ws.send(JSON.stringify(liveHeader))
+  ws.on('message', (data) => {
+    try {
+      const msg = JSON.parse(String(data))
+      if (msg?.type === 'cmd') {
+        const d = msg.drive ?? {}
+        const b = msg.buttons ?? {}
+        const pressed = Object.entries(b)
+          .filter(([, v]) => v)
+          .map(([k]) => k)
+          .join(',')
+        console.log(
+          `cmd drive lx=${(d.lx ?? 0).toFixed(2)} ly=${(d.ly ?? 0).toFixed(2)} rx=${(d.rx ?? 0).toFixed(2)}` +
+            (pressed ? ` buttons=${pressed}` : ''),
+        )
+      }
+    } catch {
+      /* ignore */
+    }
+  })
 })
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))

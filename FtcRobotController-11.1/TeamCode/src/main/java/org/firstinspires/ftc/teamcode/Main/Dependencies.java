@@ -71,7 +71,7 @@ public class Dependencies {
         sensorControl = new SensorControl(hardwareMap, edgeDetection, pedroLocalizer);
         servoControl = new ServoControl(hardwareMap);
         turretServoControl = new TurretServoControl(servoControl, sensorControl);
-        shooterLogger = new ShooterLogger(motorControl, sensorControl);
+        shooterLogger = new ShooterLogger(motorControl, sensorControl, turretServoControl);
         // Persistent singleton (no-op after the first OpMode); serves recorded
         // sessions + live stream to the laptop viewer on port 8765.
         ShooterTelemetryServer.ensureStarted();

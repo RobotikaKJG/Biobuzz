@@ -11,6 +11,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycl
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TurretServo.TurretServoControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,6 +51,7 @@ public class ShooterLogger {
 
     private final MotorControl motorControl;
     private final SensorControl sensorControl;
+    private final TurretServoControl turretServoControl;
 
     private final ArrayBlockingQueue<ShooterSample> queue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
     private volatile boolean running = false;
@@ -60,10 +63,18 @@ public class ShooterLogger {
     private long lastIdleSampleMs = 0;
     private long lastBatteryMs = 0;
     private double cachedBattery = Double.NaN;
+    // Reading all eight motor ADCs in one loop stalled hub traffic. Read one per
+    // sample instead; at active loop rate every motor still refreshes ~6 Hz.
+    private int nextCurrentMotor = 0;
+    private final double[] cachedMotorCurrent = new double[8];
 
-    public ShooterLogger(MotorControl motorControl, SensorControl sensorControl) {
+    public ShooterLogger(
+            MotorControl motorControl,
+            SensorControl sensorControl,
+            TurretServoControl turretServoControl) {
         this.motorControl = motorControl;
         this.sensorControl = sensorControl;
+        this.turretServoControl = turretServoControl;
     }
 
     /** Start a logging session. Call after waitForStart(). Never throws. */
@@ -79,7 +90,7 @@ public class ShooterLogger {
                     .format(new Date(sessionStartMs));
             File file = new File(LOG_DIR, stamp + "_" + opModeName + ".jsonl");
 
-            String headerJson = "{\"type\":\"header\",\"version\":2"
+            String headerJson = "{\"type\":\"header\",\"version\":3"
                     + ",\"epochMs\":" + sessionStartMs
                     + ",\"opMode\":\"" + opModeName + "\""
                     + ",\"alliance\":\"" + GlobalVariables.alliance + "\""
@@ -133,7 +144,8 @@ public class ShooterLogger {
 
             boolean active = motorState != OuttakeMotorStates.idle
                     || OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle
-                    || intakeBall || transferBall;
+                    || intakeBall || transferBall
+                    || RemoteControl.isActive();
             if (active) lastActiveMs = now;
 
             boolean fullRate = (now - lastActiveMs) < ACTIVE_TAIL_MS;
@@ -146,13 +158,23 @@ public class ShooterLogger {
             s.tMs = now - sessionStartMs;
             s.v1 = motorControl.getMotorVelocity(MotorConstants.outtake1);
             s.v2 = motorControl.getMotorVelocity(MotorConstants.outtake2);
-            // getMotorCurrent() is cached per motor for 150 ms, so sampling here does
-            // not add an ADC round-trip on every control-loop iteration.
-            s.i1 = motorControl.getMotorCurrent(MotorConstants.outtake1);
-            s.i2 = motorControl.getMotorCurrent(MotorConstants.outtake2);
+            int currentMotor = nextCurrentMotor;
+            cachedMotorCurrent[currentMotor] = motorControl.getMotorCurrent(currentMotor);
+            nextCurrentMotor = (nextCurrentMotor + 1) % cachedMotorCurrent.length;
+            s.i1 = cachedMotorCurrent[MotorConstants.outtake1];
+            s.i2 = cachedMotorCurrent[MotorConstants.outtake2];
+            s.idFl = cachedMotorCurrent[MotorConstants.frontLeft];
+            s.idBl = cachedMotorCurrent[MotorConstants.backLeft];
+            s.idFr = cachedMotorCurrent[MotorConstants.frontRight];
+            s.idBr = cachedMotorCurrent[MotorConstants.backRight];
+            s.iIntake = cachedMotorCurrent[MotorConstants.intake];
+            s.iTransfer = cachedMotorCurrent[MotorConstants.transfer];
             s.target = motorControl.getLastCommandedVelocity(MotorConstants.outtake1);
             s.shootState = OuttakeStates.getAutoCycleShootState().name();
             s.motorState = motorState.name();
+            s.intakeMotorState = IntakeStates.getIntakeMotorState().name();
+            s.transferMotorState = IntakeStates.getTransferMotorState().name();
+            s.turretTracking = OuttakeStates.isTurretTrackingEnabled();
             s.intakeBall = intakeBall;
             s.transferBall = transferBall;
 
@@ -170,6 +192,12 @@ public class ShooterLogger {
             double distIn = OuttakeConstants.correctedDistanceInches(
                     sensorControl.getDistanceFromLocalizer());
             s.distance = distIn >= 0 ? distIn : Double.NaN;
+
+            try {
+                s.turretDeg = turretServoControl.getTurretAngleDeg();
+            } catch (Throwable ignored) {
+                s.turretDeg = Double.NaN;
+            }
 
             if (!queue.offer(s)) {
                 queue.poll(); // drop oldest, keep newest

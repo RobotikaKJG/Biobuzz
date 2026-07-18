@@ -16,10 +16,11 @@ export function parseJsonl(name: string, text: string): Session {
     if (obj.type === 'header') header = obj as SessionHeader
     else if (typeof obj.t === 'number') {
       const sample = obj as Sample
-      // i1/i2 were added in log v2. Keep them optional so v1 JSONL continues
-      // through the exact same analysis path without synthetic zero-current data.
-      if (typeof sample.i1 !== 'number' || !Number.isFinite(sample.i1)) delete sample.i1
-      if (typeof sample.i2 !== 'number' || !Number.isFinite(sample.i2)) delete sample.i2
+      // Optional fields (v2 currents, v3 drive/transfer/turret) — drop non-finite.
+      for (const key of ['i1', 'i2', 'id0', 'id1', 'id2', 'id3', 'ii', 'it', 'ta'] as const) {
+        const v = sample[key]
+        if (typeof v !== 'number' || !Number.isFinite(v)) delete sample[key]
+      }
       samples.push(sample)
     }
   }

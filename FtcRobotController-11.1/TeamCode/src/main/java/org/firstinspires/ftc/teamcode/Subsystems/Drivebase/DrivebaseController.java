@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
+import org.firstinspires.ftc.teamcode.Main.ShooterTelemetry.RemoteControl;
 
 /**
  * Runs on the drive loop (the main OpMode thread). Self-contained: keeps its own
@@ -27,6 +28,7 @@ public class DrivebaseController {
     public void updateState() {
         prevGamepad.copy(currentGamepad);
         currentGamepad.copy(gamepad1);
+        RemoteControl.mergeInto(currentGamepad);
         edgeDetection.refreshGamepadIndex(currentGamepad, prevGamepad);
 
         if (edgeDetection.rising(drivebaseTrigger.getTrigger()))

@@ -8,11 +8,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const kids = []
 
 function run(cmd, args) {
+  // No shell: with shell:true Windows concatenates argv unquoted, so a node
+  // installed at "C:\Program Files\nodejs" splits at the space. Both children
+  // are plain .js run through node, so a shell was never needed.
   const child = spawn(cmd, args, {
     cwd: root,
     stdio: 'inherit',
     env: process.env,
-    shell: process.platform === 'win32',
   })
   kids.push(child)
   child.on('exit', (code, signal) => {
@@ -36,4 +38,5 @@ process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 
 run(process.execPath, ['server/index.mjs'])
-run(path.join(root, 'node_modules/.bin/vite'), [])
+// vite/bin/vite.js, not .bin/vite: the latter is a shell script on Windows.
+run(process.execPath, [path.join(root, 'node_modules/vite/bin/vite.js')])

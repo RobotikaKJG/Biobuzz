@@ -6,6 +6,7 @@
  * - GET /api/net-status       → JSON from hub-live.sh status (for UI badge)
  */
 import { spawn, execFile } from 'node:child_process'
+import fs from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -16,6 +17,28 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const VIEWER_ROOT = path.resolve(__dirname, '..')
 const HUB_LIVE = path.resolve(VIEWER_ROOT, '../FtcRobotController-11.1/hub-live.sh')
 const PORT = Number(process.env.VIEWER_API_PORT || 5174)
+const IS_WINDOWS = process.platform === 'win32'
+
+/** Git Bash interpreter, needed to run hub-live.sh on Windows. */
+function findBash() {
+  if (process.env.VIEWER_BASH) return process.env.VIEWER_BASH
+  const candidates = [
+    'C:\\Program Files\\Git\\bin\\bash.exe',
+    'C:\\Program Files (x86)\\Git\\bin\\bash.exe',
+    'C:\\Program Files\\Git\\usr\\bin\\bash.exe',
+  ]
+  return candidates.find((p) => fs.existsSync(p)) || 'bash.exe'
+}
+
+/**
+ * Windows cannot exec a .sh directly (EFTYPE) — run it through Git Bash.
+ * hub-live.sh already handles MINGW/MSYS, so it works once bash drives it.
+ * Returns [cmd, args] for spawn/execFile.
+ */
+function shellScriptCmd(script, args) {
+  if (!IS_WINDOWS) return [script, args]
+  return [findBash(), [script.replace(/\\/g, '/'), ...args]]
+}
 
 function streamCommand(res, cmd, args, cwd) {
   res.writeHead(200, {
@@ -74,15 +97,23 @@ const server = http.createServer((req, res) => {
   }
 
   if (url.pathname === '/api/live-connect') {
-    streamCommand(res, HUB_LIVE, ['connect-live'], path.dirname(HUB_LIVE))
+    streamCommand(res, ...shellScriptCmd(HUB_LIVE, ['connect-live']), path.dirname(HUB_LIVE))
     return
   }
   if (url.pathname === '/api/live-disconnect') {
-    streamCommand(res, HUB_LIVE, ['disconnect-live'], path.dirname(HUB_LIVE))
+    streamCommand(res, ...shellScriptCmd(HUB_LIVE, ['disconnect-live']), path.dirname(HUB_LIVE))
     return
   }
   if (url.pathname === '/api/net-status') {
-    execFileAsync(HUB_LIVE, ['status'], { cwd: path.dirname(HUB_LIVE), timeout: 8000 })
+    // Wrapped: execFile can throw synchronously (EFTYPE on a bad interpreter),
+    // which would escape .catch() below and take down the whole server.
+    Promise.resolve()
+      .then(() =>
+        execFileAsync(...shellScriptCmd(HUB_LIVE, ['status']), {
+          cwd: path.dirname(HUB_LIVE),
+          timeout: 8000,
+        }),
+      )
       .then(({ stdout }) => {
         res.writeHead(200, {
           'Content-Type': 'application/json',

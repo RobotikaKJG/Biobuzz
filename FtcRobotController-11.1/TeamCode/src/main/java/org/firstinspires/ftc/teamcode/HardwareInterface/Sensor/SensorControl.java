@@ -32,7 +32,11 @@ public class SensorControl {
 
     private final InfraRedSensor[] infraRedSensors;
 
-    private boolean isResetting = false;
+    // Set on the control loop (AutoResetPosControl, i.e. the square button) and read on
+    // the turret loop, which owns updateLocalizer()/applyContinuousVisionFusion(). Without
+    // volatile the turret loop can miss the flag entirely and keep fusing vision over the
+    // pose the reset just wrote, so the reset silently does nothing.
+    private volatile boolean isResetting = false;
 
     private double flywheelOffset = 0.0;
 

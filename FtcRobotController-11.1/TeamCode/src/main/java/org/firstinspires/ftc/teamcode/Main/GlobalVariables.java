@@ -14,8 +14,12 @@ public class GlobalVariables {
     public static boolean subCycles;
     public static boolean hang = false;
     public static double lastTurretAngle = 0;
-    public static double outtakeTargetSpeed = 0;
-    public static double rpmOffset = 0;
+    // Both cross thread boundaries and are non-atomic as plain doubles: the control
+    // loop writes outtakeTargetSpeed and reads rpmOffset, while tuning OpModes write
+    // rpmOffset and read both for telemetry. Without volatile a tuning change can sit
+    // in a cache and never reach the shooter (or the driver-hub readout).
+    public static volatile double outtakeTargetSpeed = 0;
+    public static volatile double rpmOffset = 0;
     public static Pose lastPose = new Pose(0,0,0);
     public static int gateTotal;
 }

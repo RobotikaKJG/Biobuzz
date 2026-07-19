@@ -44,7 +44,16 @@ public class OuttakeConstants {
     public static double minDistance = 53.94;
 
     public static double oneBallWait = 0.15;
+    // Delay in AutoCycleShootLogic.activate(), BEFORE the state machine reaches
+    // turnTransfer. The latch is still locked here, so this is not latch travel time.
     public static double servoOpenWait = 0.15;
+
+    // Latch travel time: AutoCycleShootControl.turnTransfer unlocks the latch and starts
+    // the transfer in the same tick, so the transfer used to push balls into a latch that
+    // had not moved yet. Hold the intake/transfer this long after the unlock command.
+    // Diagnostic value — far longer than servo travel should need. If it still jams at
+    // 2 s the cause is not timing (check latch command / position limits / binding).
+    public static double latchOpenSettleSec = 2.0;
     public static double deactivateAfter = 0.3;
 
     // TeleOp auto-finish for a shot: feed until both ball sensors have read empty

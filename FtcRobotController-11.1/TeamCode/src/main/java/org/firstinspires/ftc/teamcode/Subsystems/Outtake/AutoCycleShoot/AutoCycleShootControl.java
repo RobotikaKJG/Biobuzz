@@ -33,6 +33,9 @@ public class AutoCycleShootControl {
     /** True while turnTransfer is holding the queue for flywheel recovery. */
     private static volatile boolean holdingForRecovery = false;
 
+    /** When the latch unlock was first commanded this shot; NaN until then. */
+    private double unlockCommandedSec = Double.NaN;
+
     public AutoCycleShootControl(MotorControl motorControl) {
         this.motorControl = motorControl;
     }
@@ -67,8 +70,21 @@ public class AutoCycleShootControl {
                 break;
             case turnTransfer:
                 if (canFeedBall()) {
-                    holdingForRecovery = false;
                     IntakeStates.setLockServoState(LockServoStates.unlock);
+                    if (Double.isNaN(unlockCommandedSec)) {
+                        unlockCommandedSec = nowSec();
+                    }
+                    // The unlock above is only a command; the latch still has to travel.
+                    // Hold the feed until it has, or the transfer jams balls into it.
+                    // Reuse the recovery pause so this wait does not count against
+                    // shootFeedMaxSec — otherwise a long settle aborts ball 2/3.
+                    if (nowSec() - unlockCommandedSec < OuttakeConstants.latchOpenSettleSec) {
+                        holdingForRecovery = true;
+                        IntakeStates.setIntakeMotorState(IntakeMotorStates.idle);
+                        IntakeStates.setTransferMotorState(TransferMotorStates.idle);
+                        break;
+                    }
+                    holdingForRecovery = false;
                     IntakeStates.setIntakeMotorState(IntakeMotorStates.forward);
                     IntakeStates.setTransferMotorState(TransferMotorStates.forward);
                 } else {
@@ -103,6 +119,11 @@ public class AutoCycleShootControl {
         firstDropSeen = false;
         recoveredToPreFirst = false;
         holdingForRecovery = false;
+        unlockCommandedSec = Double.NaN;
+    }
+
+    private static double nowSec() {
+        return System.currentTimeMillis() / 1000.0;
     }
 
     /**

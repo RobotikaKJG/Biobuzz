@@ -4,7 +4,6 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.Main.ControlThread;
@@ -62,20 +61,36 @@ public class ShooterDistanceTuningTeleOp extends LinearOpMode {
         long lastTelemetryMs = 0;
         long prevLoopNs = System.nanoTime();
 
+        // Local edge state. We deliberately do NOT use dependencies.edgeDetection here:
+        // ControlThread owns that object and writes its EnumMaps with no memory barrier,
+        // so reading it from this thread both misses presses (stale cached read) and
+        // double-counts them (the rising flag stays set for a whole control cycle, which
+        // is longer than this loop's period). Sampling gamepad1 directly is race-free.
+        boolean prevTriangle = false;
+        boolean prevCross = false;
+
         try {
             while (opModeIsActive()) {
                 long startNs = System.nanoTime();
                 driveTimer.record(startNs - prevLoopNs);
                 prevLoopNs = startNs;
 
-                // 1. Shooter RPM Tuning (D-pad Up/Down)
-                // Modifies the offset used by OuttakeMotorControl in the background
-                if (dependencies.edgeDetection.rising(GamepadIndexValues.dpadLeft)) {
+                // 1. Shooter velocity tuning: Triangle = +20, Cross = -20 (ticks/s).
+                // NOT on the d-pad: ControlThread runs the normal TeleOp bindings, where
+                // dpadUp toggles the intake motor, dpadRight toggles the latch servo, and
+                // dpadLeft triggers a Limelight localizer reset — that last one would move
+                // the distance reading mid-sweep and silently corrupt a calibration point.
+                // Triangle/Cross are unbound in TeleOp and sit vertically like +/-.
+                boolean triangleNow = gamepad1.triangle;
+                boolean crossNow = gamepad1.cross;
+                if (triangleNow && !prevTriangle) {
                     GlobalVariables.rpmOffset += 20;
                 }
-                if (dependencies.edgeDetection.rising(GamepadIndexValues.dpadDown)) {
+                if (crossNow && !prevCross) {
                     GlobalVariables.rpmOffset -= 20;
                 }
+                prevTriangle = triangleNow;
+                prevCross = crossNow;
 
                 // 3. Continuous Camera-based Position Adjustment
                 dependencies.sensorControl.applyContinuousVisionFusion();
@@ -87,7 +102,7 @@ public class ShooterDistanceTuningTeleOp extends LinearOpMode {
                 // 5. Specialized Tuning Telemetry
                 long nowMs = System.currentTimeMillis();
                 if (nowMs - lastTelemetryMs >= TELEMETRY_INTERVAL_MS) {
-                    telemetry.addLine("--- SHOOTER TUNING ---");
+                    telemetry.addLine("--- SHOOTER TUNING (Triangle +20 / Cross -20 ticks/s) ---");
                     telemetry.addData("Distance from Target", "%.2f inches", dependencies.sensorControl.getDistanceFromLocalizer());
                     telemetry.addData("Target Base RPM", "%.0f", GlobalVariables.outtakeTargetSpeed);
                     telemetry.addData("Manual RPM Offset", "%.0f", GlobalVariables.rpmOffset);

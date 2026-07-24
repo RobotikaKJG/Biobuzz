@@ -46,6 +46,8 @@ public class GeneralBlueTeleOp extends LinearOpMode {
 
         if (isStopRequested()) return;
 
+        dependencies.shooterLogger.start("GeneralBlueTeleOp");
+
         // Background loops. Control: bulk cache + non-drive/non-turret subsystems
         // (motors 4..7). Turret: Pinpoint localizer + turret servo tracking.
         ControlThread controlThread = new ControlThread(this, allHubs, iterativeController);
@@ -100,6 +102,8 @@ public class GeneralBlueTeleOp extends LinearOpMode {
                 // Throttle telemetry so it never caps the fast drive loop.
                 long nowMs = System.currentTimeMillis();
                 if (nowMs - lastTelemetryMs >= TELEMETRY_INTERVAL_MS) {
+                    telemetry.addData("Deployed", BuildInfo.DEPLOYED);
+                    telemetry.addLine(cycleTimer.toTable());
                     telemetry.addData("Drive loop",   "%.2f ms  (%.0f hz)", driveTimer.getAvgMs(), hz(driveTimer.getAvgMs()));
                     telemetry.addData("Turret loop",  "%.2f ms  (%.0f hz)", turretThread.getAvgLoopMs(), hz(turretThread.getAvgLoopMs()));
                     telemetry.addData("Control loop", "%.2f ms  (%.0f hz)", controlThread.getAvgLoopMs(), hz(controlThread.getAvgLoopMs()));
@@ -115,7 +119,6 @@ public class GeneralBlueTeleOp extends LinearOpMode {
                         telemetry.addData("Control lastErr", controlThread.getErrorCount() + "x " + controlThread.getLastError());
                     if (driveErrors > 0)
                         telemetry.addData("Drive errors", driveErrors);
-                    telemetry.addLine(cycleTimer.toTable());
                     telemetry.update();
                     lastTelemetryMs = nowMs;
                 }
@@ -128,6 +131,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
             // Stop the background loops, then zero every motor from this thread.
             controlThread.stopLoop();
             turretThread.stopLoop();
+            dependencies.shooterLogger.stop();
             controlThread.interrupt();
             turretThread.interrupt();
             try { controlThread.join(500); } catch (InterruptedException ignored) {}

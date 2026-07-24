@@ -39,13 +39,11 @@ public class TrippleServoControl extends LinearOpMode {
             {
                 dependencies.servoControl.setServoPos(1, ServoConstants.servoMinPos[1]);
                 dependencies.servoControl.setServoPos(2, ServoConstants.servoMinPos[2]);
-                dependencies.servoControl.setServoPos(3, ServoConstants.servoMinPos[3]);
             }
             if(dependencies.edgeDetection.rising(GamepadIndexValues.rightBumper))
             {
                 dependencies.servoControl.setServoPos(1, OuttakeConstants.turretServo1Max);
                 dependencies.servoControl.setServoPos(2, OuttakeConstants.turretServo2Max);
-                dependencies.servoControl.setServoPos(3, OuttakeConstants.turretServo3Max);
             }
             if(dependencies.edgeDetection.rising(GamepadIndexValues.square))
             {

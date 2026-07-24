@@ -11,6 +11,8 @@ public class AutoCycleShootLogic {
     private double currentWait = 0;
     private double feedStartSec = 0;
     private double clearSinceSec = -1; // when the ball queue first went (and stayed) empty
+    /** When recovery hold began; used to freeze the feed-max clock while paused. */
+    private double feedPausedSinceSec = -1;
     private boolean wasIfCalled = false;
     private SensorControl sensorControl;
     private MotorControl motorControl;
@@ -75,17 +77,31 @@ public class AutoCycleShootLogic {
     }
 
     private void turnTransfer() {
-        // TeleOp auto-finish: feed until the ball queue (both sensors — including the
-        // mid/back one that fills first when intaking) has been empty CONTINUOUSLY for
+        // TeleOp auto-finish: feed until the ball queue (both sensor pairs — including the
+        // transfer one that fills first when intaking) has been empty CONTINUOUSLY for
         // shootClearHoldSec. The "held" requirement is critical: while feeding, a ball
-        // is briefly in transit BETWEEN the two sensors and both momentarily read empty;
+        // is briefly in transit BETWEEN the two pairs and both momentarily read empty;
         // without the hold that ended the shot early and only 2 of 3 balls fired. The
         // hold also gives the last ball time to launch before the gate closes.
         // Autonomous scripts its own stop, so leave that path unchanged.
         if (GlobalVariables.isAutonomous) return;
         double now = getSeconds();
+
+        // Flywheel recovery pause: keep the shoot sequence in turnTransfer, but do not
+        // count empty-queue / feed-max time while intake+transfer are held. Otherwise a
+        // long recovery could abort ball 2/3 and look like the driver must re-trigger.
+        if (AutoCycleShootControl.isHoldingForRecovery()) {
+            if (feedPausedSinceSec < 0) feedPausedSinceSec = now;
+            clearSinceSec = -1;
+            return;
+        }
+        if (feedPausedSinceSec >= 0) {
+            feedStartSec += (now - feedPausedSinceSec);
+            feedPausedSinceSec = -1;
+        }
+
         double elapsed = now - feedStartSec;
-        boolean queueEmpty = !sensorControl.isMidBall() && !sensorControl.isFrontBall();
+        boolean queueEmpty = !sensorControl.isTransferBall() && !sensorControl.isIntakeBall();
         if (queueEmpty && elapsed >= OuttakeConstants.shootFeedMinSec) {
             if (clearSinceSec < 0) clearSinceSec = now;   // queue just went empty
         } else {
@@ -99,14 +115,10 @@ public class AutoCycleShootLogic {
     }
 
     private void startFeed() {
-//        if (!wasIfCalled) {
         feedStartSec = getSeconds();
         clearSinceSec = -1;
-//            wasIfCalled = true;
-//        }
-//        if (!GlobalVariables.far &&  motorControl.getMotorVelocity(MotorConstants.outtake2) > OuttakeConstants.outtakeSpeedClose + 10) return;
+        feedPausedSinceSec = -1;
         OuttakeStates.setAutoCycleShootState(AutoCycleShootStates.turnTransfer);
-//        wasIfCalled = false;
     }
 
     private void stopTransfer() {
@@ -126,9 +138,7 @@ public class AutoCycleShootLogic {
     }
 
     private boolean isNoBallSeen() {
-        // Shared, centrally-throttled reads (see SensorControl). Preserves the exact
-        // original semantics: true only when BOTH front and mid currently see a ball.
-        return !sensorControl.isFrontBall() && !sensorControl.isMidBall();
+        return !sensorControl.isIntakeBall() && !sensorControl.isTransferBall();
     }
 
     private void addWaitTime(double waitTime) {

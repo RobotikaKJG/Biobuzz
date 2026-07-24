@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.HardwareInterface.Sensor;
 
 import com.pedropathing.ftc.localization.localizers.PinpointLocalizer;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -10,7 +9,6 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
@@ -25,8 +23,6 @@ import java.util.function.Consumer;
 public class SensorControl {
     private static final String PINPOINT_NAME = "pinpointIMU";
     private static final String LIMELIGHT_NAME = "limelight";
-    private static final String FRONT_COLOR_SENSOR_NAME = "FrontColorSensor";
-    private static final String MID_COLOR_SENSOR_NAME = "MidColorSensor";
 
     private final Limelight3A limelight;
     private final EdgeDetection edgeDetection;
@@ -34,24 +30,14 @@ public class SensorControl {
     public GoBildaIndicator indicator1;
     public GoBildaIndicator indicator2;
 
-    public final LynxI2cColorRangeSensor rangeSensorMid;
-    public final LynxI2cColorRangeSensor rangeSensorFront;
-
     private final InfraRedSensor[] infraRedSensors;
 
-    public double ballDistanceIn = 4.0;
-    private boolean isResetting = false;
+    // Set on the control loop (AutoResetPosControl, i.e. the square button) and read on
+    // the turret loop, which owns updateLocalizer()/applyContinuousVisionFusion(). Without
+    // volatile the turret loop can miss the flag entirely and keep fusing vision over the
+    // pose the reset just wrote, so the reset silently does nothing.
+    private volatile boolean isResetting = false;
 
-    // Cached color/range-sensor reads. Each getDistance() is a ~2.7ms I2C round-trip,
-    // so refresh each sensor at most every BALL_SENSOR_REFRESH_MS and let every caller
-    // (intake-transfer logic + auto-cycle-shoot logic) share the one read. Default
-    // POSITIVE_INFINITY = "no ball" until the first real read. Read only on the control
-    // loop, so no cross-thread synchronization is needed.
-    private static final long BALL_SENSOR_REFRESH_MS = 50;
-    private long lastFrontBallReadMs = -1;
-    private long lastMidBallReadMs = -1;
-    private double cachedFrontBallDistanceIn = Double.POSITIVE_INFINITY;
-    private double cachedMidBallDistanceIn = Double.POSITIVE_INFINITY;
     private double flywheelOffset = 0.0;
 
     // Goal coordinates in INCHES
@@ -98,8 +84,6 @@ public class SensorControl {
 
         infraRedSensors = getInfraRedSensors(hardwareMap);
 
-        rangeSensorMid = hardwareMap.get(LynxI2cColorRangeSensor.class, MID_COLOR_SENSOR_NAME);
-        rangeSensorFront = hardwareMap.get(LynxI2cColorRangeSensor.class, FRONT_COLOR_SENSOR_NAME);
         limelight = hardwareMap.get(Limelight3A.class, LIMELIGHT_NAME);
         indicator1 = new GoBildaIndicator(hardwareMap.get(Servo.class, "led1"));
         indicator2 = new GoBildaIndicator(hardwareMap.get(Servo.class, "led2"));
@@ -107,15 +91,22 @@ public class SensorControl {
         setInitialLocalisationAngle();
     }
 
+    /**
+     * Indexed by {@link InfraRedSensors} ordinal — keep this array in the same order as
+     * that enum. Config names must match the Robot Controller configuration; the digital
+     * port each one occupies is set there, not here.
+     */
     private InfraRedSensor[] getInfraRedSensors(HardwareMap hardwareMap) {
-        final InfraRedSensor[] infraRedSensors;
-        infraRedSensors = new InfraRedSensor[]{
-                hardwareMap.get(InfraRedSensor.class, "infraMid"),
-                hardwareMap.get(InfraRedSensor.class, "infraFront")
+        final InfraRedSensor[] infraRedSensors = new InfraRedSensor[]{
+                hardwareMap.get(InfraRedSensor.class, "infraTransfer1"),  // digital port 3
+                hardwareMap.get(InfraRedSensor.class, "infraTransfer2"),  // digital port 5
+                hardwareMap.get(InfraRedSensor.class, "infraIntake1"),    // digital port 6
+                hardwareMap.get(InfraRedSensor.class, "infraIntake2")     // digital port 7
         };
 
-        infraRedSensors[0].setMode(InfraRedSensor.SwitchConfig.NC);
-        infraRedSensors[1].setMode(InfraRedSensor.SwitchConfig.NC);
+        for (InfraRedSensor sensor : infraRedSensors) {
+            sensor.setMode(InfraRedSensor.SwitchConfig.NC);
+        }
         return infraRedSensors;
     }
 
@@ -133,15 +124,8 @@ public class SensorControl {
         isResetting = reset;
     }
 
-    public boolean isInfraRedObstructed(InfraRedSensors state) {
-        switch (state) {
-            case infraMid:
-                return infraRedSensors[0].isObstructed();
-            case infraFront:
-                return infraRedSensors[1].isObstructed();
-            default:
-                return false; // Or throw an exception
-        }
+    public boolean isInfraRedObstructed(InfraRedSensors sensor) {
+        return infraRedSensors[sensor.ordinal()].isObstructed();
     }
 
     public void setLEDColor(GoBildaIndicator.Color color) {
@@ -479,44 +463,16 @@ public class SensorControl {
         return weightedX + weightedY - weightedH;
     }
 
-    public double getFrontColorSensorDistance(DistanceUnit unit) {
-        double distance = rangeSensorFront.getDistance(unit);
-        return distance;
+    /** True when either transfer-path IR sensor (digital port 3 or 5) sees an artifact. */
+    public boolean isTransferBall() {
+        return isInfraRedObstructed(InfraRedSensors.infraTransfer1)
+                || isInfraRedObstructed(InfraRedSensors.infraTransfer2);
     }
 
-    public double getMidColorSensorDistance(DistanceUnit unit) {
-        double distance = rangeSensorMid.getDistance(unit);
-        return distance;
-    }
-
-    /** Front color sensor distance (inches), refreshed at most every 50ms; shared by all callers. */
-    public double getFrontBallDistanceInCached() {
-        long now = System.currentTimeMillis();
-        if (lastFrontBallReadMs < 0 || now - lastFrontBallReadMs >= BALL_SENSOR_REFRESH_MS) {
-            cachedFrontBallDistanceIn = rangeSensorFront.getDistance(DistanceUnit.INCH);
-            lastFrontBallReadMs = now;
-        }
-        return cachedFrontBallDistanceIn;
-    }
-
-    /** Mid (back) color sensor distance (inches), refreshed at most every 50ms; shared by all callers. */
-    public double getMidBallDistanceInCached() {
-        long now = System.currentTimeMillis();
-        if (lastMidBallReadMs < 0 || now - lastMidBallReadMs >= BALL_SENSOR_REFRESH_MS) {
-            cachedMidBallDistanceIn = rangeSensorMid.getDistance(DistanceUnit.INCH);
-            lastMidBallReadMs = now;
-        }
-        return cachedMidBallDistanceIn;
-    }
-
-    /** True when a ball is within range of the front sensor (uses the shared cached read). */
-    public boolean isFrontBall() {
-        return getFrontBallDistanceInCached() < ballDistanceIn || isInfraRedObstructed(InfraRedSensors.infraFront);
-    }
-
-    /** True when a ball is within range of the mid (back) sensor (uses the shared cached read). */
-    public boolean isMidBall() {
-        return getMidBallDistanceInCached() < ballDistanceIn || isInfraRedObstructed(InfraRedSensors.infraMid);
+    /** True when either intake IR sensor (digital port 6 or 7) sees an artifact. */
+    public boolean isIntakeBall() {
+        return isInfraRedObstructed(InfraRedSensors.infraIntake1)
+                || isInfraRedObstructed(InfraRedSensors.infraIntake2);
     }
 
     private double getTrimmedAverage(List<Double> data) {

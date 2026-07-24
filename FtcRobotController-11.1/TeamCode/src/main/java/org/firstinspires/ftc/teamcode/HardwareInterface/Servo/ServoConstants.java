@@ -8,7 +8,6 @@ public class ServoConstants {
     public static final int lockServo = 0;
     public static final int turretServo1 = 1;
     public static final int turretServo2 = 2;
-    public static final int turretServo3 = 3;
 
     // CR Servo indexes
 
@@ -21,14 +20,12 @@ public class ServoConstants {
             {
                     IntakeConstants.lockServoMinPos,
                     OuttakeConstants.turretServo1Min,
-                    OuttakeConstants.turretServo2Min,
-                    OuttakeConstants.turretServo3Min
+                    OuttakeConstants.turretServo2Min
             };
     public static final double[] servoMaxPos =
             {
                     IntakeConstants.lockServoMaxPos,
                     OuttakeConstants.turretServo1Max,
-                    OuttakeConstants.turretServo2Max,
-                    OuttakeConstants.turretServo3Max
+                    OuttakeConstants.turretServo2Max
             };
 }

@@ -1,0 +1,49 @@
+{
+  "version": 4,
+  "updatedAt": "2026-07-18",
+  "ticksPerRev": 28,
+  "coordinateFrame": "pedroCornerInches",
+  "points": [
+    {
+      "id": "triangle-tip-close",
+      "label": "Close triangle tip (working)",
+      "alliance": "either",
+      "pose": {
+        "x": 72,
+        "y": 72,
+        "headingDeg": null,
+        "notes": "Center-field tip of the close-zone V on the MeepMeep art (Pedro x=72, y=72)."
+      },
+      "distance": {
+        "robotEstimateCm": null,
+        "tapeMeasuredCm": 275
+      },
+      "turret": {
+        "robotEstimateDeg": null
+      },
+      "trials": [
+        {
+          "id": "trial-known-working",
+          "rpm": 3636,
+          "balls": {
+            "first": "unknown",
+            "second": "unknown",
+            "third": "unknown"
+          },
+          "telemetry": {
+            "robotHeadingDeg": null,
+            "turretAngleDeg": null,
+            "commandedTicksPerSec": 1697,
+            "measuredRpm1": null,
+            "measuredRpm2": null,
+            "batteryV": null,
+            "distanceCm": null
+          },
+          "notes": "Previously verified working RPM; individual ball results were not recorded."
+        }
+      ],
+      "notes": "OuttakeConstants closeCal* after +1% tune (was 1680 @ 275 cm). Robot heading and turret angle were not recorded for this historical shot.",
+      "source": "OuttakeConstants.closeCalDistanceCm / closeCalTicks"
+    }
+  ]
+}

@@ -42,8 +42,7 @@ public class ServoControl {
         servos = new Servo[]{
                 hardwareMap.get(Servo.class, "lockServo"),
                 hardwareMap.get(Servo.class, "turretServo1"),
-                hardwareMap.get(Servo.class, "turretServo2"),
-                hardwareMap.get(Servo.class, "turretServo3")
+                hardwareMap.get(Servo.class, "turretServo2")
         };
 //        analog = new AnalogInput[]{
 //                hardwareMap.get(AnalogInput.class, "turretAnalog")
@@ -87,8 +86,6 @@ public class ServoControl {
         servos[ServoConstants.turretServo1].setPosition(position * OuttakeConstants.turretServo1Mult);
 
         servos[ServoConstants.turretServo2].setPosition(position * OuttakeConstants.turretServo2Mult);
-
-        servos[ServoConstants.turretServo3].setPosition(position * OuttakeConstants.turretServo3Mult);
     }
 
 //    public void setServoSpeed(int index, double speed) {
@@ -107,8 +104,6 @@ public class ServoControl {
                 return "turretServo1";
             case ServoConstants.turretServo2:
                 return "turretServo2";
-            case ServoConstants.turretServo3:
-                return "turretServo3";
             default:
                 return "unknownServo" + index;
         }

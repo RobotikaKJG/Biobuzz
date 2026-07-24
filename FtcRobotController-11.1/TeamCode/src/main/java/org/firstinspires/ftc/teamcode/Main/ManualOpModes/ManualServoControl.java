@@ -44,7 +44,7 @@ public class ManualServoControl extends LinearOpMode {
             }
             if(dependencies.edgeDetection.rising(GamepadIndexValues.square))
             {
-                if(currentServo < 3)
+                if(currentServo < 2)
                     currentServo ++;
                 else currentServo = 0;
             }
@@ -59,9 +59,6 @@ public class ManualServoControl extends LinearOpMode {
                     break;
                 case 2:
                     telemetry.addLine("turret 2");
-                    break;
-                case 3:
-                    telemetry.addLine("turret 3");
                     break;
             }
             telemetry.update();

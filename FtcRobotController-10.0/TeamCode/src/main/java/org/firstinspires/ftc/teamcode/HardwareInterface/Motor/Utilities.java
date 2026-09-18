@@ -2,6 +2,11 @@ package org.firstinspires.ftc.teamcode.HardwareInterface.Motor;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+/**
+ * Group-index helpers for MotorControl. MotorConstants.motorConfig maps each group to motor slots.
+ * Group position is the arithmetic mean of its encoder readings; current/velocity methods in
+ * MotorControl instead read the first member. Never request an average of the empty notDrive group.
+ */
 public class Utilities {
 
     public static int getMotorPosition(DcMotor[] motors, int index) {
@@ -28,6 +33,7 @@ public class Utilities {
     }
 
     public static int avg(int sum, int count) {
+        if (count == 0) throw new IllegalArgumentException("Cannot average an empty motor group");
         return sum / count;
     }
 

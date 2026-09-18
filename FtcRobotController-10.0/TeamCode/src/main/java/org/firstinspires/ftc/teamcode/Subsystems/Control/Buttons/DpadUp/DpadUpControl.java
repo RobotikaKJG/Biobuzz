@@ -1,28 +1,17 @@
-
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.DpadUp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
+/**
+ * Translates a DpadUpLogic command into requested IntakeStates/OuttakeStates (or a new subsystem).
+ * Subsystem controllers apply those requests later in the same IterativeController loop.
+ * This separation lets autonomous request the same mechanism states without simulating buttons.
+ */
 public class DpadUpControl {
     public void update() {
         switch (ButtonStates.getDpadUpState()) {
-            case toggleMotor:
-                toggleMotor();
-                break;
             case idle:
-                break;
-        }
-    }
-
-    private void toggleMotor() {
-        switch (IntakeStates.getMotorState()) {
-            case forward:
-                IntakeStates.setMotorState(IntakeMotorStates.backward);
-                break;
-            case backward:
-                IntakeStates.setMotorState(IntakeMotorStates.forward);
+                // Unassigned in the starter. Add cases that set subsystem states here.
                 break;
         }
     }

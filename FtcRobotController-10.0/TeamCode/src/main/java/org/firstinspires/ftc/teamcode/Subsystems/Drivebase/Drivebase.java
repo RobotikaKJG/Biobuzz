@@ -5,37 +5,37 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
-import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 
 
+/**
+ * Converts gamepad 1 sticks into staged mecanum wheel powers using the original drive signs.
+ * DrivebaseController handles mode selection; MotorControl applies output at the end of the loop.
+ * Robot-oriented driving needs only motors. Field-oriented mode additionally needs SensorControl
+ * to be explicitly configured with a heading sensor. Slow mode changes speed, never driver ownership.
+ */
 public class Drivebase {
 
     private final Gamepad gamepad1;
-    private final Gamepad gamepad2;
     private final Gamepad currentGamepad = new Gamepad();
     private final MotorControl motorControl;
     private final SensorControl sensorControl;
-    private boolean isDriverOriented = true;
+    private boolean isDriverOriented = false;
 
     public Drivebase(Gamepad gamepad1,Gamepad gamepad2, MotorControl motorControl, SensorControl sensorControl) {
         this.gamepad1 = gamepad1;
-        this.gamepad2 = gamepad2;
         this.motorControl = motorControl;
         this.sensorControl = sensorControl;
     }
 
     private void selectGamepad(){
-        if(GlobalVariables.slowMode)
-            currentGamepad.copy(gamepad2);
-        else
-            currentGamepad.copy(gamepad1);
+        currentGamepad.copy(gamepad1);
     }
 
     public void gamepadDrive(double maxSpeed) {
         selectGamepad();
-        double y = -currentGamepad.left_stick_y;// * yGain;
-        double x = -currentGamepad.left_stick_x;// * xGain;
-        double rotation = -currentGamepad.right_stick_x;// * rotationGain;
+        double y = -currentGamepad.left_stick_y;
+        double x = -currentGamepad.left_stick_x;
+        double rotation = -currentGamepad.right_stick_x;
         robotOrientedGamepadDrive(y, x, rotation, maxSpeed);
     }
 
@@ -81,11 +81,11 @@ public class Drivebase {
     }
 
     public void switchDrivingMode() {
-        isDriverOriented = !isDriverOriented;
+        if (sensorControl.hasHeading()) isDriverOriented = !isDriverOriented;
     }
 
     public void drive(double maxSpeed) {
-        if (isDriverOriented)
+        if (isDriverOriented && sensorControl.hasHeading())
             driverOrientedGamepadDrive(maxSpeed);
         else
             gamepadDrive(maxSpeed);

@@ -1,61 +1,53 @@
 package org.firstinspires.ftc.teamcode.HardwareInterface.Servo;
 
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeConstants;
-
+/**
+ * Shared servo hardware adapter, built by Dependencies and injected into mechanism controllers.
+ * The empty configuration requires no servos. Add names and bounds in ServoConstants before use.
+ * Unlike staged motor commands, servo commands are applied immediately.
+ */
 public class ServoControl {
-
-    private final HardwareMap hardwareMap;
-    private Servo[] servos;
-    private CRServo[] crservos;
-    private AnalogInput[] analog;
+    private final Servo[] servos;
+    private final CRServo[] crServos;
 
     public ServoControl(HardwareMap hardwareMap) {
-        this.hardwareMap = hardwareMap;
-        getServos();
-    }
-
-    private void getServos() {
-        crservos = new CRServo[]{
-                hardwareMap.get(CRServo.class, "transferCRServo")
-        };
-        servos = new Servo[]{
-                hardwareMap.get(Servo.class, "outtakeServo"),
-                hardwareMap.get(Servo.class, "transferServo")
-        };
-        analog = new AnalogInput[]{
-                hardwareMap.get(AnalogInput.class, "transferAnalog")
-        };
-    }
-
-    public void setServoStartPos() {
-        setServoPos(ServoConstants.outtakeServo, OuttakeConstants.outtakeDownServoMaxPos);
-        for (int i = 0; i< crservos.length; i++) {
-            crservos[i].setDirection(DcMotorSimple.Direction.FORWARD);
+        if (ServoConstants.SERVO_NAMES.length != ServoConstants.servoMinPos.length
+                || ServoConstants.SERVO_NAMES.length != ServoConstants.servoMaxPos.length) {
+            throw new IllegalArgumentException("Each servo needs a name, minimum and maximum");
         }
+        servos = new Servo[ServoConstants.SERVO_NAMES.length];
+        crServos = new CRServo[ServoConstants.CR_SERVO_NAMES.length];
+        for (int i = 0; i < servos.length; i++) {
+            servos[i] = hardwareMap.get(Servo.class, ServoConstants.SERVO_NAMES[i]);
+        }
+        for (int i = 0; i < crServos.length; i++) {
+            crServos[i] = hardwareMap.get(CRServo.class, ServoConstants.CR_SERVO_NAMES[i]);
+            crServos[i].setPower(0);
+        }
+    }
 
+    /** Called after START. Add only positions calibrated for the new mechanism. */
+    public void setServoStartPos() {
+        // No positional servo is commanded by the starter.
     }
 
     public void setServoPos(int index, double position) {
-        if (isInBounds(index, position))
-            servos[index].setPosition(position);
+        if (!Double.isFinite(position) || position < ServoConstants.servoMinPos[index]
+                || position > ServoConstants.servoMaxPos[index]) {
+            throw new IllegalArgumentException("Servo position outside calibrated bounds");
+        }
+        servos[index].setPosition(position);
     }
 
     public void setServoSpeed(int index, double speed) {
-        crservos[index].setPower(speed);
+        crServos[index].setPower(speed);
     }
 
-    private boolean isInBounds(int index, double position) {
-        return position >= ServoConstants.servoMinPos[index] && position <= ServoConstants.servoMaxPos[index];
-    }
-
-    public double getCRSPos(int index) {
-        return analog[index].getVoltage() / analog[index].getMaxVoltage();
+    /** Stop continuous rotation; positional servos retain their last commanded position. */
+    public void stop() {
+        for (CRServo servo : crServos) servo.setPower(0);
     }
 }

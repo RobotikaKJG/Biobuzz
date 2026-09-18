@@ -1,74 +1,23 @@
 package org.firstinspires.ftc.teamcode.Main.ManualOpModes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoConstants;
-import org.firstinspires.ftc.teamcode.Main.Dependencies;
-import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-
-@TeleOp
+/**
+ * Disabled bench-test extension point; the previous robot's hardware and setpoints were removed.
+ * Map a positional servo through ServoControl, choose its calibrated range, then add edge-based position steps.
+ * Implement the test first, then remove @Disabled to show it on the Driver Station.
+ * Production behavior belongs in a subsystem controller, not in this diagnostic OpMode.
+ */
+@Disabled
+@TeleOp(name = "ManualServoControl", group = "Templates")
 public class ManualServoControl extends LinearOpMode {
-
     @Override
     public void runOpMode() throws InterruptedException {
-
-        GlobalVariables.isAutonomous = false;
-        Dependencies dependencies = new Dependencies(hardwareMap, gamepad1,gamepad2, telemetry);
-        Gamepad currentGamepad1 = new Gamepad();
-        Gamepad prevGamepad1 = new Gamepad();
-        prevGamepad1.copy(currentGamepad1);
-        currentGamepad1.copy(gamepad1);
-        int currentServo = 0;
+        telemetry.addLine("Unconfigured test template: see this class's documentation.");
+        telemetry.update();
         waitForStart();
-
-        if (isStopRequested()) return;
-
-        while (opModeIsActive()) {
-
-            prevGamepad1.copy(currentGamepad1);
-            currentGamepad1.copy(gamepad1);
-            if(gamepad1.triangle) break;
-            dependencies.edgeDetection.refreshGamepadIndex(currentGamepad1,prevGamepad1);
-            telemetry.addLine("Press left bumper for min pos, press right bumper for max pos");
-            telemetry.addLine("Press square to cycle through servos");
-            if(dependencies.edgeDetection.rising(GamepadIndexValues.leftBumper))
-            {
-                dependencies.servoControl.setServoPos(currentServo, ServoConstants.servoMinPos[currentServo]);
-            }
-            if(dependencies.edgeDetection.rising(GamepadIndexValues.rightBumper))
-            {
-                dependencies.servoControl.setServoPos(currentServo, ServoConstants.servoMaxPos[currentServo]);
-            }
-            if(dependencies.edgeDetection.rising(GamepadIndexValues.square))
-            {
-                if(currentServo < 4)
-                    currentServo ++;
-                else currentServo = 0;
-            }
-
-            telemetry.addLine("Currently selected servo:");
-            switch (currentServo) {
-                case 0:
-                    telemetry.addLine("outtake arm");
-                    break;
-                case 1:
-                    telemetry.addLine("outtake turn");
-                    break;
-                case 2:
-                    telemetry.addLine("outtake claw");
-                    break;
-                case 3:
-                    telemetry.addLine("outtake down");
-                    break;
-                case 4:
-                    telemetry.addLine("intake");
-                    break;
-            }
-            telemetry.update();
-        }
+        // Add a STOP-aware loop and a finally block that stops any motor/CR-servo output.
     }
-
 }

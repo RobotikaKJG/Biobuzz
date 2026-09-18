@@ -1,48 +1,26 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Outtake.TransferMotor;
 
-import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
+/**
+ * Hardware-facing extension point called every loop by OuttakeControl.
+ * Dependencies injects the shared MotorControl; this class must not construct another hardware owner.
+ * Add calibrated hardware commands for each state after configuring the new device in HardwareInterface.
+ * No device is mapped or moved by this placeholder. Once a motor is added, idle must command zero.
+ */
 public class TransferMotorControl {
     private final MotorControl motorControl;
-    private TransferMotorStates prevMotorStates = TransferMotorStates.idle;
-    private double currentWait = 0;
 
     public TransferMotorControl(MotorControl motorControl) {
         this.motorControl = motorControl;
-
     }
 
     public void update() {
-        if(OuttakeStates.getTransferMotorState() != prevMotorStates) {
-            updateStates();
-            prevMotorStates = OuttakeStates.getTransferMotorState();
-        }
-
-    }
-
-    public void updateStates() {
         switch (OuttakeStates.getTransferMotorState()) {
-            case forward:
-                motorControl.setMotorSpeed(MotorConstants.transfer, -1);
-                break;
-            case backward:
-                motorControl.setMotorSpeed(MotorConstants.transfer, 1.0);
-                break;
             case idle:
-                motorControl.setMotorSpeed(MotorConstants.transfer, 0);
+                // No mechanism fitted. Implement the resting behavior when adding this device.
                 break;
         }
-
-    }
-
-    private void addWaitTime(double waitTime) {
-        currentWait = getSeconds() + waitTime;
-    }
-
-    private double getSeconds() {
-        return System.currentTimeMillis() / 1000.0;
     }
 }

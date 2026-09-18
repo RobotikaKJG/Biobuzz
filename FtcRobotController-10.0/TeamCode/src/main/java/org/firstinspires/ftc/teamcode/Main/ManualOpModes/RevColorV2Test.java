@@ -1,44 +1,23 @@
 package org.firstinspires.ftc.teamcode.Main.ManualOpModes;
 
-import android.graphics.Color;
-
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
-import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
-
-
-@TeleOp
+/**
+ * Disabled bench-test extension point; the previous robot's hardware and setpoints were removed.
+ * Map the new color sensor and report raw readings before deriving any game-specific color thresholds.
+ * Implement the test first, then remove @Disabled to show it on the Driver Station.
+ * Production behavior belongs in a subsystem controller, not in this diagnostic OpMode.
+ */
+@Disabled
+@TeleOp(name = "RevColorV2Test", group = "Templates")
 public class RevColorV2Test extends LinearOpMode {
-    // Define a variable for our color sensor
-    EdgeDetection edgeDetection = new EdgeDetection();
-
     @Override
-    public void runOpMode() {
-        // Get the color sensor from hardwareMap
-
-        SensorControl sensorControl = new SensorControl(hardwareMap,edgeDetection, new StandardTrackingWheelLocalizer(hardwareMap));
-
-        // Wait for the Play button to be pressed
+    public void runOpMode() throws InterruptedException {
+        telemetry.addLine("Unconfigured test template: see this class's documentation.");
+        telemetry.update();
         waitForStart();
-
-        // While the Op Mode is running, update the telemetry values.
-        while (opModeIsActive()) {
-            sensorControl.updateColor();
-//            sensorControl.updateDistance();
-            telemetry.addData("Red", sensorControl.isRed());
-            telemetry.addData("Yellow", sensorControl.isYellow());
-            telemetry.addData("Blue", sensorControl.isBlue());
-
-            telemetry.addData("Red", Color.red(sensorControl.currentColor));
-            telemetry.addData("Green", Color.green(sensorControl.currentColor));
-            telemetry.addData("Blue", Color.blue(sensorControl.currentColor));
-            telemetry.addData("Distance correct:",sensorControl.getDistance());
-            telemetry.addData("Distance correct:",sensorControl.getDistance() < 70);
-
-            telemetry.update();
-        }
+        // Add a STOP-aware loop and a finally block that stops any motor/CR-servo output.
     }
 }

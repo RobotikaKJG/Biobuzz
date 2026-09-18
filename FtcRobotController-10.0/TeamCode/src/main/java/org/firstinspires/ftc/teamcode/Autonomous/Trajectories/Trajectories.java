@@ -2,12 +2,11 @@ package org.firstinspires.ftc.teamcode.Autonomous.Trajectories;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
-import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySequence;
-
+/**
+ * Alliance-specific path contract used by GoalAuton. Distances are inches, headings are radians.
+ * Add named TrajectorySequence methods here and implement them in both alliance classes.
+ * Keep path geometry here and decisions about when to follow a path in GoalAuton.
+ */
 public interface Trajectories {
-
-    // Abstract methods for each trajectory sequence to be implemented by subclasses
-    TrajectorySequence moveToShoot();
-    TrajectorySequence park();
     Pose2d getStartPose();
 }

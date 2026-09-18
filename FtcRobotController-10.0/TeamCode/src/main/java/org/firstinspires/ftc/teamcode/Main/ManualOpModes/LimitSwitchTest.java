@@ -1,36 +1,23 @@
 package org.firstinspires.ftc.teamcode.Main.ManualOpModes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.LimitSwitch;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.LimitSwitches;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
-import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
-
-@TeleOp
+/**
+ * Disabled bench-test extension point; the previous robot's hardware and setpoints were removed.
+ * Map a new LimitSwitch and select its normally-open or normally-closed wiring before reporting its state.
+ * Implement the test first, then remove @Disabled to show it on the Driver Station.
+ * Production behavior belongs in a subsystem controller, not in this diagnostic OpMode.
+ */
+@Disabled
+@TeleOp(name = "LimitSwitchTest", group = "Templates")
 public class LimitSwitchTest extends LinearOpMode {
-    EdgeDetection edgeDetection = new EdgeDetection();
-
     @Override
-    public void runOpMode() {
-        // Get the color sensor from hardwareMap
-
-        SensorControl sensorControl = new SensorControl(hardwareMap,edgeDetection, new StandardTrackingWheelLocalizer(hardwareMap));
-        LimitSwitch limitSwitch = hardwareMap.get(LimitSwitch.class, "pivotLimitSwitch");
-
-        // Wait for the Play button to be pressed
+    public void runOpMode() throws InterruptedException {
+        telemetry.addLine("Unconfigured test template: see this class's documentation.");
+        telemetry.update();
         waitForStart();
-
-        // While the Op Mode is running, update the telemetry values.
-        while (opModeIsActive()) {
-//            telemetry.addData("LeftSlide", sensorControl.isLimitSwitchPressed(LimitSwitches.slideLeft));
-//            telemetry.addData("RightSlide", sensorControl.isLimitSwitchPressed(LimitSwitches.slideRight));
-//            telemetry.addData("Extendo", sensorControl.isLimitSwitchPressed(LimitSwitches.extendo));
-            telemetry.addData("Test", limitSwitch.getValue());
-
-            telemetry.update();
-        }
+        // Add a STOP-aware loop and a finally block that stops any motor/CR-servo output.
     }
 }

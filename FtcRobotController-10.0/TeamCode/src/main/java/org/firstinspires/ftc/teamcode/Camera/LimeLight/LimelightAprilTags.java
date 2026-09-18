@@ -2,61 +2,41 @@ package org.firstinspires.ftc.teamcode.Camera.LimeLight;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-
-@TeleOp(name = "Limelight AprilTag Pose Test", group = "Test")
+/**
+ * Optional read-only camera diagnostic; the standard robot does not require a Limelight.
+ * Configure "limelight" and the pipeline below before enabling. For AprilTags, also configure
+ * the new field's tag map and camera mounting in the camera. No target IDs or field offsets remain.
+ * Integrate production camera ownership through SensorControl, including shutdown in stop().
+ */
+@Disabled
+@TeleOp(name = "LimelightAprilTags Test", group = "Tests")
 public class LimelightAprilTags extends LinearOpMode {
-
-    private Limelight3A limelight;
-    private int aprilTagPipeline = 1;  // Make sure this pipeline is configured for AprilTags
+    private static final int PIPELINE = 0; // Replace with your configured pipeline.
 
     @Override
     public void runOpMode() throws InterruptedException {
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.start();
-
-        telemetry.addLine("Booting Limelight...");
-        telemetry.update();
-
-        // Wait for limelight to be ready
-//        while (!isStopRequested()) {
-//            LLResult result = limelight.getLatestResult();
-//            if (result != null && result.isValid()) {
-//                telemetry.addLine("Limelight Ready ✅");
-//                telemetry.update();
-//                break;
-//            } else {
-//                telemetry.addLine("Waiting for Limelight...");
-//                telemetry.update();
-//                sleep(200);
-//            }
-//        }
-        waitForStart();
-
-        while (opModeIsActive()) {
-            LLResult result = limelight.getLatestResult();
-
-            if (result != null && result.isValid()) {
-                // Get botpose relative to field (make sure your Limelight is configured to Field mode)
-                Pose3D botpose = result.getBotpose();
-
-                double x = botpose.getPosition().x + 1.7;
-                double y = botpose.getPosition().y - 1.7;
-
-                // Calculate distance to tag (in meters)
-                double distance = Math.sqrt(x * x + y * y);
-
-                telemetry.addData("X (m)", x);
-                telemetry.addData("Y (m)", y);
-                telemetry.addData("Distance to Tag (m)", distance);
-            } else {
-                telemetry.addLine("No valid AprilTag detected.");
+        Limelight3A camera = hardwareMap.get(Limelight3A.class, "limelight");
+        try {
+            camera.pipelineSwitch(PIPELINE);
+            camera.start();
+            waitForStart();
+            while (opModeIsActive()) {
+                LLResult result = camera.getLatestResult();
+                telemetry.addData("Valid target", result != null && result.isValid());
+                if (result != null && result.isValid() && result.getBotpose() != null) {
+                    // This is field pose from the configured pipeline, not distance to a game target.
+                    telemetry.addData("Field X (m)", result.getBotpose().getPosition().x);
+                    telemetry.addData("Field Y (m)", result.getBotpose().getPosition().y);
+                }
+                telemetry.update();
+                idle();
             }
-
-            telemetry.update();
+        } finally {
+            camera.stop();
         }
     }
 }

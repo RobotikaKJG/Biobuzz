@@ -1,8 +1,12 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Main;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+/**
+ * Optional immutable pose value with unit conversion. Internal units: millimeters and radians.
+ * Separate from Road Runner Pose2d (inches/radians) and the SDK Pose2D; do not interchange silently.
+ */
 public class Pose2D {
     private final double x; // in millimeters
     private final double y; // in millimeters
@@ -19,7 +23,7 @@ public class Pose2D {
     public Pose2D(double x, double y, double heading) {
         this.x = x;  // assuming x and y are in millimeters
         this.y = y;
-        this.heading = Math.toRadians(heading); // assuming heading is in degrees
+        this.heading = heading; // radians
     }
 
     // Getters with unit conversions

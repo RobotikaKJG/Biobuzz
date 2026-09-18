@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Roadrunner.opmode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -22,6 +24,8 @@ import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySe
  * These coefficients can be tuned live in dashboard.
  */
 @Config
+// Enable after verifying the hardware/localizer and calibration described in Roadrunner/README.md.
+@Disabled
 @Autonomous(group = "org/firstinspires/ftc/teamcode.Roadrunner")
 public class FollowerPIDTuner extends LinearOpMode {
     public static double DISTANCE = 48; // in

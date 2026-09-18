@@ -2,59 +2,41 @@ package org.firstinspires.ftc.teamcode.Camera.LimeLight;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "Limelight Sample Detection Test", group = "Test")
+/**
+ * Optional read-only camera diagnostic; the standard robot does not require a Limelight.
+ * Configure "limelight" and the pipeline below before enabling. For AprilTags, also configure
+ * the new field's tag map and camera mounting in the camera. No target IDs or field offsets remain.
+ * Integrate production camera ownership through SensorControl, including shutdown in stop().
+ */
+@Disabled
+@TeleOp(name = "Limelight Test", group = "Tests")
 public class Limelight extends LinearOpMode {
-
-    private Limelight3A limelight;
-    private int testPipeline = 1;  // Set this to 1, 2, or 3 based on which sample color you want to test
-
-    // Thresholds
-    private static final double MIN_AREA_THRESHOLD = 1.0;   // ta must be > 0
-    private static final double CENTERING_THRESHOLD = 0.1;  // tx and ty must be within ±0.1
+    private static final int PIPELINE = 0; // Replace with your configured pipeline.
 
     @Override
     public void runOpMode() throws InterruptedException {
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(testPipeline);  // Switch to the desired sample color pipeline
-        limelight.setPollRateHz(100);
-        limelight.start();
-
-        telemetry.setMsTransmissionInterval(50);
-        telemetry.addLine("Waiting for start...");
-        telemetry.update();
-        waitForStart();
-
-        while (opModeIsActive()) {
-            LLResult result = limelight.getLatestResult();
-
-            boolean targetVisible = false;
-            boolean targetCentered = false;
-
-            double tx = 0.0;
-            double ty = 0.0;
-            double ta = 0.0;
-
-            if (result != null && result.isValid()) {
-                tx = result.getTx();
-                ty = result.getTy();
-                ta = result.getTa();
-
-                // Check if the target area is above the minimum threshold
-                targetVisible = ta > MIN_AREA_THRESHOLD;
-
-                // Check if it's centered within threshold
-                targetCentered = Math.abs(tx) <= CENTERING_THRESHOLD && Math.abs(ty) <= CENTERING_THRESHOLD;
+        Limelight3A camera = hardwareMap.get(Limelight3A.class, "limelight");
+        try {
+            camera.pipelineSwitch(PIPELINE);
+            camera.start();
+            waitForStart();
+            while (opModeIsActive()) {
+                LLResult result = camera.getLatestResult();
+                telemetry.addData("Valid target", result != null && result.isValid());
+                if (result != null && result.isValid()) {
+                    telemetry.addData("Horizontal angle (deg)", result.getTx());
+                    telemetry.addData("Vertical angle (deg)", result.getTy());
+                    telemetry.addData("Target area (%)", result.getTa());
+                }
+                telemetry.update();
+                idle();
             }
-
-            telemetry.addData("tx", tx);
-            telemetry.addData("ty", ty);
-            telemetry.addData("ta", ta);
-            telemetry.addData("Target Visible (ta > 0)?", targetVisible);
-            telemetry.addData("Target Centered (±0.1)?", targetCentered);
-            telemetry.update();
+        } finally {
+            camera.stop();
         }
     }
 }

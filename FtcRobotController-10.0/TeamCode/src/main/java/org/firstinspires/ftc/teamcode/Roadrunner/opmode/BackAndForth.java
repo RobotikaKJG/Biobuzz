@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Roadrunner.opmode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -25,6 +27,8 @@ import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
  * is recommended that you use the FollowerPIDTuner opmode for further fine tuning.
  */
 @Config
+// Enable after verifying the hardware/localizer and calibration described in Roadrunner/README.md.
+@Disabled
 @Autonomous(group = "org/firstinspires/ftc/teamcode.Roadrunner")
 public class BackAndForth extends LinearOpMode {
 

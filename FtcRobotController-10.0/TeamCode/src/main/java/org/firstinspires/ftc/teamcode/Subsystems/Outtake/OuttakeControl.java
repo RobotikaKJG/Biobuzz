@@ -7,6 +7,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TransferMotor.TransferM
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TransferServo.TransferServoControl;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
+/**
+ * Aggregates the outtake child controllers created by Dependencies.
+ * Called once per iteration in TeleOp and autonomous, after intentions have been selected.
+ * Retained folder/class names are extension points; the starter has no outtake hardware.
+ */
 public class OuttakeControl {
     private final OuttakeServoControl outtakeServoControl;
     private final OuttakeMotorControl outtakeMotorControl;
@@ -23,12 +28,13 @@ public class OuttakeControl {
     }
 
     public void update() {
+        // Select sequence transitions before applying child states in this same loop.
+        autoCycleShootLogic.update();
+        autoCycleShootControl.update();
         outtakeServoControl.update();
         outtakeMotorControl.update();
         transferServoControl.update();
         transferMotorControl.update();
-        autoCycleShootControl.update();
-        autoCycleShootLogic.update();
 
         updateOuttakeState();
     }
@@ -41,6 +47,7 @@ public class OuttakeControl {
     }
 
     private boolean outtakeActive() {
+        // Extend this predicate when introducing non-idle child states.
         return false;
     }
 }

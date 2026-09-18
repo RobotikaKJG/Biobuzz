@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Servo.ServoControl;
-import org.firstinspires.ftc.teamcode.Roadrunner.StandardTrackingWheelLocalizer;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.Drivebase;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
@@ -21,17 +20,22 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeServo.OuttakeSer
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TransferMotor.TransferMotorControl;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake.TransferServo.TransferServoControl;
 
+/**
+ * Composition root: maps shared hardware once and wires it into the robot's controllers.
+ * OpModes supply SDK objects here; subsystem code receives only the adapters it needs.
+ * Factories create controllers, not new hardware adapters. Build one controller tree per OpMode.
+ * Default hardware is just the four drive motors; mechanism controllers are idle extension points.
+ */
 public class Dependencies {
     public final HardwareMap hardwareMap;
     public final Gamepad gamepad1;
     public final Gamepad gamepad2;
     public final Telemetry telemetry;
-    public final StandardTrackingWheelLocalizer localizer;
-    public MotorControl motorControl;
-    public SensorControl sensorControl;
-    public ServoControl servoControl;
-    public EdgeDetection edgeDetection = new EdgeDetection();
-    public EdgeDetection gamepad2EdgeDetection = new EdgeDetection();
+    public final MotorControl motorControl;
+    public final SensorControl sensorControl;
+    public final ServoControl servoControl;
+    public final EdgeDetection edgeDetection = new EdgeDetection();
+    public final EdgeDetection gamepad2EdgeDetection = new EdgeDetection();
 
     public Dependencies(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Telemetry telemetry) {
 
@@ -39,10 +43,11 @@ public class Dependencies {
         this.gamepad1 = gamepad1;
         this.gamepad2 = gamepad2;
         this.telemetry = telemetry;
-        localizer = new StandardTrackingWheelLocalizer(hardwareMap);
         motorControl = new MotorControl(hardwareMap);
-        sensorControl = new SensorControl(hardwareMap, edgeDetection, localizer);
+        sensorControl = new SensorControl(hardwareMap, edgeDetection);
         servoControl = new ServoControl(hardwareMap);
+        // Opt in only after configuring and calibrating pinpointIMU:
+        // sensorControl.initPinpoint();
     }
 
     public Drivebase createDrivebase() {
@@ -91,5 +96,17 @@ public class Dependencies {
 
     private TransferMotorControl createTransferMotorControl() {
         return new TransferMotorControl(motorControl);
+    }
+    /** Called in the OpMode's finally block, including when STOP arrives before START. */
+    public void stop() {
+        try {
+            motorControl.resetMotors();
+        } finally {
+            try {
+                servoControl.stop();
+            } finally {
+                sensorControl.stop();
+            }
+        }
     }
 }

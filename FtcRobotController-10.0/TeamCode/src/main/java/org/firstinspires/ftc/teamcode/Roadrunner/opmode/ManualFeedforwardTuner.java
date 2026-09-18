@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Roadrunner.opmode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import static org.firstinspires.ftc.teamcode.Roadrunner.DriveConstants.MAX_ACCEL;
 import static org.firstinspires.ftc.teamcode.Roadrunner.DriveConstants.MAX_VEL;
 import static org.firstinspires.ftc.teamcode.Roadrunner.DriveConstants.RUN_USING_ENCODER;
@@ -42,6 +44,8 @@ import java.util.Objects;
  * Pressing B/O (Xbox/PS4) will cede control back to the tuning process.
  */
 @Config
+// Enable after verifying the hardware/localizer and calibration described in Roadrunner/README.md.
+@Disabled
 @Autonomous(group = "org/firstinspires/ftc/teamcode.Roadrunner")
 public class ManualFeedforwardTuner extends LinearOpMode {
     public static double DISTANCE = 72; // in

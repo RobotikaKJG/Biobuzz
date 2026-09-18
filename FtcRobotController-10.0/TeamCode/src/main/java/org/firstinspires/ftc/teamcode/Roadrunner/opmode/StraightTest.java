@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Roadrunner.opmode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -15,6 +17,8 @@ import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
  * This is a simple routine to test translational drive capabilities.
  */
 @Config
+// Enable after verifying the hardware/localizer and calibration described in Roadrunner/README.md.
+@Disabled
 @Autonomous(group = "org/firstinspires/ftc/teamcode.Roadrunner")
 public class StraightTest extends LinearOpMode {
     public static double DISTANCE = 60; // in

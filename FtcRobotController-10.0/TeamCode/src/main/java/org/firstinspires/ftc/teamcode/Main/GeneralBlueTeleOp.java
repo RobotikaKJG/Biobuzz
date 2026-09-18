@@ -4,59 +4,37 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
-import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.TransferCRServoControl;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
-
-import java.util.List;
-
-
-@TeleOp
+/** Driver Station entry point. Dependencies wires the robot; IterativeController runs each loop. */
+@TeleOp(name = "GeneralBlueTeleOp", group = "Starter")
 public class GeneralBlueTeleOp extends LinearOpMode {
-
-    private double prevTime;
-
     @Override
     public void runOpMode() throws InterruptedException {
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-
-        GlobalVariables.isAutonomous = false;
-        GlobalVariables.subCycles = false;
-        GlobalVariables.hang = false;
-        GlobalVariables.alliance = Alliance.Blue;
-        Dependencies dependencies = new Dependencies(hardwareMap, gamepad1, gamepad2, telemetry);
-        IterativeController iterativeController = new IterativeController(dependencies);
-
-        for (LynxModule hub : allHubs) {
+        GlobalVariables.reset(Alliance.Blue, false);
+        for (LynxModule hub : hardwareMap.getAll(LynxModule.class)) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
-
-        waitForStart();
-
-        dependencies.servoControl.setServoStartPos();
-
-        if (isStopRequested()) return;
-
-        while (opModeIsActive()) {
-            iterativeController.TeleOp();
-
-            telemetry.addData("yaw", dependencies.sensorControl.getPinpointAngle());
-            telemetry.addData("Motor velocity: ", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake));
-            telemetry.addData(" Distance ", dependencies.sensorControl.getTagDistance());
-            telemetry.addData("Outtake motor state", OuttakeStates.getMotorState());
-            
-            if (gamepad1.triangle) break;
-            calculateLoopTime();
+        Dependencies dependencies = new Dependencies(hardwareMap, gamepad1, gamepad2, telemetry);
+        try {
+            IterativeController controller = new IterativeController(dependencies);
+            telemetry.addLine("Ready: gamepad 1 left stick drives, right stick turns.");
+            telemetry.addLine("Robot-oriented by default. Mechanism buttons are unassigned.");
             telemetry.update();
+            waitForStart();
+            if (isStopRequested()) return;
+            dependencies.servoControl.setServoStartPos();
+            double previousTime = getRuntime();
+            while (opModeIsActive()) {
+                controller.TeleOp();
+                double now = getRuntime();
+                telemetry.addData("Loop (ms)", (now - previousTime) * 1000);
+                telemetry.addData("Alliance", GlobalVariables.alliance);
+                telemetry.addData("Heading sensor configured", dependencies.sensorControl.hasHeading());
+                previousTime = now;
+                telemetry.update();
+                idle();
+            }
+        } finally {
+            dependencies.stop();
         }
-    }
-
-    private void calculateLoopTime()
-    {
-        double currentTime = System.nanoTime() / 1_000_000.0;
-        telemetry.addData("Loop time:", currentTime - prevTime);
-        prevTime = currentTime;
     }
 }

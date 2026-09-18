@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 /*
  * Constants shared between multiple drive types.
+ * Retained calibration for the previous drivebase, NOT universal defaults for a new chassis.
+ * This optional stack is disabled in the starter. Measure/tune it before enabling autonomous.
  *
  * TODO: Tune or adjust the following constants to fit your robot. Note that the non-final
  * fields may also be edited through the dashboard (connect to the robot's WiFi network and

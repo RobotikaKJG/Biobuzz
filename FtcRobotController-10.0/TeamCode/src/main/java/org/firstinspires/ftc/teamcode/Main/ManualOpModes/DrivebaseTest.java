@@ -1,38 +1,14 @@
 package org.firstinspires.ftc.teamcode.Main.ManualOpModes;
 
-
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.teamcode.Main.GeneralRedTeleOp;
 
-import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
-import org.firstinspires.ftc.teamcode.Main.Dependencies;
-import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
-
-@TeleOp
-public class DrivebaseTest extends LinearOpMode {
-
-    @Override
-    public void runOpMode() throws InterruptedException {
-
-
-
-        GlobalVariables.isAutonomous = false;
-        Dependencies dependencies = new Dependencies(hardwareMap, gamepad1,gamepad2, telemetry);
-        DrivebaseController drivebaseController = dependencies.createDrivebaseController();
-
-        waitForStart();
-
-        if (isStopRequested()) return;
-
-        while (opModeIsActive()) {
-            drivebaseController.updateState();
-            dependencies.motorControl.setMotors(MotorConstants.allDrive);
-            dependencies.localizer.update();
-            telemetry.addData("Rotation",dependencies.sensorControl.getPinpointAngle());
-            telemetry.update();
-            if(gamepad1.triangle)
-                break;
-        }
-    }
-}
+/**
+ * Optional drive-only diagnostic entry point using the same wiring and mixing as production TeleOp.
+ * Remove @Disabled when needed. Test one direction at a time with the wheels raised initially.
+ * Keep drive configuration in MotorControl/Drivebase, so test and competition behavior stay aligned.
+ */
+@Disabled
+@TeleOp(name = "Drivebase Test", group = "Tests")
+public class DrivebaseTest extends GeneralRedTeleOp { }

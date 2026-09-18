@@ -1,32 +1,17 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftTrigger;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
+/**
+ * Translates a LeftTriggerLogic command into requested IntakeStates/OuttakeStates (or a new subsystem).
+ * Subsystem controllers apply those requests later in the same IterativeController loop.
+ * This separation lets autonomous request the same mechanism states without simulating buttons.
+ */
 public class LeftTriggerControl {
-
-    public LeftTriggerControl() {
-    }
-
     public void update() {
-        switch(ButtonStates.getLeftTriggerState()){
-            case toggleOuttake:
-                toggleOuttake();
-                break;
+        switch (ButtonStates.getLeftTriggerState()) {
             case idle:
-                break;
-        }
-    }
-
-    private void toggleOuttake() {
-        switch (OuttakeStates.getMotorState()){
-            case idle:
-                OuttakeStates.setMotorState(OuttakeMotorStates.forwardStart);
-                break;
-            case forwardStart:
-            case forwardFull:
-                OuttakeStates.setMotorState(OuttakeMotorStates.idle);
+                // Unassigned in the starter. Add cases that set subsystem states here.
                 break;
         }
     }

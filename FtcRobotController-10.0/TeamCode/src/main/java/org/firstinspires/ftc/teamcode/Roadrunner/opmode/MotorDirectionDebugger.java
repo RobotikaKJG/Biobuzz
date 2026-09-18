@@ -36,7 +36,7 @@ import org.firstinspires.ftc.teamcode.Roadrunner.SampleMecanumDrive;
  * \.          .'              (A/X)        \   (B/O)
  * \________/
  * <p>
- * Uncomment the @Disabled tag below to use this opmode.
+ * Remove the @Disabled annotation below to use this opmode.
  */
 @Disabled
 @Config

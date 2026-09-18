@@ -1,16 +1,17 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Circle;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.TransferCRServoStates;
 
+/**
+ * Translates a CircleLogic command into requested IntakeStates/OuttakeStates (or a new subsystem).
+ * Subsystem controllers apply those requests later in the same IterativeController loop.
+ * This separation lets autonomous request the same mechanism states without simulating buttons.
+ */
 public class CircleControl {
     public void update() {
         switch (ButtonStates.getCircleState()) {
-            case turnOuttake:
-                IntakeStates.setTransferCRServoState(TransferCRServoStates.turnOuttake);
-                break;
             case idle:
+                // Unassigned in the starter. Add cases that set subsystem states here.
                 break;
         }
     }

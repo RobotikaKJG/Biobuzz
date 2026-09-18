@@ -4,6 +4,11 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import java.util.EnumMap;
 
+/**
+ * Compares the current and previous snapshots supplied by IterativeController.
+ * rising means pressed this loop; falling means released this loop. Queries do not consume edges,
+ * so refresh exactly once per gamepad per iteration before any controller reads them.
+ */
 public class EdgeDetection {
 
     private final GamepadIndex currentGamepad1Index = new GamepadIndex();

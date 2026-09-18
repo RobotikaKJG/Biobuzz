@@ -2,9 +2,12 @@ package org.firstinspires.ftc.teamcode.Subsystems.Drivebase;
 
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 
-public class DrivebaseConstants{
-    public static final double driveSpeed = GlobalVariables.slowMode ? 0.5 : 0.1;
-    public static double getDriveSpeed(){
-        return GlobalVariables.slowMode ? 0.5 : 1;
+/** Speed limits read each loop. A future button mapping may toggle GlobalVariables.slowMode. */
+public final class DrivebaseConstants {
+    private DrivebaseConstants() { }
+    public static final double NORMAL_SPEED = 1.0;
+    public static final double SLOW_SPEED = 0.5;
+    public static double getDriveSpeed() {
+        return GlobalVariables.slowMode ? SLOW_SPEED : NORMAL_SPEED;
     }
 }

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Roadrunner.opmode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -23,6 +25,8 @@ import java.util.Objects;
  */
 
 @Config
+// Enable after verifying the hardware/localizer and calibration described in Roadrunner/README.md.
+@Disabled
 @Autonomous(group = "org/firstinspires/ftc/teamcode.Roadrunner")
 public class MaxAngularVeloTuner extends LinearOpMode {
     public static double RUNTIME = 4.0;

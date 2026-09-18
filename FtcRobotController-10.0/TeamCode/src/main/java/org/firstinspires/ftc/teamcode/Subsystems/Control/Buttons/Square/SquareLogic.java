@@ -1,26 +1,18 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.Square;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeMotor.OuttakeMotorStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
+/**
+ * Called by ButtonControl once on the Square rising edge, not continuously while held.
+ * Decide which command is allowed here, pass it to SquareControl, then clear the one-shot command.
+ * Check mechanism state here when a command has an interlock; do not access hardware directly.
+ */
 public class SquareLogic {
-    private final SquareControl squareControl = new SquareControl();
+    private final SquareControl control = new SquareControl();
 
     public void update() {
-        if (turnIntake()) return;
-    }
-
-    private void completeAction(){
-        squareControl.update();
+        // Set a new SquareStates command here when this button is assigned next season.
+        control.update();
         ButtonStates.setSquareState(SquareStates.idle);
-    }
-
-    private boolean turnIntake() {
-        if(OuttakeStates.getAutoCycleShootState() != AutoCycleShootStates.idle) return false;
-        ButtonStates.setSquareState(SquareStates.turnIntake);
-        completeAction();
-        return true;
     }
 }

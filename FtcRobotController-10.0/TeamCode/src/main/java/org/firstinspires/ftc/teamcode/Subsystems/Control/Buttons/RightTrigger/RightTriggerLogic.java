@@ -1,33 +1,18 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.RightTrigger;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
+/**
+ * Called by ButtonControl once on the RightTrigger rising edge, not continuously while held.
+ * Decide which command is allowed here, pass it to RightTriggerControl, then clear the one-shot command.
+ * Check mechanism state here when a command has an interlock; do not access hardware directly.
+ */
 public class RightTriggerLogic {
-    private final RightTriggerControl rightTriggerControl = new RightTriggerControl();
+    private final RightTriggerControl control = new RightTriggerControl();
 
     public void update() {
-
-        if (runIntake()) return;
-        stopIntake();
-
-    }
-
-    private void completeAction(){
-        rightTriggerControl.update();
+        // Set a new RightTriggerStates command here when this button is assigned next season.
+        control.update();
         ButtonStates.setRightTriggerState(RightTriggerStates.idle);
-    }
-
-    private boolean runIntake() {
-        if(IntakeStates.getMotorState() != IntakeMotorStates.idle) return false;
-        ButtonStates.setRightTriggerState(RightTriggerStates.forward);
-        completeAction();
-        return true;
-    }
-
-    private void stopIntake() {
-        ButtonStates.setRightTriggerState(RightTriggerStates.stop);
-        completeAction();
     }
 }

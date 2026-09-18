@@ -1,47 +1,23 @@
 package org.firstinspires.ftc.teamcode.HardwareInterface.Servo;
-//IntakeServoTest
 
-
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "ServoControl", group = "TeleOp")
+/**
+ * Disabled bench-test extension point; the previous robot's hardware and setpoints were removed.
+ * Connect this test to the next intake servo through ServoControl after measuring its bounds.
+ * Implement the test first, then remove @Disabled to show it on the Driver Station.
+ * Production behavior belongs in a subsystem controller, not in this diagnostic OpMode.
+ */
+@Disabled
+@TeleOp(name = "IntakeServoTest", group = "Templates")
 public class IntakeServoTest extends LinearOpMode {
-
-    private Servo myServo;
-    private double servoPosition = 0.0;  // Start at middle position (0.5)
-    private final double INCREMENT = 0.05; // Convert degrees to servo range
-
     @Override
-    public void runOpMode() {
-        myServo = hardwareMap.get(Servo.class, "myServo");
-
-        myServo.setPosition(servoPosition); // Initialize servo position
-
-        telemetry.addData("Status", "Initialized");
+    public void runOpMode() throws InterruptedException {
+        telemetry.addLine("Unconfigured test template: see this class's documentation.");
         telemetry.update();
-
         waitForStart();
-
-        while (opModeIsActive()) {
-            if (gamepad1.dpad_up) {
-                servoPosition += INCREMENT;
-            } else if (gamepad1.dpad_down) {
-                servoPosition -= INCREMENT;
-            }
-
-            // Ensure servo position remains within bounds
-            servoPosition = Math.max(0.0, Math.min(1.0, servoPosition));
-
-            myServo.setPosition(servoPosition);
-
-            // Output current servo position
-            telemetry.addData("Servo Position", "%.3f", servoPosition);
-            telemetry.update();
-
-            sleep(100); // Prevent button spam
-        }
+        // Add a STOP-aware loop and a finally block that stops any motor/CR-servo output.
     }
 }
-

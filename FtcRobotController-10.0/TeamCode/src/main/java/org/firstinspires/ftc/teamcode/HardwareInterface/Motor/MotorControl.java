@@ -8,24 +8,20 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
+/**
+ * The only drive-motor owner during TeleOp. Dependencies creates one shared instance.
+ * setMotorSpeed/add/multiply/divide stage commands; setMotors writes them to the REV Hub.
+ * IterativeController flushes once AFTER drive and subsystem updates, avoiding a one-loop delay.
+ * Road Runner owns drive outputs during autonomous; flush only notDrive in that mode.
+ */
 public class MotorControl {
-
-    private static class MotorNames {
-        public static final String frontLeft = "frontLeftMotor";
-        public static final String backLeft = "backLeftMotor";
-        public static final String frontRight = "frontRightMotor";
-        public static final String backRight = "backRightMotor";
-        public static final String outtake = "outtakeMotor";
-        public static final String intake = "intakeMotor";
-        public static final String transfer = "transferMotor";
-    }
 
     private final HardwareMap hardwareMap;
     private DcMotorEx[] motors;
     private final Utilities utilities = new Utilities();
 
 
-    private final double[] motorSpeeds = new double[7];
+    private final double[] motorSpeeds = new double[MotorConstants.MOTOR_COUNT];
 
     public MotorControl(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
@@ -34,26 +30,24 @@ public class MotorControl {
 
     private void getMotors() {
         motors = new DcMotorEx[]{
-                hardwareMap.get(DcMotorEx.class, MotorNames.frontLeft),
-                hardwareMap.get(DcMotorEx.class, MotorNames.backLeft),
-                hardwareMap.get(DcMotorEx.class, MotorNames.frontRight),
-                hardwareMap.get(DcMotorEx.class, MotorNames.backRight),
-                hardwareMap.get(DcMotorEx.class, MotorNames.outtake),
-                hardwareMap.get(DcMotorEx.class, MotorNames.intake),
-                hardwareMap.get(DcMotorEx.class, MotorNames.transfer),
+                hardwareMap.get(DcMotorEx.class, MotorConstants.FRONT_LEFT_NAME),
+                hardwareMap.get(DcMotorEx.class, MotorConstants.BACK_LEFT_NAME),
+                hardwareMap.get(DcMotorEx.class, MotorConstants.FRONT_RIGHT_NAME),
+                hardwareMap.get(DcMotorEx.class, MotorConstants.BACK_RIGHT_NAME),
         };
 
         setMotorProperties();
     }
 
     private void setMotorProperties() {
+        // Explicitly set every direction so a previous OpMode cannot leave stale settings behind.
+        motors[MotorConstants.frontLeft].setDirection(DcMotorSimple.Direction.FORWARD);
+        motors[MotorConstants.backRight].setDirection(DcMotorSimple.Direction.FORWARD);
         motors[MotorConstants.frontRight].setDirection(DcMotorSimple.Direction.REVERSE);
         motors[MotorConstants.backLeft].setDirection(DcMotorSimple.Direction.REVERSE);
+        resetMotors();
         setZeroPowerBehavior(MotorConstants.all, DcMotor.ZeroPowerBehavior.BRAKE);
-        setZeroPowerBehavior(MotorConstants.outtake, DcMotor.ZeroPowerBehavior.FLOAT);
-        setMotorMode(MotorConstants.all, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setMotorMode(MotorConstants.all, DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        setMotorMode(MotorConstants.outtake, DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void setZeroPowerBehavior(int index, DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
@@ -77,6 +71,7 @@ public class MotorControl {
     }
 
     public void divideMotorSpeed(int index, double divisor) {
+        if (divisor == 0) throw new IllegalArgumentException("Motor speed divisor cannot be zero");
         for (int i = 0; i < Utilities.configLength(index); i++)
             motorSpeeds[Utilities.motorIndex(index, i)] /= divisor;
     }
@@ -105,7 +100,7 @@ public class MotorControl {
                 result = Math.min(result, voltage);
             }
         }
-        return result;
+        return Double.isInfinite(result) ? 12.0 : result;
     }
 
     private double compensateForVoltage(double desiredPower) {
@@ -116,9 +111,10 @@ public class MotorControl {
     }
 
 
+    /** Stage voltage-compensated power; the normal end-of-loop flush applies it. */
     public void setMotorSpeedVoltage(int index, double power){
         for (int i = 0; i < Utilities.configLength(index); i++)
-            motors[Utilities.motorIndex(index, i)].setPower(compensateForVoltage(power));
+            motorSpeeds[Utilities.motorIndex(index, i)] = compensateForVoltage(power);
     }
 
     public double getMotorCurrent(int index)
@@ -145,6 +141,7 @@ public class MotorControl {
      * @noinspection unused
      */
     public void resetMotors() {
+        java.util.Arrays.fill(motorSpeeds, 0);
         for (DcMotor i : motors)
             i.setPower(0);
     }

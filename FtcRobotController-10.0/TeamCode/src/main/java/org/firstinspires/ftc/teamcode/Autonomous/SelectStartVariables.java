@@ -1,66 +1,37 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.EdgeDetection;
-import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Gamepad.GamepadIndexValues;
+import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
 
+/**
+ * Non-blocking pre-start menu. GeneralAutonomous calls update() until START or STOP.
+ * Constructors must not wait for button presses; otherwise the Driver Station cannot stop init.
+ */
 public class SelectStartVariables {
-    Gamepad gamepad1;
-    Gamepad currentGamepad1 = new Gamepad();
-    Gamepad prevGamepad1 = new Gamepad();
-    Telemetry telemetry;
-    EdgeDetection edgeDetection;
-    private boolean risingTriangleEdge;
-    private boolean risingSquareEdge;
+    private final Gamepad gamepad;
+    private final Telemetry telemetry;
+    private final Gamepad current = new Gamepad();
+    private final Gamepad previous = new Gamepad();
+    private final EdgeDetection edges = new EdgeDetection();
 
-    public SelectStartVariables(Gamepad gamepad1, Telemetry telemetry) {
-        this.gamepad1 = gamepad1;
+    public SelectStartVariables(Gamepad gamepad, Telemetry telemetry) {
+        this.gamepad = gamepad;
         this.telemetry = telemetry;
-        currentGamepad1.copy(this.gamepad1);
-        edgeDetection = new EdgeDetection();
-//        selectAuton();
-        selectAlliance();
     }
 
-//    private void selectAuton() {
-//        while (!risingTriangleEdge && !risingSquareEdge) {
-//            calculateGamepadValues();
-//
-//            telemetry.addLine("Press triangle for SAMPLE, press square for SPECIMEN");
-//            telemetry.update();
-//            if (risingTriangleEdge)
-//                GlobalVariables.autonomousMode = AutonomousMode.sampleAuton;
-//            if (risingSquareEdge)
-//                GlobalVariables.autonomousMode = AutonomousMode.specimenAuton;
-//
-//        }
-//    }
-
-    private void selectAlliance() {
-        risingTriangleEdge = false;
-        risingSquareEdge = false;
-        while (!risingTriangleEdge && !risingSquareEdge) {
-            calculateGamepadValues();
-
-            telemetry.addLine("Press triangle for RED, press square for BLUE");
-            telemetry.update();
-            if (risingTriangleEdge)
-                GlobalVariables.alliance = Alliance.Red;
-            if (risingSquareEdge)
-                GlobalVariables.alliance = Alliance.Blue;
-
-        }
-    }
-
-    private void calculateGamepadValues() {
-        prevGamepad1.copy(currentGamepad1);
-        currentGamepad1.copy(gamepad1);
-        edgeDetection.refreshGamepadIndex(gamepad1, prevGamepad1);
-        risingTriangleEdge = edgeDetection.rising(GamepadIndexValues.triangle);
-        risingSquareEdge = edgeDetection.rising(GamepadIndexValues.square);
+    public void update() {
+        previous.copy(current);
+        current.copy(gamepad);
+        edges.refreshGamepadIndex(current, previous);
+        if (edges.rising(GamepadIndexValues.triangle)) GlobalVariables.alliance = Alliance.Red;
+        if (edges.rising(GamepadIndexValues.square)) GlobalVariables.alliance = Alliance.Blue;
+        telemetry.addLine("Triangle/Y: RED | Square/X: BLUE");
+        telemetry.addData("Alliance", GlobalVariables.alliance);
+        telemetry.addData("Routine", GlobalVariables.autonomousMode);
+        telemetry.addLine("Starter autonomous stays idle. Add and select a routine before competition.");
     }
 }

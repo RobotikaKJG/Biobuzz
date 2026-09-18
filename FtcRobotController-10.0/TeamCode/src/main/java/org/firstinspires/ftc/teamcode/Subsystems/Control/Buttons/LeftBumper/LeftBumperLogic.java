@@ -1,26 +1,18 @@
 package org.firstinspires.ftc.teamcode.Subsystems.Control.Buttons.LeftBumper;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Control.ButtonStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
+/**
+ * Called by ButtonControl once on the LeftBumper rising edge, not continuously while held.
+ * Decide which command is allowed here, pass it to LeftBumperControl, then clear the one-shot command.
+ * Check mechanism state here when a command has an interlock; do not access hardware directly.
+ */
 public class LeftBumperLogic {
-    private final LeftBumperControl leftBumperControl = new LeftBumperControl();
+    private final LeftBumperControl control = new LeftBumperControl();
 
     public void update() {
-        if(shoot()) return;
-        return;
-    }
-
-    private boolean shoot() {
-        if(OuttakeStates.getAutoCycleShootState() !=  AutoCycleShootStates.idle) return false;
-        ButtonStates.setLeftBumperState(LeftBumperStates.shoot);
-        completeAction();
-        return true;
-    }
-
-    private void completeAction(){
-        leftBumperControl.update();
+        // Set a new LeftBumperStates command here when this button is assigned next season.
+        control.update();
         ButtonStates.setLeftBumperState(LeftBumperStates.idle);
     }
 }

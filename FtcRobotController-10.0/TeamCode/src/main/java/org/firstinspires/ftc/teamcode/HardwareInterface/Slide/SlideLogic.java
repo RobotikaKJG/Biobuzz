@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.HardwareInterface.Slide;
 
+/**
+ * Reusable target-position helper above a SlideControl hardware adapter. Bounds come from
+ * SlideProperties; updateSlidePosition must still be called by the owning subsystem each loop.
+ * Construction resets encoders: create this only when the mechanism is at its known zero position.
+ */
 public class SlideLogic {
 
 

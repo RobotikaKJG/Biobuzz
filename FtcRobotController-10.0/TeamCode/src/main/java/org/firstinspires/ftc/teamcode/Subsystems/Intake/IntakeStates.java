@@ -4,6 +4,11 @@ import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor.IntakeMotorS
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.TransferCRServo.TransferCRServoStates;
 import org.firstinspires.ftc.teamcode.Subsystems.SubsystemState;
 
+/**
+ * Requested intake states shared by button commands and autonomous routines.
+ * IntakeControl and its child controllers read these each loop. Reset at each OpMode start.
+ * Add state values to the child enums and implement their behavior in the matching Control classes.
+ */
 public class IntakeStates {
     private static SubsystemState intakeState = SubsystemState.Idle;
     private static IntakeMotorStates intakeMotorState = IntakeMotorStates.idle;

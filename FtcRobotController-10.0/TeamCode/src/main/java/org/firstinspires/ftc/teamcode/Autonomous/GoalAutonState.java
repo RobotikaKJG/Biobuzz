@@ -1,11 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
+/** Sequence stages for GoalAuton. No previous competition stages are retained. */
 public enum GoalAutonState {
-    moveToShoot,
-    shootFirst,
-    shootSecond,
-    shootThird,
-    park,
-    stop,
     idle
 }

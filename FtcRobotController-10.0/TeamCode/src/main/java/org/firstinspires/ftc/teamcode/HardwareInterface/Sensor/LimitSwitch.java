@@ -7,9 +7,14 @@ import com.qualcomm.robotcore.hardware.configuration.annotations.DevicePropertie
 import com.qualcomm.robotcore.hardware.configuration.annotations.DigitalIoDeviceType;
 
 
+/**
+ * Optional digital input adapter. SensorControl maps no switches until the next robot needs them.
+ * Select NC/NO using setMode(); getIsPressed() applies that wiring choice, while isPressed() exposes
+ * the active-low electrical reading. Call resetDeviceConfigurationForOpMode() to select input mode.
+ */
 @DigitalIoDeviceType
 @DeviceProperties(name = "Limit Switch", description = "Physical limit switch", xmlTag = "LimitSwitch")
-public class LimitSwitch implements TouchSensor  //implements ColorSensor
+public class LimitSwitch implements TouchSensor
 {
 
     private final DigitalChannelController digitalChannelController;

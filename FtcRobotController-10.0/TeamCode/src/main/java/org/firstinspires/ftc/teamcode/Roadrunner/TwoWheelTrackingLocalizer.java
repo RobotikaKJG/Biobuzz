@@ -5,10 +5,8 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.TwoTrackingWheelLocalizer;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.FTCDashboard.Encoder;
 import org.firstinspires.ftc.teamcode.Main.GoBildaPinpointDriver;
 
 import java.util.Arrays;
@@ -40,7 +38,7 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 2000;
     public static double WHEEL_RADIUS = 0.629921; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
-    //AUTONOTE change these if too bad (check with localizationtest)T
+    // Retained chassis calibration: verify these offsets if the odometry mounting changes.
     public static double PARALLEL_X = 0; // X is the up and down direction
     public static double PARALLEL_Y = -2.85; // Y is the strafe direction
 
@@ -50,8 +48,6 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     // Parallel/Perpendicular to the forward axis
     // Parallel wheel is parallel to the forward axis
     // Perpendicular is perpendicular to the forward axis
-    private final Encoder parallelEncoder;
-    private final Encoder perpendicularEncoder;
 
     private final GoBildaPinpointDriver imu;
 
@@ -63,12 +59,9 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
         this.imu = imu;
 
-        parallelEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "frontRightMotor"));
-        perpendicularEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "intakeMotor"));
+        // Encoder measurements come from the Pinpoint directly, not REV motor ports.
+        // No intake motor or separate encoder motor configuration is required here.
 
-        // TODO: reverse any encoders using Encoder.setDirection(Encoder.Direction.REVERSE)
-        parallelEncoder.setDirection(Encoder.Direction.REVERSE);
-        perpendicularEncoder.setDirection(Encoder.Direction.REVERSE);
     }
 
     public static double encoderTicksToInches(double ticks) {
@@ -82,7 +75,7 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
     @Override
     public Double getHeadingVelocity() {
-        return imu.getHeadingVelocity();
+        return -imu.getHeadingVelocity();
     }
 
     @NonNull
@@ -94,16 +87,13 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
         );
     }
 
-    @NonNull
+    /**
+     * The Pinpoint driver exposes robot velocity in mm/s, not raw tracking-wheel ticks/s.
+     * Returning null lets Road Runner omit velocity feedback; do not convert those values as ticks.
+     * Supply actual wheel velocities here only after adding a source with known units and frame.
+     */
     @Override
     public List<Double> getWheelVelocities() {
-        // TODO: If your encoder velocity can exceed 32767 counts / second (such as the REV Through Bore and other
-        //  competing magnetic encoders), change Encoder.getRawVelocity() to Encoder.getCorrectedVelocity() to enable a
-        //  compensation method
-
-        return Arrays.asList(
-                encoderTicksToInches(-imu.getVelX()),
-                encoderTicksToInches(-imu.getVelY())
-        );
+        return null;
     }
 }

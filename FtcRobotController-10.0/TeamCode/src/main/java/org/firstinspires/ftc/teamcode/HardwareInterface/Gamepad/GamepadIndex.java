@@ -5,6 +5,12 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import java.util.EnumMap;
 
+/**
+ * Adapts SDK gamepad fields to the names used by button routing and DrivebaseTrigger.
+ * These booleans are for edge detection; Drivebase reads analog stick values directly.
+ * Stick entries mean positive-axis activity, and triggers currently activate above zero;
+ * choose explicit thresholds here if the next controller needs dead zones.
+ */
 public class GamepadIndex {
 
     // EnumMap to store boolean values for each control

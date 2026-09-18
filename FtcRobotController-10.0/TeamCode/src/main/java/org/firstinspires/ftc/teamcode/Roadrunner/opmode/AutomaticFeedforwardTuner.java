@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Roadrunner.opmode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import static org.firstinspires.ftc.teamcode.Roadrunner.DriveConstants.MAX_RPM;
 import static org.firstinspires.ftc.teamcode.Roadrunner.DriveConstants.RUN_USING_ENCODER;
 import static org.firstinspires.ftc.teamcode.Roadrunner.DriveConstants.rpmToVelocity;
@@ -33,6 +35,8 @@ import java.util.List;
  *      regression.
  */
 @Config
+// Enable after verifying the hardware/localizer and calibration described in Roadrunner/README.md.
+@Disabled
 @Autonomous(group = "org/firstinspires/ftc/teamcode.Roadrunner")
 public class AutomaticFeedforwardTuner extends LinearOpMode {
     public static double MAX_POWER = 0.7;

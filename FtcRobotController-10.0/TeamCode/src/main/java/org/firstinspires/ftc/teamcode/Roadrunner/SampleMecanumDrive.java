@@ -27,22 +27,19 @@ import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.FTCDashboard.LynxModuleUtil;
 import org.firstinspires.ftc.teamcode.Main.GoBildaPinpointDriver;
+import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.Roadrunner.trajectorysequence.TrajectorySequenceRunner;
@@ -52,7 +49,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /*
- * Simple mecanum drive hardware implementation for REV hardware.
+ * Optional Road Runner drive used by AutonomousDependencies when explicitly enabled.
+ * Owns drive-motor output during autonomous; never flush MotorControl.allDrive alongside it.
+ * Requires the four shared motor names plus pinpointIMU. Retained gains describe the old chassis;
+ * verify DriveConstants and TwoWheelTrackingLocalizer before enabling trajectories.
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
@@ -68,7 +68,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     private final TrajectorySequenceRunner trajectorySequenceRunner;
 
     private static final TrajectoryVelocityConstraint VEL_CONSTRAINT = getVelocityConstraint(MAX_VEL, MAX_ANG_VEL, TRACK_WIDTH);
-    private static final TrajectoryAccelerationConstraint ACCEL_CONSTRAINT = getAccelerationConstraint(MAX_ACCEL, MIN_ACCEL);
+    private static final TrajectoryAccelerationConstraint ACCEL_CONSTRAINT = getAccelerationConstraint(MIN_ACCEL, MAX_ACCEL);
 
     private final TrajectoryFollower follower;
 
@@ -100,15 +100,13 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         // TODO: adjust the names of the following hardware devices to match your configuration
         imu = hardwareMap.get(GoBildaPinpointDriver.class, "pinpointIMU");
-//        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-//                DriveConstants.LOGO_FACING_DIR, DriveConstants.USB_FACING_DIR));
-//        imu.initialize(parameters);
         imu.initialize();
+        imu.resetPosAndIMU();
 
-        leftFront = hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
-        leftRear = hardwareMap.get(DcMotorEx.class, "backLeftMotor");
-        rightRear = hardwareMap.get(DcMotorEx.class, "backRightMotor");
-        rightFront = hardwareMap.get(DcMotorEx.class, "frontRightMotor");
+        leftFront = hardwareMap.get(DcMotorEx.class, MotorConstants.FRONT_LEFT_NAME);
+        leftRear = hardwareMap.get(DcMotorEx.class, MotorConstants.BACK_LEFT_NAME);
+        rightRear = hardwareMap.get(DcMotorEx.class, MotorConstants.BACK_RIGHT_NAME);
+        rightFront = hardwareMap.get(DcMotorEx.class, MotorConstants.FRONT_RIGHT_NAME);
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
@@ -118,9 +116,8 @@ public class SampleMecanumDrive extends MecanumDrive {
             motor.setMotorType(motorConfigurationType);
         }
 
-        if (RUN_USING_ENCODER) {
-            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
+        setMotorPowers(0, 0, 0, 0);
+        setMode(RUN_USING_ENCODER ? DcMotor.RunMode.RUN_USING_ENCODER : DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -128,10 +125,11 @@ public class SampleMecanumDrive extends MecanumDrive {
             setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
         }
 
-        // TODO: reverse any motors using DcMotor.setDirection()
-        //Reversed in motorControl
-        rightFront.setDirection(DcMotor.Direction.REVERSE); // add if needed
-        leftRear.setDirection(DcMotor.Direction.REVERSE); // add if needed
+        // Same chassis directions as MotorControl; set all four for standalone tuning OpModes.
+        leftFront.setDirection(DcMotor.Direction.FORWARD);
+        rightRear.setDirection(DcMotor.Direction.FORWARD);
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        leftRear.setDirection(DcMotor.Direction.REVERSE);
 
         List<Integer> lastTrackingEncPositions = new ArrayList<>();
         List<Integer> lastTrackingEncVels = new ArrayList<>();
@@ -300,14 +298,12 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public double getRawExternalHeading() {
-//        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        return imu.getHeading();
+        return -imu.getHeading();
     }
 
     @Override
     public Double getExternalHeadingVelocity() {
-//        return (double) imu.getRobotAngularVelocity(AngleUnit.RADIANS).yRotationRate;
-        return imu.getHeadingVelocity();
+        return -imu.getHeadingVelocity();
     }
 
     public static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
@@ -316,10 +312,6 @@ public class SampleMecanumDrive extends MecanumDrive {
                 new MecanumVelocityConstraint(maxVel, trackWidth)
         ));
     }
-
-//    public static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
-//        return new ProfileAccelerationConstraint(maxAccel);
-//    }
 
     public static TrajectoryAccelerationConstraint getAccelerationConstraint(double minAccel, double maxAccel) {
         return (displacement, velocity, pose, motionState) ->

@@ -4,17 +4,6 @@ Welcome to **BioBuzz’s main robot codebase for the current FTC season**.
 
 This repository contains our driver controls, hardware interfaces, subsystem controllers, autonomous framework, and testing tools.
 
-## Driver Controls
-
-| Input | Action |
-| --- | --- |
-| Gamepad 1 left stick | Drive forward, backward, and sideways |
-| Gamepad 1 right stick X | Turn |
-| Share / Back | Toggle field-oriented driving when a heading sensor is configured |
-| Options / Start | Reset heading when a heading sensor is configured |
-| Mechanism buttons | Currently unassigned |
-| Gamepad 2 | Available for future operator controls |
-
 ## Getting Started
 
 1. Clone the repository:

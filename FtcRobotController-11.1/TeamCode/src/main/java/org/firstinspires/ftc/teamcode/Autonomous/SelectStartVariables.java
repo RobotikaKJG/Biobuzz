@@ -27,21 +27,18 @@ public class SelectStartVariables {
         edgeDetection = new EdgeDetection();
         selectAuton();
         selectAlliance();
-        selectGateTotal();
     }
 
     private void selectAuton() {
         while (!risingDpadUpEdge && !risingDpadLeftEdge && !risingDpadRightEdge) {
             calculateGamepadValues();
 
-            telemetry.addLine("Press dpad up for audience side, dpad left for goal side, dpad right for goal side solo");
+            telemetry.addLine("Press dpad up for audience side, dpad left for goal side");
             telemetry.update();
             if (risingDpadUpEdge)
                 GlobalVariables.autonomousMode = AutonomousMode.audienceSide;
             if (risingDpadLeftEdge)
                 GlobalVariables.autonomousMode = AutonomousMode.goalSide;
-            if (risingDpadRightEdge)
-                GlobalVariables.autonomousMode = AutonomousMode.goalSideSolo;
 
         }
     }
@@ -59,21 +56,6 @@ public class SelectStartVariables {
             if (risingSquareEdge)
                 GlobalVariables.alliance = Alliance.Blue;
 
-        }
-    }
-
-    private void selectGateTotal() {
-        risingTriangleEdge = false;
-        risingSquareEdge = false;
-        while (!risingTriangleEdge && !risingSquareEdge) {
-            calculateGamepadValues();
-
-            telemetry.addLine("Press triangle for 3 GATES, press square for 4 GATES");
-            telemetry.update();
-            if (risingTriangleEdge)
-                GlobalVariables.gateTotal = 3;
-            if (risingSquareEdge)
-                GlobalVariables.gateTotal = 4;
         }
     }
 

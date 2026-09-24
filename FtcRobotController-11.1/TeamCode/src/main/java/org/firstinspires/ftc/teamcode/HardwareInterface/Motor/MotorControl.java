@@ -18,7 +18,6 @@ public class MotorControl {
         public static final String backRight = "backRightMotor";
         public static final String outtake1 = "outtake1Motor";
         public static final String intake = "intakeMotor";
-        public static final String transfer = "transferMotor";
         public static final String outtake2 = "outtake2Motor";
     }
 
@@ -30,9 +29,6 @@ public class MotorControl {
     private final double[] lastWrittenSpeeds = new double[8];
     private static final double POWER_EPSILON = 0.005;
 
-    // Per-motor caches so RPM/velocity mode does not re-issue blocking config
-    // (setMode / setPIDFCoefficients) every loop. These are the single biggest
-    // per-loop I2C cost on the outtake when shooting.
     private final DcMotor.RunMode[] lastMode = new DcMotor.RunMode[8];
     private final PIDFCoefficients[] lastPidf = new PIDFCoefficients[8];
     private final double[] lastWrittenVelocity = new double[8];
@@ -57,7 +53,6 @@ public class MotorControl {
                 hardwareMap.get(DcMotorEx.class, MotorNames.backRight),
                 hardwareMap.get(DcMotorEx.class, MotorNames.outtake1),
                 hardwareMap.get(DcMotorEx.class, MotorNames.intake),
-                hardwareMap.get(DcMotorEx.class, MotorNames.transfer),
                 hardwareMap.get(DcMotorEx.class, MotorNames.outtake2),
         };
 
@@ -274,8 +269,6 @@ public class MotorControl {
                 return MotorNames.outtake1;
             case MotorConstants.intake:
                 return MotorNames.intake;
-            case MotorConstants.transfer:
-                return MotorNames.transfer;
             case MotorConstants.outtake2:
                 return MotorNames.outtake2;
             default:

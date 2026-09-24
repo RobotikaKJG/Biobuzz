@@ -25,8 +25,8 @@ public class TurretAlignment extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            // 0.5 is the 'center' or 'forward' position defined in TurretServoControl
-            dependencies.servoControl.setTurretServosPos(0.5);
+//            // 0.5 is the 'center' or 'forward' position defined in TurretServoControl
+//            dependencies.servoControl.setTurretServosPos(0.5);
             
             telemetry.addLine("Turret is LOCKED at 0.5 (Forward)");
             telemetry.addLine("You can now safely mount the gears in the center position.");

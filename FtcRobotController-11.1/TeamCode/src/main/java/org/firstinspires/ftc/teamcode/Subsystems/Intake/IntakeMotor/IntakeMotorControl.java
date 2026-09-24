@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeMotor;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
+import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake.IntakeStates;
 
 public class IntakeMotorControl {
@@ -23,10 +24,10 @@ public class IntakeMotorControl {
     public void updateStates() {
         switch (IntakeStates.getIntakeMotorState()) {
             case forward:
-                motorControl.setMotorSpeed(MotorConstants.intake, 0.8);  //was 1.0
+                motorControl.setMotorSpeed(MotorConstants.intake, IntakeConstants.intakeSpeed);
                 break;
             case backward:
-                motorControl.setMotorSpeed(MotorConstants.intake, -0.8);  // was -1.0
+                motorControl.setMotorSpeed(MotorConstants.intake, -IntakeConstants.intakeSpeed);
                 break;
             case idle:
                 motorControl.setMotorSpeed(MotorConstants.intake, 0);

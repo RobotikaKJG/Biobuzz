@@ -21,11 +21,6 @@ public class GeneralAutonomous extends LinearOpMode {
 
         initialise();
 
-//        Dependencies dependencies = new Dependencies(hardwareMap, gamepad1, gamepad2, telemetry);
-//
-//        dependencies.sensorControl.initPinpoint();
-//        dependencies.sensorControl.initBallCamera(hardwareMap);
-
         while (!isStarted() && !isStopRequested()) {
             updateAutonData();
         }
@@ -33,8 +28,6 @@ public class GeneralAutonomous extends LinearOpMode {
         begin();
 
         if (isStopRequested()) return;
-
-        dependencies.shooterLogger.start("GeneralAutonomous");
 
         LoopTimer loopTimer = new LoopTimer(10);
 
@@ -44,9 +37,6 @@ public class GeneralAutonomous extends LinearOpMode {
 
                 autonomousControl.runAutonomous();
                 follower.update();
-
-                // Shooter telemetry (autonomous is single-threaded, so sample here).
-                dependencies.shooterLogger.sample();
 
                 loopTimer.record(System.nanoTime() - startNs);
 
@@ -58,7 +48,7 @@ public class GeneralAutonomous extends LinearOpMode {
                     break;
             }
         } finally {
-            dependencies.shooterLogger.stop();
+//            dependencies.shooterLogger.stop();
         }
     }
 
@@ -82,14 +72,12 @@ public class GeneralAutonomous extends LinearOpMode {
     private void updateAutonData() {
         telemetry.addData("Auton:", GlobalVariables.autonomousMode);
         telemetry.addData("Alliance:", GlobalVariables.alliance);
-        telemetry.addData("Gates:", GlobalVariables.gateTotal);
 
         telemetry.addLine(" ");
         dependencies.sensorControl.updateLocalizer();
         telemetry.addData("yaw", dependencies.sensorControl.getLocalizerAngle());
         telemetry.addData("outtake vel", dependencies.motorControl.getMotorVelocity(MotorConstants.outtake1));
 
-        //telemetry.addData("Current position: ",aprilTagCameraControl.getCurrentPosition());
         telemetry.update();
         // Slow down CPU cycles
         sleep(100);

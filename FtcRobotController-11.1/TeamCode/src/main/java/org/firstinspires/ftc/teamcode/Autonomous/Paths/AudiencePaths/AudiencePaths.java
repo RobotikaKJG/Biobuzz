@@ -10,9 +10,4 @@ public interface AudiencePaths {
     PathChain startPos_shootPos();
     PathChain shootPos_takeThreePos();
     PathChain takeThreePos_shootPos();
-    PathChain shootPos_takeBottomPos();
-    PathChain takeBottomPos_shootPos();
-    PathChain takeBottomPos_takeUpPos();
-    PathChain takeUpPos_shootPos();
-    PathChain shootPos_park();
 }

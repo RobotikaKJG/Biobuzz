@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Camera.LimeLight;
+package org.firstinspires.ftc.teamcode.HardwareInterface.Sensor;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;

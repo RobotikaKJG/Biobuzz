@@ -7,8 +7,6 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorConstants;
 import org.firstinspires.ftc.teamcode.Subsystems.Drivebase.DrivebaseController;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.AutoCycleShoot.AutoCycleShootStates;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake.OuttakeStates;
 
 import java.util.List;
 
@@ -28,9 +26,7 @@ public class GeneralBlueTeleOp extends LinearOpMode {
 
         GlobalVariables.isAutonomous = false;
         GlobalVariables.subCycles = false;
-        GlobalVariables.hang = false;
         GlobalVariables.alliance = Alliance.Blue;
-        GlobalVariables.rpmOffset = 0;
 
         Dependencies dependencies = new Dependencies(hardwareMap, gamepad1, gamepad2, telemetry);
         IterativeController iterativeController = new IterativeController(dependencies);
@@ -46,19 +42,17 @@ public class GeneralBlueTeleOp extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        dependencies.shooterLogger.start("GeneralBlueTeleOp");
-
         // Background loops. Control: bulk cache + non-drive/non-turret subsystems
         // (motors 4..7). Turret: Pinpoint localizer + turret servo tracking.
         ControlThread controlThread = new ControlThread(this, allHubs, iterativeController);
-        TurretThread turretThread = new TurretThread(this, dependencies.sensorControl,
-                dependencies.turretServoControl, gamepad1);
+//        TurretThread turretThread = new TurretThread(this, dependencies.sensorControl,
+//                dependencies.turretServoControl, gamepad1);
         controlThread.start();
-        turretThread.start();
+//        turretThread.start();
 
         LoopTimer driveTimer = new LoopTimer(10);
         CycleTimer cycleTimer = new CycleTimer(10);
-        AutoCycleShootStates prevShootState = AutoCycleShootStates.idle;
+//        AutoCycleShootStates prevShootState = AutoCycleShootStates.idle;
         long lastTelemetryMs = 0;
         long prevLoopNs = System.nanoTime();
         long driveErrors = 0;
@@ -85,18 +79,6 @@ public class GeneralBlueTeleOp extends LinearOpMode {
                     }
                 }
 
-                // Scoring cycle time: each idle -> active transition of the shoot sequence is
-                // one "shoot". recordEvent discards >20s gaps (idle stretches) as non-cycles.
-                AutoCycleShootStates shootState = OuttakeStates.getAutoCycleShootState();
-                if (prevShootState == AutoCycleShootStates.idle && shootState != AutoCycleShootStates.idle) {
-                    long cyc = cycleTimer.recordEvent(System.currentTimeMillis());
-                    if (cyc >= 0) {
-                        RobotLog.ii("CycleTimer", "shoot cycle %.2fs (avg %.2fs, n=%d)",
-                                cyc / 1000.0, cycleTimer.getAvgSec(), cycleTimer.getCount());
-                    }
-                }
-                prevShootState = shootState;
-
                 if (gamepad1.triangle) break;
 
                 // Throttle telemetry so it never caps the fast drive loop.
@@ -105,16 +87,16 @@ public class GeneralBlueTeleOp extends LinearOpMode {
                     telemetry.addData("Deployed", BuildInfo.DEPLOYED);
                     telemetry.addLine(cycleTimer.toTable());
                     telemetry.addData("Drive loop",   "%.2f ms  (%.0f hz)", driveTimer.getAvgMs(), hz(driveTimer.getAvgMs()));
-                    telemetry.addData("Turret loop",  "%.2f ms  (%.0f hz)", turretThread.getAvgLoopMs(), hz(turretThread.getAvgLoopMs()));
+//                    telemetry.addData("Turret loop",  "%.2f ms  (%.0f hz)", turretThread.getAvgLoopMs(), hz(turretThread.getAvgLoopMs()));
                     telemetry.addData("Control loop", "%.2f ms  (%.0f hz)", controlThread.getAvgLoopMs(), hz(controlThread.getAvgLoopMs()));
-                    telemetry.addData("Turret diag", "iters=%d err=%d alive=%b track=%b",
-                            turretThread.getIterations(), turretThread.getErrorCount(),
-                            turretThread.isLoopAlive(), OuttakeStates.isTurretTrackingEnabled());
-                    telemetry.addData("Turret aim", "cur=%.0f tgt=%.0f",
-                            dependencies.turretServoControl.getTurretAngleDeg(),
-                            dependencies.turretServoControl.getTargetAngleDeg());
-                    if (turretThread.getErrorCount() > 0)
-                        telemetry.addData("Turret lastErr", turretThread.getLastError());
+//                    telemetry.addData("Turret diag", "iters=%d err=%d alive=%b track=%b",
+//                            turretThread.getIterations(), turretThread.getErrorCount(),
+//                            turretThread.isLoopAlive(), OuttakeStates.isTurretTrackingEnabled());
+//                    telemetry.addData("Turret aim", "cur=%.0f tgt=%.0f",
+//                            dependencies.turretServoControl.getTurretAngleDeg(),
+//                            dependencies.turretServoControl.getTargetAngleDeg());
+//                    if (turretThread.getErrorCount() > 0)
+//                        telemetry.addData("Turret lastErr", turretThread.getLastError());
                     if (controlThread.getErrorCount() > 0)
                         telemetry.addData("Control lastErr", controlThread.getErrorCount() + "x " + controlThread.getLastError());
                     if (driveErrors > 0)
@@ -130,12 +112,11 @@ public class GeneralBlueTeleOp extends LinearOpMode {
         } finally {
             // Stop the background loops, then zero every motor from this thread.
             controlThread.stopLoop();
-            turretThread.stopLoop();
-            dependencies.shooterLogger.stop();
+//            turretThread.stopLoop();
             controlThread.interrupt();
-            turretThread.interrupt();
+//            turretThread.interrupt();
             try { controlThread.join(500); } catch (InterruptedException ignored) {}
-            try { turretThread.join(500); } catch (InterruptedException ignored) {}
+//            try { turretThread.join(500); } catch (InterruptedException ignored) {}
 
             dependencies.motorControl.setMotorSpeed(MotorConstants.all, 0);
             dependencies.motorControl.setMotors(MotorConstants.all);

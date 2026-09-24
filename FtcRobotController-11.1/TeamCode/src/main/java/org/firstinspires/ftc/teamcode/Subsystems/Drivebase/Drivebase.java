@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.HardwareInterface.Motor.MotorControl;
 import org.firstinspires.ftc.teamcode.HardwareInterface.Sensor.SensorControl;
 import org.firstinspires.ftc.teamcode.Main.Alliance;
 import org.firstinspires.ftc.teamcode.Main.GlobalVariables;
-import org.firstinspires.ftc.teamcode.Main.ShooterTelemetry.RemoteControl;
 
 
 public class Drivebase {
@@ -42,7 +41,6 @@ public class Drivebase {
             currentGamepad.copy(gamepad2);
         else
             currentGamepad.copy(gamepad1);
-        RemoteControl.mergeInto(currentGamepad);
     }
 
     public void togglePathFollowing() {

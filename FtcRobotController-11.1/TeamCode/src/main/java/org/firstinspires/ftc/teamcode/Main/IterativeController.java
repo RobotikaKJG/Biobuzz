@@ -32,6 +32,7 @@ public class IterativeController {
         gamepad2 = dependencies.gamepad2;
         edgeDetection = dependencies.edgeDetection;
         motorControl = dependencies.motorControl;
+        sensorControl = dependencies.sensorControl;
         currentGamepad1.copy(this.gamepad1);
         prevGamepad1.copy(currentGamepad1);
         currentGamepad2.copy(this.gamepad2);
@@ -39,7 +40,6 @@ public class IterativeController {
         buttonControl = dependencies.createSubsystemControl();
         outtakeControl = dependencies.createOuttakeControl();
         intakeControl = dependencies.createIntakeControl();
-        sensorControl = dependencies.sensorControl;
 
         IntakeStates.setInitialStates();
         OuttakeStates.setInitialStates();

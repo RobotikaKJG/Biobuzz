@@ -7,7 +7,7 @@ public class MotorConstants {
     public static final int backRight = 3;
     public static final int outtake1 = 4;
     public static final int intake = 5;
-    public static final int outtake2 = 7;
+    public static final int outtake2 = 6;
     public static final int[][] motorConfig = {
             //separate motors
             {frontLeft},
@@ -29,14 +29,14 @@ public class MotorConstants {
             {outtake1, outtake2}
     };
     // motorConfig combined value names
-    public static final int allDrive = 8;
-    public static final int leftDrive = 9;
-    public static final int rightDrive = 10;
-    public static final int frontLeftBackRight = 11;
-    public static final int frontRightBackLeft = 12;
-    public static final int all = 13;
-    public static final int notDrive = 14;
-    public static final int notOuttake = 15;
-    public static final int outtake = 16;
+    public static final int allDrive = 7;
+    public static final int leftDrive = 8;
+    public static final int rightDrive = 9;
+    public static final int frontLeftBackRight = 10;
+    public static final int frontRightBackLeft = 11;
+    public static final int all = 12;
+    public static final int notDrive = 13;
+    public static final int notOuttake = 14;
+    public static final int outtake = 15;
 
 }
